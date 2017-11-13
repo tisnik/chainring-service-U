@@ -6,6 +6,33 @@
 
 (require '[chainring-service.db-spec :as db-spec])
 
+(defn simple-query-sequence
+    [query operation]
+    (try
+        (jdbc/query db-spec/zg-db query)
+        (catch Exception e
+            (log/error e operation)
+            [])))
+
+(defn simple-query
+    [query operation]
+    (try
+        (-> (jdbc/query db-spec/zg-db query)
+            first)
+        (catch Exception e
+            (log/error e operation)
+            [])))
+
+(defn simple-query-selector
+    [query selector operation]
+    (try
+        (-> (jdbc/query db-spec/zg-db query)
+            first
+            (get selector))
+        (catch Exception e
+            (log/error e operation)
+            [])))
+
 (defn read-project-list
     []
     (try
