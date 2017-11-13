@@ -2,5 +2,7 @@
 
 DATABASE=chainring.db
 
-cat create_database.sql | sqlite3 ../${DATABASE}
+cat schema.sql | sqlite3 ../${DATABASE}
+cat catalog.sql | sqlite3 ../${DATABASE}
+cat test_data.sql | sqlite3 ../${DATABASE}
 
