@@ -73,3 +73,69 @@
         ] ; </body>
 ))
 
+(defn render-project-list
+    [projects]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"]
+                         [:th "Projekt"]]
+                    (for [project projects]
+                            [:tr [:td (:id project)]
+                                 [:td [:a {:href (str "project?id=" (:id project))}(:name project)]]])
+                ]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-building-list
+    [project-id buildings]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:p "Projekt" project-id]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"]
+                         [:th "Budova"]]
+                    (for [building buildings]
+                            [:tr [:td (:id building)]
+                                 [:td (:name building)]])
+                ]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-error-page-no-buildings
+    [project-id]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:p "Projekt" project-id]
+                [:p "No buildings for project"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-error-page-no-project-id
+    []
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:p "No project ID!"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
