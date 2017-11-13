@@ -1,5 +1,6 @@
 create table project (
     id       integer primary key asc,
+    sap      text,
     name     text not null
 );
 
@@ -15,6 +16,7 @@ create table drawing (
     id       integer primary key asc,
     building integer not null,
     name     text not null,
+    sap      text,
     foreign key (building) references building(id)
 );
 
