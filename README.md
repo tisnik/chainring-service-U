@@ -1,6 +1,6 @@
 # chainring-service
 
-FIXME: description
+On-line database used by the Chainring CAD system.
 
 ## Installation
 
@@ -14,7 +14,13 @@ FIXME: explanation
 
 ## Options
 
-FIXME: listing of options this app accepts.
+Current version of the chainring-service accepts only one command line option
+used to specify port on which the service should accepts all HTTP request.
+
+Usage:
+-p     port number
+--port port number
+
 
 ## Examples
 
@@ -30,7 +36,7 @@ FIXME: listing of options this app accepts.
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 Pavel Tisnovsky
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
