@@ -112,28 +112,20 @@
         ] ; </body>
 ))
 
-(defn render-error-page-no-buildings
-    [project-id]
+(defn render-error-page
+    "Render error page with a 'back' button."
+    [message]
     (page/xhtml
         (render-html-header "/")
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:p "Projekt" project-id]
-                [:p "No buildings for project"]
-                (render-html-footer)
-            ] ; </div class="container">
-        ] ; </body>
-))
-
-(defn render-error-page-no-project-id
-    []
-    (page/xhtml
-        (render-html-header "/")
-        [:body
-            [:div {:class "container"}
-                (render-navigation-bar-section "/")
-                [:p "No project ID!"]
+                [:div {:class "col-md-10"}
+                    [:h2 "Chyba či neočekávaný stav"]
+                    [:p {:class "alert alert-danger"} message]
+                    [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                ]
+                [:br][:br][:br][:br]
                 (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
