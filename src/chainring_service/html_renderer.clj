@@ -92,24 +92,31 @@
 ))
 
 (defn render-building-list
-    [project-id buildings]
+    [project-id project-info buildings]
     (page/xhtml
         (render-html-header "/")
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:p "Projekt" project-id]
+                [:h2 (:name project-info)]
+                [:h4 (:sap project-info)]
+                [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
-                         [:th "Budova"]]
+                         [:th "Budova"]
+                         [:th "SAP"]]
                     (for [building buildings]
                             [:tr [:td (:id building)]
-                                 [:td (:name building)]])
+                                 [:td [:a {:href (str "building?project-id=" project-id "&building-id=" (:id building))}
+                                          (:name building)]]
+                                 [:td (:sap building)]])
                 ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-error-page
     "Render error page with a 'back' button."
