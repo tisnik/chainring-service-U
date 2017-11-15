@@ -78,11 +78,14 @@
                 (render-navigation-bar-section "/")
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
-                         [:th "Projekt"]]
+                         [:th "Projekt"]
+                         [:th "SAP"]]
                     (for [project projects]
                             [:tr [:td (:id project)]
-                                 [:td [:a {:href (str "project?id=" (:id project))}(:name project)]]])
+                                 [:td [:a {:href (str "project?project-id=" (:id project))}(:name project)]]
+                                 [:td (:sap project)]])
                 ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
