@@ -54,20 +54,16 @@
 
 (defn render-front-page
     "Render front page of this application."
-    [drawings]
+    []
     (page/xhtml
         (render-html-header "/")
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                (if drawings
-                    [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                        [:tr [:th "ID"]
-                             [:th "Výkres"]]
-                        (for [drawing drawings]
-                                [:tr [:td (:id drawing)]
-                                     [:td (:name drawing)]])
-                    ])
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:td [:a {:href "project-list"} "Seznam projektů"]]
+                    ]
+                ]
                 (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
