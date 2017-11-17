@@ -40,9 +40,18 @@
 (defn process-front-page
     "Function that prepares data for the front page."
     [request]
+    (finish-processing request (html-renderer/render-front-page)))
+
+(defn process-project-list-page
+    "Function that prepares data for the page with project list."
+    [request]
     (let [projects      (db-interface/read-project-list)]
-        (log/trace "Projects " projects)
-        (finish-processing request (html-renderer/render-project-list projects))))
+        (log/info "Projects:" projects)
+        (if projects
+            (if (seq projects)
+                (finish-processing request (html-renderer/render-project-list projects))
+                (finish-processing request (html-renderer/render-error-page "Databáze projektů je prázdná")))
+            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k databázi")))))
 
 (defn process-project-page
     "Function that prepares data for the project page."
