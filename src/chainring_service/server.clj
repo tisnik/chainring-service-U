@@ -1,3 +1,15 @@
+;
+;  (C) Copyright 2017  Pavel Tisnovsky
+;
+;  All rights reserved. This program and the accompanying materials
+;  are made available under the terms of the Eclipse Public License v1.0
+;  which accompanies this distribution, and is available at
+;  http://www.eclipse.org/legal/epl-v10.html
+;
+;  Contributors:
+;      Pavel Tisnovsky
+;
+
 (ns chainring-service.server
     "Server module with functions to accept requests and send response back to users via HTTP.")
 
@@ -23,7 +35,7 @@
     (let [cookies       (:cookies request)]
         (log/info "Incoming cookies: " cookies)
         (-> (http-response/response response-html)
-            (http-response/content-type "text/html"))))
+            (http-response/content-type "text/html; charset=utf-8"))))
 
 (defn process-front-page
     "Function that prepares data for the front page."
