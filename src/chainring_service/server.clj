@@ -69,6 +69,49 @@
                       (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
               (finish-processing request (html-renderer/render-error-page "Projekt nebyl vybrán")))))
 
+(defn process-building-page
+    "Function that prepares data for the page with list of drawings for the selected building."
+    [request]
+    (let [params        (:params request)
+          project-id    (get params "project-id")
+          building-id   (get params "building-id")
+          project-info  (db-interface/read-project-info project-id)
+          building-info (db-interface/read-building-info building-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Project info" project-info)
+          (log/info "Building ID:" building-id)
+          (log/info "Building info" building-info)
+          (if building-id
+              (let [drawings (db-interface/read-drawing-list building-id)]
+                  (log/info "Drawings" drawings)
+                  (if (seq drawings)
+                      (finish-processing request (html-renderer/render-drawing-list project-id building-id project-info building-info drawings))
+                      (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
+              (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
+
+(defn process-drawing-page
+    "Function that prepares data for the page with selected drawing."
+    [request]
+    (let [params        (:params request)
+          project-id    (get params "project-id")
+          building-id   (get params "building-id")
+          drawing-id    (get params "drawing-id")
+          project-info  (db-interface/read-project-info project-id)
+          building-info (db-interface/read-building-info building-id)
+          drawing-info  (db-interface/read-drawing-info drawing-id)
+          rooms         (db-interface/read-room-list drawing-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Project info" project-info)
+          (log/info "Building ID:" building-id)
+          (log/info "Building info" building-info)
+          (log/info "Drawing ID:" drawing-id)
+          (log/info "Drawing info" drawing-info)
+          (log/info "Rooms" rooms)
+          (if drawing-id
+              (if drawing-info
+                  (finish-processing request (html-renderer/render-drawing project-id building-id drawing-id project-info building-info drawing-info rooms))
+                  (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
+              (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
 (defn handler
     "Handler that is called by Ring for all requests received from user(s)."
@@ -81,4 +124,8 @@
             "/chainring.css"              (return-file "chainring.css" "text/css")
             "/bootstrap.min.js"           (return-file "bootstrap.min.js" "application/javascript")
             "/"                           (process-front-page request)
-            "/project"                    (process-project-page request))))
+            "/project-list"               (process-project-list-page request)
+            "/project"                    (process-project-page request)
+            "/building"                   (process-building-page request)
+            "/drawing"                    (process-drawing-page request)
+            )))
