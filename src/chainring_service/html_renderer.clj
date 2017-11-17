@@ -1,3 +1,15 @@
+;
+;  (C) Copyright 2017  Pavel Tisnovsky
+;
+;  All rights reserved. This program and the accompanying materials
+;  are made available under the terms of the Eclipse Public License v1.0
+;  which accompanies this distribution, and is available at
+;  http://www.eclipse.org/legal/epl-v10.html
+;
+;  Contributors:
+;      Pavel Tisnovsky
+;
+
 (ns chainring-service.html-renderer
     "Module that contains functions used to render HTML pages sent back to the browser.")
 
@@ -144,6 +156,25 @@
         ] ; </body>
 ))
 
+(defn render-drawing
+    [project-id building-id drawing-id project-info building-info drawing-info rooms]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h3 (:name project-info)
+                     "(" (:sap project-info) ")"
+                     "   Budova: " (:name building-info)
+                     "   Výkres: " (:name drawing-info)]
+                [:br]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
 
 (defn render-error-page
     "Render error page with a 'back' button."
