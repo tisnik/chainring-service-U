@@ -56,16 +56,19 @@
 (defn process-project-page
     "Function that prepares data for the project page."
     [request]
-    (let [params     (:params request)
-          project-id (get params "id")]
-          (println "Project id:" project-id)
+    (let [params       (:params request)
+          project-id   (get params "project-id")
+          project-info (db-interface/read-project-info project-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Project info" project-info)
           (if project-id
-              (let [buildings (db-interface/read-buildings project-id)]
-                  (println "Buildings:" buildings)
-                  (if buildings
-                      (finish-processing request (html-renderer/render-building-list project-id buildings))
-                      (finish-processing request (html-renderer/render-error-page-no-buildings project-id))))
-              (finish-processing request (html-renderer/render-error-page-no-project-id)))))
+              (let [buildings (db-interface/read-building-list project-id)]
+                  (log/info "Buildings:" buildings)
+                  (if (seq buildings)
+                      (finish-processing request (html-renderer/render-building-list project-id project-info buildings))
+                      (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
+              (finish-processing request (html-renderer/render-error-page "Projekt nebyl vybrán")))))
+
 
 (defn handler
     "Handler that is called by Ring for all requests received from user(s)."
