@@ -117,6 +117,33 @@
         ] ; </body>
 ))
 
+(defn render-drawing-list
+    [project-id building-id project-info building-info drawings]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h2 (:name project-info)]
+                [:h4 (:sap project-info)]
+                [:h3 "Budova: " (:name building-info)]
+                [:h5 (:sap building-info)]
+                [:br]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"]
+                         [:th "Výkres"]
+                         [:th "SAP"]]
+                    (for [drawing drawings]
+                            [:tr [:td (:id drawing)]
+                                 [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&drawing-id=" (:id drawing))} (:name drawing)]]
+                                 [:td (:sap drawing)]])
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 
 (defn render-error-page
     "Render error page with a 'back' button."
