@@ -78,4 +78,4 @@
 
 (defn read-room-list
     [drawing-id]
-    (simple-query ["select * from rooms where drawing=?" drawing-id] "read-room-list"))
+    (simple-query ["select * from room where drawing=?" drawing-id] "read-room-list"))
