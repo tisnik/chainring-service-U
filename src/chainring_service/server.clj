@@ -19,6 +19,9 @@
 (require '[chainring-service.db-interface  :as db-interface])
 (require '[chainring-service.html-renderer :as html-renderer])
 
+(use     '[chainring-service.utils])
+
+
 (defn return-file
     "Creates HTTP response containing content of specified file.
      Special value nil / HTTP response 404 is returned in case of any I/O error."
@@ -113,19 +116,30 @@
                   (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
+(defn api-call-handler
+    [request uri method]
+    )
+
+(defn gui-call-handler
+    [request uri method]
+    (condp = uri
+        "/favicon.ico"                (return-file "favicon.ico" "image/x-icon")
+        "/bootstrap.min.css"          (return-file "bootstrap.min.css" "text/css")
+        "/chainring.css"              (return-file "chainring.css" "text/css")
+        "/bootstrap.min.js"           (return-file "bootstrap.min.js" "application/javascript")
+        "/"                           (process-front-page request)
+        "/project-list"               (process-project-list-page request)
+        "/project"                    (process-project-page request)
+        "/building"                   (process-building-page request)
+        "/drawing"                    (process-drawing-page request)
+        ))
+
 (defn handler
     "Handler that is called by Ring for all requests received from user(s)."
     [request]
     (log/info "request URI: " (request :uri))
-    (let [uri          (request :uri)]
-        (condp = uri
-            "/favicon.ico"                (return-file "favicon.ico" "image/x-icon")
-            "/bootstrap.min.css"          (return-file "bootstrap.min.css" "text/css")
-            "/chainring.css"              (return-file "chainring.css" "text/css")
-            "/bootstrap.min.js"           (return-file "bootstrap.min.js" "application/javascript")
-            "/"                           (process-front-page request)
-            "/project-list"               (process-project-list-page request)
-            "/project"                    (process-project-page request)
-            "/building"                   (process-building-page request)
-            "/drawing"                    (process-drawing-page request)
-            )))
+    (let [uri      (:uri request)
+          method   (:request-method request)]
+        (if (startsWith uri "/api")
+            (api-call-handler request uri method)
+            (gui-call-handler request uri method))))
