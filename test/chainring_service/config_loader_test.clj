@@ -26,4 +26,25 @@
 ;
 ; Tests for functions existence
 ;
+(deftest test-properties->map-existence
+    "Check that the chainring-service.config-loader/properties->map definition exists."
+    (testing "if the chainring-service.config-loader/properties->map definition exists."
+        (is (callable? 'chainring-service.config-loader/properties->map))))
+
+
+(deftest test-load-property-file-existence
+    "Check that the chainring-service.config-loader/load-property-file definition exists."
+    (testing "if the chainring-service.config-loader/load-property-file definition exists."
+        (is (callable? 'chainring-service.config-loader/load-property-file))))
+
+
+(deftest test-load-configuration-file-existence
+    "Check that the chainring-service.config-loader/load-configuration-file definition exists."
+    (testing "if the chainring-service.config-loader/load-configuration-file definition exists."
+        (is (callable? 'chainring-service.config-loader/load-configuration-file))))
+
+;
+; Tests for functions behaviour
+;
+
 
