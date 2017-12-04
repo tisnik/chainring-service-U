@@ -20,6 +20,13 @@ create table drawing (
     foreign key (building) references building(id)
 );
 
+create table drawing_raw_data (
+    id       integer primary key asc,
+    drawing  integer not null,
+    raw_data blob,
+    foreign key (drawing) references drawing(id)
+);
+
 create table entity_type (
     id       integer primary key asc,
     type     text not null
