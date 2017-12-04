@@ -18,6 +18,8 @@
 
 (require '[chainring-service.db-interface  :as db-interface])
 (require '[chainring-service.html-renderer :as html-renderer])
+(require '[chainring-service.rest-api      :as rest-api])
+(require '[chainring-service.config        :as config])
 
 (use     '[chainring-service.utils])
 
@@ -116,11 +118,40 @@
                   (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
+(defn get-api-part-from-uri
+    "Get API part (string) from the full URI. The API part string should not starts with /"
+    [uri prefix]
+    (let [api-part (re-find #"/[^/]*" (subs uri (count prefix)))]
+       (if (and api-part (startsWith api-part "/"))
+           (subs api-part 1)
+           api-part)))
+
+(defn get-api-command
+    "Retrieve the actual command from the API call."
+    [uri prefix]
+    (if uri
+        (if (startsWith uri prefix)
+            (let [uri-without-prefix (subs uri (count prefix))]
+                (if (empty? uri-without-prefix) ; special handler for a call with / only
+                    ""
+                    (get-api-part-from-uri uri prefix))))))
+
 (defn api-call-handler
-    [request uri method]
-    )
+    "This function is used to handle all API calls. Three parameters are expected:
+     data structure containing HTTP request, string with URI, and the HTTP method."
+    [request uri method prefix]
+    (if (= uri prefix)
+        (rest-api/api-info-handler request)
+        (condp = [method (get-api-command uri prefix)]
+            [:get  ""]     (rest-api/api-info-handler request)
+            [:get  "info"] (rest-api/info-handler request)
+            [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
+                           (rest-api/unknown-endpoint request uri)
+        )))
 
 (defn gui-call-handler
+    "This function is used to handle all GUI calls. Three parameters are expected:
+     data structure containing HTTP request, string with URI, and the HTTP method."
     [request uri method]
     (condp = uri
         "/favicon.ico"                (return-file "favicon.ico" "image/x-icon")
@@ -137,9 +168,11 @@
 (defn handler
     "Handler that is called by Ring for all requests received from user(s)."
     [request]
-    (log/info "request URI: " (request :uri))
-    (let [uri      (:uri request)
-          method   (:request-method request)]
-        (if (startsWith uri "/api")
-            (api-call-handler request uri method)
+    (log/info "request URI:   " (:uri request))
+    (log/info "configuration: " (:configuration request))
+    (let [uri        (:uri request)
+          method     (:request-method request)
+          api-prefix (config/get-api-prefix request)]
+        (if (startsWith uri api-prefix)
+            (api-call-handler request uri method api-prefix)
             (gui-call-handler request uri method))))
