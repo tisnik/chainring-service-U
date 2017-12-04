@@ -17,7 +17,8 @@
                                                       javax.jms/jms
                                                       com.sun.jmdk/jmxtools
                                                       com.sun.jmx/jmxri]]
-                   [org.slf4j/slf4j-log4j12 "1.6.6"]]
+                   [org.slf4j/slf4j-log4j12 "1.6.6"]
+                   [org.clojars.tisnik/clj-fileutils "0.2.0-SNAPSHOT"]]
     :dev-dependencies [[lein-ring "0.8.10"]]
     :main ^:skip-aot chainring-service.core
     :plugins [[lein-ring "0.8.10"]
