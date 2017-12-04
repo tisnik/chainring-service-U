@@ -13,7 +13,7 @@
 (ns chainring-service.db-spec
     "Namespace that contains configuration of all JDBC sources.")
 
-(def zg-db
+(def chainring-db
     "Specification for SQLite database used for storing all dictionaries."
     {:classname   "org.sqlite.JDBC"
      :subprotocol "sqlite"

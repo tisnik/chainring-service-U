@@ -21,7 +21,7 @@
 (defn simple-query-sequence
     [query operation]
     (try
-        (jdbc/query db-spec/zg-db query)
+        (jdbc/query db-spec/chainring-db query)
         (catch Exception e
             (log/error e operation)
             [])))
@@ -29,7 +29,7 @@
 (defn simple-query
     [query operation]
     (try
-        (-> (jdbc/query db-spec/zg-db query)
+        (-> (jdbc/query db-spec/chainring-db query)
             first)
         (catch Exception e
             (log/error e operation)
@@ -38,7 +38,7 @@
 (defn simple-query-selector
     [query selector operation]
     (try
-        (-> (jdbc/query db-spec/zg-db query)
+        (-> (jdbc/query db-spec/chainring-db query)
             first
             (get selector))
         (catch Exception e
@@ -79,3 +79,10 @@
 (defn read-room-list
     [drawing-id]
     (simple-query ["select * from room where drawing=?" drawing-id] "read-room-list"))
+ 
+(defn store-drawing-raw-data
+    [drawing-id raw-data]
+    (jdbc/insert! db-spec/chainring-db
+        :drawing_raw_data {:drawing drawing-id
+                           :raw_data raw-data}))
+
