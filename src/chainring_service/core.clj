@@ -20,14 +20,17 @@
 (require '[clojure.tools.cli       :as cli])
 (require '[clojure.tools.logging   :as log])
 
-(require '[chainring-service.server :as server])
+(require '[chainring-service.config     :as config])
+(require '[chainring-service.server     :as server])
+(require '[chainring-service.middleware :as middleware])
 
-(def default-port
-    "Default port on which the service accepts all HTTP requests.")
+; we need to load the configuration in advance so the 'app' could use it
+(def configuration (config/load-configuration-from-ini "config.ini"))
 
 (def app
     "Definition of a Ring-based application behaviour."
     (-> server/handler            ; handle all events
+        (middleware/inject-configuration configuration) ; inject configuration structure into the parameter
         cookies/wrap-cookies      ; we need to work with cookies
         http-params/wrap-params)) ; and to process request parameters, of course
 
@@ -40,6 +43,6 @@
 (defn -main
     "Entry point to the chainring service."
     [& args]
-    (let [port             "3000"]
+    (let [port             (-> configuration :service :port)]
           (start-server    port)))
 
