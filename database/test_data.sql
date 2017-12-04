@@ -7,3 +7,4 @@ insert into drawing(id, building, sap, name) values(1, 1, 'SAP11100', 'Podlazi 1
 insert into drawing(id, building, sap, name) values(2, 1, 'SAP11110', 'Podlazi 2');
 insert into drawing(id, building, sap, name) values(3, 1, 'SAP11120', 'Podlazi 3');
 
+--insert into drawing_raw_data(id, drawing, raw_data) values(1, 1, readfile('drawing1.drw'));
