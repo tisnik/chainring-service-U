@@ -1,6 +1,6 @@
 (ns chainring-service.config)
 
-(require '[chainring-service.utils         :as utils])
+(require '[clj-utils.utils :as utils])
 (require '[config-loader.config-loader :as config-loader])
 
 (defn update-configuration

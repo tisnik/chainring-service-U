@@ -21,7 +21,7 @@
 (require '[chainring-service.rest-api      :as rest-api])
 (require '[chainring-service.config        :as config])
 
-(use     '[chainring-service.utils])
+(use     '[clj-utils.utils])
 
 
 (defn return-file
