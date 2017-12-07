@@ -1,7 +1,7 @@
 (ns chainring-service.config)
 
 (require '[chainring-service.utils         :as utils])
-(require '[chainring-service.config-loader :as config-loader])
+(require '[config-loader.config-loader :as config-loader])
 
 (defn update-configuration
     "Update selected items in the configuration structure."
