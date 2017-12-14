@@ -7,4 +7,19 @@ insert into drawing(id, building, sap, name) values(1, 1, 'SAP11100', 'Podlazi 1
 insert into drawing(id, building, sap, name) values(2, 1, 'SAP11110', 'Podlazi 2');
 insert into drawing(id, building, sap, name) values(3, 1, 'SAP11120', 'Podlazi 3');
 
+insert into room(id, drawing, sap) values(1, 1, 'SAP1110001');
+insert into room(id, drawing, sap) values(2, 1, 'SAP1110002');
+insert into room(id, drawing, sap) values(3, 1, 'SAP1110003');
+insert into room(id, drawing, sap) values(4, 1, 'SAP1110004');
+
+insert into room(id, drawing, sap) values(5, 2, 'SAP1111001');
+insert into room(id, drawing, sap) values(6, 2, 'SAP1111002');
+insert into room(id, drawing, sap) values(7, 2, 'SAP1111003');
+insert into room(id, drawing, sap) values(8, 2, 'SAP1111004');
+
+insert into room(id, drawing, sap) values(9, 3, 'SAP1112001');
+insert into room(id, drawing, sap) values(10, 3, 'SAP1112002');
+insert into room(id, drawing, sap) values(11, 3, 'SAP1112003');
+insert into room(id, drawing, sap) values(12, 3, 'SAP1112004');
+
 --insert into drawing_raw_data(id, drawing, raw_data) values(1, 1, readfile('drawing1.drw'));
