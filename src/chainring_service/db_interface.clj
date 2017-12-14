@@ -78,7 +78,7 @@
 
 (defn read-room-list
     [drawing-id]
-    (simple-query ["select * from room where drawing=?" drawing-id] "read-room-list"))
+    (simple-query-sequence ["select * from room where drawing=?" drawing-id] "read-room-list"))
  
 (defn store-drawing-raw-data
     [drawing-id raw-data]
