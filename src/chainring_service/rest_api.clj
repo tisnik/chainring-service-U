@@ -126,12 +126,8 @@
     "REST API handler for the /api/building request."
     [request uri]
     (let [params        (:params request)
-          project-id    (get params "project-id")
           building-id   (get params "building-id")
-          project-info  (db-interface/read-project-info project-id)
           building-info (db-interface/read-building-info building-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
           (if building-id
@@ -143,7 +139,18 @@
 (defn drawing-handler
     "REST API handler for the /api/drawing request."
     [request uri]
-    )
+    (let [params        (:params request)
+          drawing-id    (get params "drawing-id")
+          drawing-info  (db-interface/read-drawing-info drawing-id)
+          rooms         (db-interface/read-room-list drawing-id)]
+          (log/info "Drawing ID:" drawing-id)
+          (log/info "Drawing info" drawing-info)
+          (log/info "Rooms" rooms)
+          (if drawing-id
+              (if drawing-info
+                  (send-response drawing-info request)
+                  (send-error-response "no drawing info" uri request :internal-server-error))
+              (send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
 (defn store-drawing-raw-data
     [request]
