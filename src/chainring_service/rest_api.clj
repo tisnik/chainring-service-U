@@ -42,14 +42,16 @@
 
 (defn send-response
     "Send normal response (with application/json MIME type) back to the client."
-    [response request http-code]
-    (if (config/pretty-print? request)
-        (-> (http-response/response (with-out-str (json/pprint response)))
-            (http-response/content-type "application/json")
-            (http-response/status (get http-codes http-code)))
-        (-> (http-response/response (json/write-str response))
-            (http-response/content-type "application/json")
-            (http-response/status (get http-codes http-code)))))
+    ([response request http-code]
+     (if (config/pretty-print? request)
+         (-> (http-response/response (with-out-str (json/pprint response)))
+             (http-response/content-type "application/json")
+             (http-response/status (get http-codes http-code)))
+         (-> (http-response/response (json/write-str response))
+             (http-response/content-type "application/json")
+             (http-response/status (get http-codes http-code)))))
+    ([response request]
+     (send-response response request :ok)))
 
 (defn send-ok-response
     "Send ok response (with application/json MIME type) back to the client."
@@ -94,19 +96,23 @@
         (send-response response request)))
 
 (defn project-list-handler
-    [request]
-    )
+    [request uri]
+    (let [projects      (db-interface/read-project-list)]
+        (log/info "Projects:" projects)
+        (if projects
+            (send-response projects request)
+            (send-error-response "database access error" uri request :internal-server-error))))
 
 (defn project-handler
-    [request]
+    [request uri]
     )
 
 (defn building-handler
-    [request]
+    [request uri]
     )
 
 (defn drawing-handler
-    [request]
+    [request uri]
     )
 
 (defn store-drawing-raw-data
