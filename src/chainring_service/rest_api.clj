@@ -81,8 +81,12 @@
 (defn api-info-handler
     "REST API handler for the /api request."
     [request]
-    (let [response {"/"     "the schema"
-                    "/info" "basic info about the service"}]
+    (let [response {"/"             "the schema"
+                    "/info"         "basic info about the service"
+                    "/project-list" "list of projects"
+                    "/project"      "project metadata"
+                    "/building"     "building metadata"
+                    "/drawing"      "drawing metadata"}]
         (send-response response request)))
 
 (defn info-handler
