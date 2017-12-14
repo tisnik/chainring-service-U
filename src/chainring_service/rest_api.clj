@@ -142,13 +142,15 @@
     (let [params        (:params request)
           drawing-id    (get params "drawing-id")
           drawing-info  (db-interface/read-drawing-info drawing-id)
-          rooms         (db-interface/read-room-list drawing-id)]
+          rooms         (db-interface/read-room-list drawing-id)
+          result        {:drawing-info drawing-info
+                         :rooms rooms}]
           (log/info "Drawing ID:" drawing-id)
           (log/info "Drawing info" drawing-info)
           (log/info "Rooms" rooms)
           (if drawing-id
               (if drawing-info
-                  (send-response drawing-info request)
+                  (send-response result request)
                   (send-error-response "no drawing info" uri request :internal-server-error))
               (send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
