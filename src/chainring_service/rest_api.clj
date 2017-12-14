@@ -93,6 +93,22 @@
                     ;:hostname   hostname :test "/api"}]
         (send-response response request)))
 
+(defn project-list-handler
+    [request]
+    )
+
+(defn project-handler
+    [request]
+    )
+
+(defn building-handler
+    [request]
+    )
+
+(defn drawing-handler
+    [request]
+    )
+
 (defn store-drawing-raw-data
     [request]
     (let [params (:params request)
