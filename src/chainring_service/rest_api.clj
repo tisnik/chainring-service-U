@@ -100,6 +100,7 @@
         (send-response response request)))
 
 (defn project-list-handler
+    "REST API handler for the /api/project-list request."
     [request uri]
     (let [projects      (db-interface/read-project-list)]
         (log/info "Projects:" projects)
@@ -108,6 +109,7 @@
             (send-error-response "database access error" uri request :internal-server-error))))
 
 (defn project-handler
+    "REST API handler for the /api/project request."
     [request uri]
     (let [params       (:params request)
           project-id   (get params "project-id")
@@ -121,10 +123,25 @@
               (send-error-response "you need to specify project ID" uri request :internal-server-error))))
 
 (defn building-handler
+    "REST API handler for the /api/building request."
     [request uri]
-    )
+    (let [params        (:params request)
+          project-id    (get params "project-id")
+          building-id   (get params "building-id")
+          project-info  (db-interface/read-project-info project-id)
+          building-info (db-interface/read-building-info building-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Project info" project-info)
+          (log/info "Building ID:" building-id)
+          (log/info "Building info" building-info)
+          (if building-id
+              (let [drawings (db-interface/read-drawing-list building-id)]
+                  (log/info "Drawings" drawings)
+                  (send-response drawings request))
+              (send-error-response "you need to specify building ID" uri request :internal-server-error))))
 
 (defn drawing-handler
+    "REST API handler for the /api/drawing request."
     [request uri]
     )
 
