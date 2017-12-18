@@ -120,6 +120,18 @@
           :info      project-info
           :buildings buildings}))
 
+(defn read-building-info
+    [building-id]
+    (let [building-info (db-interface/read-building-info building-id)
+          floors        (db-interface/read-floor-list building-id)]
+          (log/info "Building ID:" building-id)
+          (log/info "Building info:" building-info)
+          (log/info "Floors:" floors)
+          ; result response
+          {:id      building-id
+           :info    building-info
+           :floors  floors}))
+
 (defn project-handler
     "REST API handler for the /api/project request."
     [request uri]
@@ -133,14 +145,9 @@
     "REST API handler for the /api/building request."
     [request uri]
     (let [params        (:params request)
-          building-id   (get params "building-id")
-          building-info (db-interface/read-building-info building-id)]
-          (log/info "Building ID:" building-id)
-          (log/info "Building info" building-info)
+          building-id   (get params "building-id")]
           (if building-id
-              (let [floors (db-interface/read-floor-list building-id)]
-                  (log/info "Floors" floors)
-                  (send-response floors request))
+              (send-response (read-building-info building-id) request)
               (send-error-response "you need to specify building ID" uri request :internal-server-error))))
 
 (defn floor-handler
