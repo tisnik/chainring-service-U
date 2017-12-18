@@ -67,10 +67,19 @@
     [building-id]
     (simple-query ["select * from building where id=?" building-id] "read-building-info"))
 
-(defn read-drawing-list
+(defn read-floor-list
     [building-id]
-    (simple-query-sequence ["select id, sap, name from drawing where building=? order by name" building-id]
-                  "read-building-list"))
+    (simple-query-sequence ["select id, sap, name from floor where building=? order by name" building-id]
+                  "read-floor-list"))
+
+(defn read-floor-info
+    [floor-id]
+    (simple-query ["select * from floor where id=?" floor-id] "read-floor-info"))
+
+(defn read-drawing-list
+    [floor-id]
+    (simple-query-sequence ["select id, sap, name from drawing where floor=? order by name" floor-id]
+                  "read-drawing-list"))
 
 (defn read-drawing-info
     [drawing-id]
