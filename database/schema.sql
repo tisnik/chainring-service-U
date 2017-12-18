@@ -1,3 +1,4 @@
+-- also named 'Areal' in SAP
 create table project (
     id       integer primary key asc,
     sap      text,
@@ -12,12 +13,21 @@ create table building (
     foreign key (project) references project(id)
 );
 
-create table drawing (
+create table floor (
     id       integer primary key asc,
     building integer not null,
     name     text not null,
     sap      text,
     foreign key (building) references building(id)
+);
+
+create table drawing (
+    id       integer primary key asc,
+    floor    integer not null,
+    name     text not null,
+    sap      text,
+    version  integer not null,
+    foreign key (floor) references floor(id)
 );
 
 create table drawing_raw_data (
@@ -43,6 +53,13 @@ create table entity (
 create table attribute_type (
     id       integer primary key asc,
     name     text not null
+);
+
+create table sap_room (
+    id       integer primary key asc,
+    floor    integer not null,
+    sap      text,
+    foreign key (floor) references floor(id)
 );
 
 create table room (
