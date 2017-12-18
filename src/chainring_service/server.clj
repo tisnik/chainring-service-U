@@ -148,9 +148,10 @@
             [:get  "project-list"]     (rest-api/project-list-handler request uri)
             [:get  "project"]          (rest-api/project-handler request uri)
             [:get  "building"]         (rest-api/building-handler request uri)
+            [:get  "floor"]            (rest-api/floor-handler request uri)
             [:get  "drawing"]          (rest-api/drawing-handler request uri)
             [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
-                           (rest-api/unknown-endpoint request uri)
+                                       (rest-api/unknown-endpoint request uri)
         )))
 
 (defn gui-call-handler

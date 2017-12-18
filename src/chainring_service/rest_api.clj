@@ -131,10 +131,24 @@
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
           (if building-id
-              (let [drawings (db-interface/read-drawing-list building-id)]
+              (let [floors (db-interface/read-floor-list building-id)]
+                  (log/info "Floors" floors)
+                  (send-response floors request))
+              (send-error-response "you need to specify building ID" uri request :internal-server-error))))
+
+(defn floor-handler
+    "REST API handler for the /api/floor request."
+    [request uri]
+    (let [params     (:params request)
+          floor-id   (get params "floor-id")
+          floor-info (db-interface/read-floor-info floor-id)]
+          (log/info "Floor ID:" floor-id)
+          (log/info "Floor info" floor-info)
+          (if floor-id
+              (let [drawings (db-interface/read-drawing-list floor-id)]
                   (log/info "Drawings" drawings)
                   (send-response drawings request))
-              (send-error-response "you need to specify building ID" uri request :internal-server-error))))
+              (send-error-response "you need to specify floor ID" uri request :internal-server-error))))
 
 (defn drawing-handler
     "REST API handler for the /api/drawing request."
