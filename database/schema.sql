@@ -21,6 +21,27 @@ create table floor (
     foreign key (building) references building(id)
 );
 
+create table sap_room (
+    id       integer primary key asc,
+    floor    integer not null,
+    sap      text,
+    foreign key (floor) references floor(id)
+);
+
+create table attribute_type (
+    id       integer primary key asc,
+    name     text not null
+);
+
+create table room_attribute (
+    id       integer primary key asc,
+    room     integer not null,
+    type     integer not null,
+    value    text,
+    foreign key (type) references attribute_type(id)
+    foreign key (room) references sap_room(id)
+);
+
 create table drawing (
     id       integer primary key asc,
     floor    integer not null,
@@ -37,45 +58,11 @@ create table drawing_raw_data (
     foreign key (drawing) references drawing(id)
 );
 
-create table entity_type (
-    id       integer primary key asc,
-    type     text not null
-);
-
-create table entity (
-    id       integer primary key asc,
-    drawing  integer not null,
-    type     integer not null,
-    foreign key (type) references entity_type(id)
-    foreign key (drawing) references drawing(id)
-);
-
-create table attribute_type (
-    id       integer primary key asc,
-    name     text not null
-);
-
-create table sap_room (
-    id       integer primary key asc,
-    floor    integer not null,
-    sap      text,
-    foreign key (floor) references floor(id)
-);
-
-create table room (
+create table drawing_room (
     id       integer primary key asc,
     drawing  integer not null,
     sap      text,
     foreign key (drawing) references drawing(id)
-);
-
-create table room_attribute (
-    id       integer primary key asc,
-    room     integer not null,
-    type     integer not null,
-    value    text,
-    foreign key (type) references attribute_type(id)
-    foreign key (room) references room(id)
 );
 
 create table room_vertex (
@@ -83,6 +70,6 @@ create table room_vertex (
     room     integer not null,
     x        real not null,
     y        real not null,
-    foreign key (room) references room(id)
+    foreign key (room) references drawing_room(id)
 );
 
