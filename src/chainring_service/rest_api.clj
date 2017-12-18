@@ -108,18 +108,25 @@
             (send-response projects request)
             (send-error-response "database access error" uri request :internal-server-error))))
 
+(defn read-project-info
+    [project-id]
+    (let [project-info (db-interface/read-project-info project-id)
+          buildings    (db-interface/read-building-list project-id)]
+         (log/info "Project ID:" project-id)
+         (log/info "Project info:" project-info)
+         (log/info "Buildings:" buildings)
+         ; result structure
+         {:id        project-id
+          :info      project-info
+          :buildings buildings}))
+
 (defn project-handler
     "REST API handler for the /api/project request."
     [request uri]
     (let [params       (:params request)
-          project-id   (get params "project-id")
-          project-info (db-interface/read-project-info project-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
+          project-id   (get params "project-id")]
           (if project-id
-              (let [buildings (db-interface/read-building-list project-id)]
-                  (log/info "Buildings:" buildings)
-                  (send-response buildings request))
+              (send-response (read-project-info project-id) request)
               (send-error-response "you need to specify project ID" uri request :internal-server-error))))
 
 (defn building-handler
