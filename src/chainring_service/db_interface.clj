@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -46,22 +46,29 @@
             [])))
 
 (defn read-project-list
+    "Read list of all projects."
     []
-    (simple-query-sequence ["select id, sap, name from project order by name"]
+    (simple-query-sequence ["select id, sap, name, created from project order by name"]
                   "read-project-list"))
 
 (defn read-project-name
+    "Read project name for given project ID."
     [project-id]
-    (simple-query-selector ["select name from project where id=?" project-id] :name "read-project-name"))
+    (if project-id
+        (simple-query-selector ["select name from project where id=?" project-id] :name "read-project-name")))
 
 (defn read-project-info
+    "Read project info for given project ID."
     [project-id]
-    (simple-query ["select * from project where id=?" project-id] "read-project-info"))
+    (if project-id
+        (simple-query ["select id, sap, name, created from project where id=?" project-id] "read-project-info")))
 
 (defn read-building-list
+    "Read list of buildings for given project ID."
     [project-id]
-    (simple-query-sequence ["select id, sap, name from building where project=? order by name" project-id]
-                  "read-building-list"))
+    (if project-id
+        (simple-query-sequence ["select id, sap, name, created from building where project=? order by name" project-id]
+                      "read-building-list")))
 
 (defn read-building-info
     [building-id]
