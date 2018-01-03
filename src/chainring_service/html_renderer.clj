@@ -91,11 +91,13 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Projekt"]
-                         [:th "SAP"]]
+                         [:th "SAP"]
+                         [:th "Vytvořeno"]]
                     (for [project projects]
                             [:tr [:td (:id project)]
                                  [:td [:a {:href (str "project?project-id=" (:id project))}(:name project)]]
-                                 [:td (:sap project)]])
+                                 [:td (:sap project)]
+                                 [:td (:created project)]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -116,12 +118,43 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Budova"]
-                         [:th "SAP"]]
+                         [:th "SAP"]
+                         [:th "Vytvořeno"]]
                     (for [building buildings]
                             [:tr [:td (:id building)]
                                  [:td [:a {:href (str "building?project-id=" project-id "&building-id=" (:id building))}
                                           (:name building)]]
-                                 [:td (:sap building)]])
+                                 [:td (:sap building)]
+                                 [:td (:created building)]])
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-floor-list
+    [project-id building-id project-info building-info floors]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h2 (:name project-info)]
+                [:h4 (:sap project-info)]
+                [:h3 "Budova: " (:name building-info)]
+                [:h5 (:sap building-info)]
+                [:br]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"]
+                         [:th "Podlaží"]
+                         [:th "SAP"]
+                         [:th "Vytvořeno"]]
+                    (for [floor floors]
+                            [:tr [:td (:id floor)]
+                                 [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:id floor))} (:name floor)]]
+                                 [:td (:sap floor)]
+                                 [:td (:created floor)]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
