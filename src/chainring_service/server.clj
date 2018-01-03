@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -59,7 +59,7 @@
             (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k databázi")))))
 
 (defn process-project-page
-    "Function that prepares data for the project page."
+    "Function that prepares data for the page with list of projects."
     [request]
     (let [params       (:params request)
           project-id   (get params "project-id")
@@ -75,11 +75,32 @@
               (finish-processing request (html-renderer/render-error-page "Projekt nebyl vybrán")))))
 
 (defn process-building-page
-    "Function that prepares data for the page with list of drawings for the selected building."
+    "Function that prepares data for the page with list of floors for the selected building."
     [request]
     (let [params        (:params request)
           project-id    (get params "project-id")
           building-id   (get params "building-id")
+          project-info  (db-interface/read-project-info project-id)
+          building-info (db-interface/read-building-info building-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Project info" project-info)
+          (log/info "Building ID:" building-id)
+          (log/info "Building info" building-info)
+          (if building-id
+              (let [floors (db-interface/read-floor-list building-id)]
+                  (log/info "Floors" floors)
+                  (if (seq floors)
+                      (finish-processing request (html-renderer/render-floor-list project-id building-id project-info building-info floors))
+                      (finish-processing request (html-renderer/render-error-page "Nebylo nalezeno žádné podlaží"))))
+              (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
+
+(defn process-floor-page
+    "Function that prepares data for the page with list of floors."
+    [request]
+    (let [params        (:params request)
+          project-id    (get params "project-id")
+          building-id   (get params "building-id")
+          floor-id      (get params "floor-id")
           project-info  (db-interface/read-project-info project-id)
           building-info (db-interface/read-building-info building-id)]
           (log/info "Project ID:" project-id)
@@ -166,6 +187,7 @@
         "/"                           (process-front-page request)
         "/project-list"               (process-project-list-page request)
         "/project"                    (process-project-page request)
+        "/floor"                      (process-floor-page request)
         "/building"                   (process-building-page request)
         "/drawing"                    (process-drawing-page request)
         ))
