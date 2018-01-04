@@ -19,6 +19,12 @@ def pause_scenario_execution(context, num):
     time.sleep(num)
 
 
+@given('System is in initial state')
+def initial_state(context):
+    """Restart the system to the known initial state."""
+    context.restart_system(context)
+
+
 @given('System is running')
 def running_system(context):
     """Ensure that the system is running, (re)start it if necesarry."""
