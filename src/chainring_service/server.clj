@@ -16,10 +16,11 @@
 (require '[ring.util.response      :as http-response])
 (require '[clojure.tools.logging   :as log])
 
-(require '[chainring-service.db-interface  :as db-interface])
-(require '[chainring-service.html-renderer :as html-renderer])
-(require '[chainring-service.rest-api      :as rest-api])
-(require '[chainring-service.config        :as config])
+(require '[chainring-service.db-interface     :as db-interface])
+(require '[chainring-service.html-renderer    :as html-renderer])
+(require '[chainring-service.rest-api         :as rest-api])
+(require '[chainring-service.drawing-renderer :as drawing-renderer])
+(require '[chainring-service.config           :as config])
 
 (use     '[clj-utils.utils])
 
@@ -166,12 +167,15 @@
         (condp = [method (get-api-command uri prefix)]
             [:get  ""]                 (rest-api/api-info-handler request)
             [:get  "info"]             (rest-api/info-handler request)
+            [:get  "liveness"]         (rest-api/liveness-handler request)
+            [:get  "readiness"]        (rest-api/readiness-handler request)
             [:get  "project-list"]     (rest-api/project-list-handler request uri)
             [:get  "project"]          (rest-api/project-handler request uri)
             [:get  "building"]         (rest-api/building-handler request uri)
             [:get  "floor"]            (rest-api/floor-handler request uri)
             [:get  "drawing"]          (rest-api/drawing-handler request uri)
             [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
+            [:get  "raster-drawing"]   (drawing-renderer/raster-drawing request)
                                        (rest-api/unknown-endpoint request uri)
         )))
 
@@ -197,9 +201,12 @@
     [request]
     (log/info "request URI:   " (:uri request))
     (log/info "configuration: " (:configuration request))
-    (let [uri        (:uri request)
-          method     (:request-method request)
-          api-prefix (config/get-api-prefix request)]
-        (if (startsWith uri api-prefix)
-            (api-call-handler request uri method api-prefix)
-            (gui-call-handler request uri method))))
+    (let [uri             (:uri request)
+          method          (:request-method request)
+          api-prefix      (config/get-api-prefix request)
+          api-full-prefix (config/get-api-full-prefix request)]
+          (println uri)
+        (cond (= uri api-prefix)            (rest-api/toplevel-handler request api-full-prefix)
+              (= uri (str api-prefix "/"))  (rest-api/toplevel-handler request api-full-prefix)
+              (startsWith uri api-prefix)   (api-call-handler request uri method api-full-prefix)
+              :else                         (gui-call-handler request uri method))))
