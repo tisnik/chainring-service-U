@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -75,14 +75,23 @@
         (http-response/content-type "application/json")))
 
 (defn unknown-endpoint
+    "Process any unknown endpoints."
     [request uri]
     (send-error-response "unknown endpoint" uri request :bad-request))
 
+(defn toplevel-handler
+    "REST API handler for the /api endpoint."
+    [request api-full-prefix]
+    (let [response {api-full-prefix "current REST API version endpoint"}]
+        (send-response response request)))
+
 (defn api-info-handler
-    "REST API handler for the /api request."
+    "REST API handler for the /api/{version} endpoint."
     [request]
     (let [response {"/"             "the schema"
                     "/info"         "basic info about the service"
+                    "/liveness"     "check the liveness of the service"
+                    "/readiness"    "check the readiness of the service and all subcomponents"
                     "/project-list" "list of projects"
                     "/project"      "project metadata"
                     "/building"     "building metadata"
@@ -90,17 +99,31 @@
         (send-response response request)))
 
 (defn info-handler
-    "REST API handler for the /api/info request."
+    "REST API handler for the /api/{version}/info endpoint."
     [request]
-    (let [response {:name       "Chainring Service"}]
-                    ;:version    (config/get-version request)
-                    ;:api_prefix (config/get-api-prefix request)
-                    ;:gui_prefix (config/get-gui-prefix request)
+    (let [response {:name            "Chainring Service"
+                    :service-version (config/get-version request)
+                    :db-version      (config/get-db-version request)
+                    :api-prefix      (config/get-api-prefix request)
+                    :api-version     (config/get-api-version request)
+                    :full-prefix     (config/get-api-full-prefix request)}]
                     ;:hostname   hostname :test "/api"}]
         (send-response response request)))
 
+(defn liveness-handler
+    "REST API handler for the /api/{version}/liveness endpoint."
+    [request]
+    (let [response {:status "ok"}]
+        (send-response response request)))
+
+(defn readiness-handler
+    "REST API handler for the /api/{version}/readiness endpoint."
+    [request]
+    (let [response {:status "ok"}]
+        (send-response response request)))
+
 (defn project-list-handler
-    "REST API handler for the /api/project-list request."
+    "REST API handler for the /api/{version}/project-list endpoint."
     [request uri]
     (let [projects      (db-interface/read-project-list)]
         (log/info "Projects:" projects)
@@ -109,6 +132,7 @@
             (send-error-response "database access error" uri request :internal-server-error))))
 
 (defn read-project-info
+    "REST API handler for /api/{version}/project endpoint."
     [project-id]
     (let [project-info (db-interface/read-project-info project-id)
           buildings    (db-interface/read-building-list project-id)]
@@ -121,6 +145,7 @@
           :buildings buildings}))
 
 (defn read-building-info
+    "REST API handler for /api/{version}/building-info endpoint."
     [building-id]
     (let [building-info (db-interface/read-building-info building-id)
           floors        (db-interface/read-floor-list building-id)]
@@ -133,7 +158,7 @@
            :floors  floors}))
 
 (defn project-handler
-    "REST API handler for the /api/project request."
+    "REST API handler for the /api/{version}/project request."
     [request uri]
     (let [params       (:params request)
           project-id   (get params "project-id")]
@@ -142,7 +167,7 @@
               (send-error-response "you need to specify project ID" uri request :internal-server-error))))
 
 (defn building-handler
-    "REST API handler for the /api/building request."
+    "REST API handler for the /api/{version}/building endpoint."
     [request uri]
     (let [params        (:params request)
           building-id   (get params "building-id")]
@@ -151,7 +176,7 @@
               (send-error-response "you need to specify building ID" uri request :internal-server-error))))
 
 (defn floor-handler
-    "REST API handler for the /api/floor request."
+    "REST API handler for the /api/{version}/floor endpoint."
     [request uri]
     (let [params     (:params request)
           floor-id   (get params "floor-id")
@@ -165,7 +190,7 @@
               (send-error-response "you need to specify floor ID" uri request :internal-server-error))))
 
 (defn drawing-handler
-    "REST API handler for the /api/drawing request."
+    "REST API handler for the /api/{version}/drawing endpoint."
     [request uri]
     (let [params        (:params request)
           drawing-id    (get params "drawing-id")
@@ -183,6 +208,7 @@
               (send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
 (defn store-drawing-raw-data
+    "REST API handler for the /api/{version}/drawing-raw-data endpoint."
     [request]
     (let [params (:params request)
           drawing-id (get params "drawing")
@@ -196,3 +222,4 @@
                     (send-error-response "exception occured during write" (.getMessage e) request :internal-server-error)))
             (send-error-response "send drawing ID as parameter and raw data in the body" "wrong input" request :bad-request)
         )))
+
