@@ -1,75 +1,93 @@
+--
+--  (C) Copyright 2017, 2018  Pavel Tisnovsky
+--
+--  All rights reserved. This program and the accompanying materials
+--  are made available under the terms of the Eclipse Public License v1.0
+--  which accompanies this distribution, and is available at
+--  http://www.eclipse.org/legal/epl-v10.html
+--
+--  Contributors:
+--      Pavel Tisnovsky
+--
+
+
 -- also named 'Areal' in SAP
-create table project (
+create table PROJECT (
     id       integer primary key asc,
+    name     text not null,
     sap      text,
-    name     text not null
+    created  text
 );
 
-create table building (
+create table BUILDING (
     id       integer primary key asc,
     project  integer not null,
     name     text not null,
     sap      text,
-    foreign key (project) references project(id)
+    created  text,
+    foreign key (project) references PROJECT(id)
 );
 
-create table floor (
+create table FLOOR (
     id       integer primary key asc,
     building integer not null,
     name     text not null,
     sap      text,
-    foreign key (building) references building(id)
+    created  text,
+    foreign key (building) references BUILDING(id)
 );
 
-create table sap_room (
+create table SAP_ROOM (
     id       integer primary key asc,
     floor    integer not null,
     sap      text,
-    foreign key (floor) references floor(id)
+    created  text,
+    foreign key (floor) references FLOOR(id)
 );
 
-create table attribute_type (
+create table ATTRIBUTE_TYPE (
     id       integer primary key asc,
     name     text not null
 );
 
-create table room_attribute (
+create table ROOM_ATTRIBUTE (
     id       integer primary key asc,
     room     integer not null,
     type     integer not null,
     value    text,
-    foreign key (type) references attribute_type(id)
-    foreign key (room) references sap_room(id)
+    foreign key (type) references ATTRIBUTE_TYPE(id)
+    foreign key (room) references SAP_ROOM(id)
 );
 
-create table drawing (
+create table DRAWING (
     id       integer primary key asc,
     floor    integer not null,
     name     text not null,
     sap      text,
+    created  text,
     version  integer not null,
-    foreign key (floor) references floor(id)
+    foreign key (floor) references FLOOR(id)
 );
 
-create table drawing_raw_data (
+create table DRAWING_RAW_DATA (
     id       integer primary key asc,
     drawing  integer not null,
     raw_data blob,
-    foreign key (drawing) references drawing(id)
+    foreign key (drawing) references DRAWING(id)
 );
 
-create table drawing_room (
+create table DRAWING_ROOM (
     id       integer primary key asc,
     drawing  integer not null,
     sap      text,
-    foreign key (drawing) references drawing(id)
+    foreign key (drawing) references DRAWING(id)
 );
 
-create table room_vertex (
+create table ROOM_VERTEX (
     id       integer primary key asc,
     room     integer not null,
     x        real not null,
     y        real not null,
-    foreign key (room) references drawing_room(id)
+    foreign key (room) references DRAWING_ROOM(id)
 );
 
