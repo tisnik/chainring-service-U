@@ -1,4 +1,18 @@
-(ns chainring-service.config)
+;
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
+;
+;  All rights reserved. This program and the accompanying materials
+;  are made available under the terms of the Eclipse Public License v1.0
+;  which accompanies this distribution, and is available at
+;  http://www.eclipse.org/legal/epl-v10.html
+;
+;  Contributors:
+;      Pavel Tisnovsky
+;
+
+
+(ns chainring-service.config
+    "Configuration loader")
 
 (require '[clj-utils.utils :as utils])
 (require '[config-loader.config-loader :as config-loader])
@@ -57,3 +71,8 @@
      HTTP request structure (middleware can be used to pass config into it)."
     [request]
     (-> request :configuration :api :full-prefix))
+
+(defn verbose?
+    "Read the verbose settings (it is used for all outputs that does not went into logs)"
+    [request]
+    (-> request :configuration :config :verbose))
