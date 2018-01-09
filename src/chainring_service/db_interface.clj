@@ -19,6 +19,7 @@
 (require '[chainring-service.db-spec :as db-spec])
 
 (defn simple-query-sequence
+    "Perform a simple query from the database. Sequence of results are returned."
     [query operation]
     (try
         (jdbc/query db-spec/chainring-db query)
@@ -27,6 +28,7 @@
             [])))
 
 (defn simple-query
+    "Perform a simple query from the database. Only the first result is returned."
     [query operation]
     (try
         (-> (jdbc/query db-spec/chainring-db query)
@@ -36,6 +38,7 @@
             [])))
 
 (defn simple-query-selector
+    "Perform a simple query from the database. Only one value from the first result is returned."
     [query selector operation]
     (try
         (-> (jdbc/query db-spec/chainring-db query)
@@ -72,33 +75,40 @@
 
 (defn read-building-info
     [building-id]
-    (simple-query ["select * from building where id=?" building-id] "read-building-info"))
+    (if building-id
+        (simple-query ["select * from building where id=?" building-id] "read-building-info")))
 
 (defn read-floor-list
     [building-id]
-    (simple-query-sequence ["select id, sap, name from floor where building=? order by name" building-id]
-                  "read-floor-list"))
+    (if building-id
+        (simple-query-sequence ["select id, sap, name from floor where building=? order by name" building-id]
+                      "read-floor-list")))
 
 (defn read-floor-info
     [floor-id]
-    (simple-query ["select * from floor where id=?" floor-id] "read-floor-info"))
+    (if floor-id
+        (simple-query ["select * from floor where id=?" floor-id] "read-floor-info")))
 
 (defn read-drawing-list
     [floor-id]
-    (simple-query-sequence ["select id, sap, name from drawing where floor=? order by name" floor-id]
-                  "read-drawing-list"))
+    (if floor-id
+        (simple-query-sequence ["select id, sap, name from drawing where floor=? order by name" floor-id]
+                      "read-drawing-list")))
 
 (defn read-drawing-info
     [drawing-id]
-    (simple-query ["select * from drawing where id=?" drawing-id] "read-drawing-info"))
+    (if drawing-id
+        (simple-query ["select * from drawing where id=?" drawing-id] "read-drawing-info")))
 
 (defn read-room-list
     [drawing-id]
-    (simple-query-sequence ["select * from room where drawing=?" drawing-id] "read-room-list"))
+    (if drawing-id
+        (simple-query-sequence ["select * from room where drawing=?" drawing-id] "read-room-list")))
  
 (defn store-drawing-raw-data
     [drawing-id raw-data]
-    (jdbc/insert! db-spec/chainring-db
-        :drawing_raw_data {:drawing drawing-id
-                           :raw_data raw-data}))
+    (if (and drawing-id raw-data)
+        (jdbc/insert! db-spec/chainring-db
+            :drawing_raw_data {:drawing drawing-id
+                               :raw_data raw-data})))
 
