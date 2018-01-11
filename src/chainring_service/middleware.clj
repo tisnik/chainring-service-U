@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -12,8 +12,6 @@
 
 (ns chainring-service.middleware
     "Definition(s) of middleware used by this app with the cooperation with Clojure Ring.")
-
-(require '[clojure.tools.logging   :as log])
 
 (defn inject-configuration
     "Inject configuration structure into the request parameter.
