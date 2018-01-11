@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -163,6 +163,7 @@
 ))
 
 (defn render-drawing-list
+    "Render page with list of drawings."
     [project-id building-id project-info building-info drawings]
     (page/xhtml
         (render-html-header "/")
@@ -190,6 +191,7 @@
 ))
 
 (defn render-drawing
+    "Render page with drawing."
     [project-id building-id drawing-id project-info building-info drawing-info rooms]
     (page/xhtml
         (render-html-header "/")
@@ -210,7 +212,7 @@
 ))
 
 (defn render-error-page
-    "Render error page with a 'back' button."
+    "Render an error page with a 'back' button."
     [message]
     (page/xhtml
         (render-html-header "/")
