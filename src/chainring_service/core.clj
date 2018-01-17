@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -20,9 +20,10 @@
 (require '[clojure.tools.cli       :as cli])
 (require '[clojure.tools.logging   :as log])
 
+(require '[clj-middleware.middleware    :as middleware])
+
 (require '[chainring-service.config     :as config])
 (require '[chainring-service.server     :as server])
-(require '[chainring-service.middleware :as middleware])
 
 ; we need to load the configuration in advance so the 'app' could use it
 (def configuration (config/load-configuration-from-ini "config.ini"))
