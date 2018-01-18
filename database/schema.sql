@@ -16,7 +16,8 @@ create table PROJECT (
     id       integer primary key asc,
     name     text not null,
     sap      text,
-    created  text
+    created  text,
+    modified text
 );
 
 create table BUILDING (
@@ -25,6 +26,7 @@ create table BUILDING (
     name     text not null,
     sap      text,
     created  text,
+    modified text,
     foreign key (project) references PROJECT(id)
 );
 
@@ -34,6 +36,7 @@ create table FLOOR (
     name     text not null,
     sap      text,
     created  text,
+    modified text,
     foreign key (building) references BUILDING(id)
 );
 
@@ -42,6 +45,7 @@ create table SAP_ROOM (
     floor    integer not null,
     sap      text,
     created  text,
+    modified text,
     foreign key (floor) references FLOOR(id)
 );
 
@@ -65,6 +69,7 @@ create table DRAWING (
     name     text not null,
     sap      text,
     created  text,
+    modified text,
     version  integer not null,
     foreign key (floor) references FLOOR(id)
 );
