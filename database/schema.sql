@@ -97,6 +97,9 @@ create table ROOM_VERTEX (
 );
 
 create table USERS (
-    id       integer primary key autoincrement,
-    name     text
+    id                  integer primary key autoincrement,
+    name                text,
+    resolution          text,
+    selected_room_color text,
+    pen_width           text
 );
