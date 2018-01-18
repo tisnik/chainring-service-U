@@ -26,3 +26,5 @@ insert into SAP_ROOM(id, floor, sap, created, modified) values(11, 3, 'SAP111200
 insert into SAP_ROOM(id, floor, sap, created, modified) values(12, 3, 'SAP1112004', datetime('now'), datetime('now'));
 
 --insert into drawing_raw_data(id, drawing, raw_data) values(1, 1, readfile('drawing1.drw'));
+insert into USERS(name) values('tester');
+

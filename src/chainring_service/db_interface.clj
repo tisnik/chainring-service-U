@@ -112,3 +112,6 @@
             :drawing_raw_data {:drawing drawing-id
                                :raw_data raw-data})))
 
+(defn get-new-user-id
+    []
+    (get (simple-query ["select seq+1 as id from sqlite_sequence where name='USERS'"] "get-new-user-id") :id))

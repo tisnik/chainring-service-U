@@ -96,3 +96,7 @@ create table ROOM_VERTEX (
     foreign key (room) references DRAWING_ROOM(id)
 );
 
+create table USERS (
+    id       integer primary key autoincrement,
+    name     text
+);

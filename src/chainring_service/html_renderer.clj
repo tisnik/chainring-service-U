@@ -34,7 +34,7 @@
 (defn render-html-footer
     "Renders part of HTML page - the footer."
     []
-    [:div "<br />"])
+    [:div "<br /><br />Chainring verze 0.1"])
 
 (defn render-navigation-bar-section
     "Renders whole navigation bar."
@@ -73,8 +73,14 @@
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:td [:a {:href "project-list"} "Seznam projektů"]]
+                    [:tr [:th [:a {:href "project-list"} "Seznam projektů"]]
                     ]
+                ]
+                [:div {:style "height: 10ex"}]
+                [:table {:class "table table-hover" :style "width:auto"}
+                    [:tr [:th "Další volby"]]
+                    [:tr [:td [:a {:href "settings"} "Nastavení"]]]
+                    [:tr [:td [:a {:href "db-stats"} "Stav dababáze"]]]
                 ]
                 (render-html-footer)
             ] ; </div class="container">
