@@ -115,3 +115,38 @@
 (defn get-new-user-id
     []
     (get (simple-query ["select seq+1 as id from sqlite_sequence where name='USERS'"] "get-new-user-id") :id))
+
+(defn get-record-count
+    [table]
+    (get (simple-query [(str "select count(*) as cnt from " table)] "get-record-count") :cnt))
+
+(defn get-db-status
+    []
+    {:projects      (get-record-count "project")
+     :buildings     (get-record-count "building")
+     :floors        (get-record-count "floor")
+     :sap-rooms     (get-record-count "sap_room")
+     :drawings      (get-record-count "drawing")
+     :drawings-data (get-record-count "drawing_raw_data")
+     :drawing-rooms (get-record-count "drawing_room")
+     :users         (get-record-count "users")
+    })
+
+(defn update-or-insert!
+    "Updates columns or inserts a new row in the specified table"
+    [database table row where-clause]
+    (jdbc/with-db-transaction [t-con database]
+        (let [result (jdbc/update! t-con table row where-clause)]
+            (if (zero? (first result))
+                (jdbc/insert! t-con table row)
+                result))))
+
+(defn store-user-settings
+    [user-id resolution selected-room-color pen-width]
+    (if (and user-id resolution selected-room-color pen-width)
+        (update-or-insert! db-spec/chainring-db :users
+            {:resolution resolution
+             :selected_room_color selected-room-color
+             :pen_width pen-width}
+            ["id = ?" user-id])))
+
