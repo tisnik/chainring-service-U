@@ -59,11 +59,11 @@
 
 (defn process-settings-page
     [request]
-    )
+    (finish-processing request (html-renderer/render-settings-page)))
 
 (defn process-db-statistic-page
     [request]
-    )
+    (finish-processing request (html-renderer/render-db-statistic-page)))
 
 (defn process-project-list-page
     "Function that prepares data for the page with project list."

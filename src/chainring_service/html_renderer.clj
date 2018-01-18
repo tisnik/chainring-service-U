@@ -80,7 +80,37 @@
                 [:table {:class "table table-hover" :style "width:auto"}
                     [:tr [:th "Další volby"]]
                     [:tr [:td [:a {:href "settings"} "Nastavení"]]]
-                    [:tr [:td [:a {:href "db-stats"} "Stav dababáze"]]]
+                    [:tr [:td [:a {:href "db-stats"} "Stav databáze"]]]
+                ]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-settings-page
+    []
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Nastavení"]]
+                ]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-db-statistic-page
+    []
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Stav databáze"]]
                 ]
                 (render-html-footer)
             ] ; </div class="container">
