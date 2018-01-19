@@ -15,7 +15,7 @@
 create table PROJECT (
     id       integer primary key asc,
     name     text not null,
-    sap      text,
+    AOID     text,
     created  text,
     modified text
 );
@@ -24,7 +24,7 @@ create table BUILDING (
     id       integer primary key asc,
     project  integer not null,
     name     text not null,
-    sap      text,
+    AOID     text,
     created  text,
     modified text,
     foreign key (project) references PROJECT(id)
@@ -34,18 +34,24 @@ create table FLOOR (
     id       integer primary key asc,
     building integer not null,
     name     text not null,
-    sap      text,
+    AOID     text,
     created  text,
     modified text,
     foreign key (building) references BUILDING(id)
 );
 
 create table SAP_ROOM (
-    id       integer primary key asc,
-    floor    integer not null,
-    sap      text,
-    created  text,
-    modified text,
+    id         integer primary key asc,
+    floor      integer not null,
+    label      text, -- oznaceni
+    room_type  integer not null,
+    AOID       text,
+    created    text,
+    modified   text,
+    valid_from text,
+    valid_to   text,
+    area       float,
+    foreign key (room_type) references ROOM_TYPE(id),
     foreign key (floor) references FLOOR(id)
 );
 
@@ -63,11 +69,16 @@ create table ROOM_ATTRIBUTE (
     foreign key (room) references SAP_ROOM(id)
 );
 
+create table ROOM_TYPE (
+    id       integer primary key asc,
+    label    text
+);
+
 create table DRAWING (
     id       integer primary key asc,
     floor    integer not null,
     name     text not null,
-    sap      text,
+    AOID     text,
     created  text,
     modified text,
     version  integer not null,
@@ -84,7 +95,7 @@ create table DRAWING_RAW_DATA (
 create table DRAWING_ROOM (
     id       integer primary key asc,
     drawing  integer not null,
-    sap      text,
+    AOID     text,
     foreign key (drawing) references DRAWING(id)
 );
 
