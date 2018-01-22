@@ -38,6 +38,13 @@
 (defn raster-drawing
     "REST API handler for the /api/raster-drawing endpoint."
     [request]
+    (let [params         (:params request)
+          drawing-id     (get params "drawing-id")
+          width          (get params "width" 640)
+          height         (get params "height" 480)
+          selected       (get params "selected")
+          ]
+    )
     (let [image (new BufferedImage 256 256 BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
           ; serialize image into output stream
