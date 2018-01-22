@@ -1,4 +1,10 @@
-body { padding-top: 100px; }
+body {
+    padding-top: 100px;
+}
+
+.body-drawing {
+    padding-top: 70px;
+}
 
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-inverse .navbar-nav > .active > a:hover, 
@@ -34,3 +40,15 @@ body { padding-top: 100px; }
     border: 1px solid black;
     margin-right: 5px;
 }
+
+.tools {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:8px;
+}
+
+.tools-spacer {
+    width:2em;
+    display:inline-block;
+}
+
