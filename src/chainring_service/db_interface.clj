@@ -51,7 +51,7 @@
 (defn read-project-list
     "Read list of all projects."
     []
-    (simple-query-sequence ["select id, sap, name, created from project order by name"]
+    (simple-query-sequence ["select id, aoid, name, created from project order by name"]
                   "read-project-list"))
 
 (defn read-project-name
@@ -64,24 +64,45 @@
     "Read project info for given project ID."
     [project-id]
     (if project-id
-        (simple-query ["select id, sap, name, created from project where id=?" project-id] "read-project-info")))
+        (simple-query ["select id, aoid, name, created from project where id=?" project-id] "read-project-info")))
+
+(defn read-detailed-project-info
+    "Read detailed project info for given project ID."
+    [project-id]
+    (if project-id
+        (simple-query ["select * from project where id=?" project-id] "read-detailed-project-info")))
 
 (defn read-building-list
     "Read list of buildings for given project ID."
     [project-id]
     (if project-id
-        (simple-query-sequence ["select id, sap, name, created from building where project=? order by name" project-id]
+        (simple-query-sequence ["select id, aoid, name, created from building where project=? order by name" project-id]
                       "read-building-list")))
+
+(defn read-building-count-for-project
+    [project-id]
+    (if project-id
+        (simple-query ["select count(*) as cnt from building where project=?" project-id] "read-building-count")))
 
 (defn read-building-info
     [building-id]
     (if building-id
         (simple-query ["select * from building where id=?" building-id] "read-building-info")))
 
+(defn read-floor-count-for-building
+    [building-id]
+    (if building-id
+        (simple-query ["select count(*) as cnt from floor where building=?" building-id] "read-floor-count-for-building")))
+
+(defn read-drawing-count-for-floor
+    [floor-id]
+    (if floor-id
+        (simple-query ["select count(*) as cnt from drawing where floor=?" floor-id] "read-drawing-count-for-floor")))
+
 (defn read-floor-list
     [building-id]
     (if building-id
-        (simple-query-sequence ["select id, sap, name from floor where building=? order by name" building-id]
+        (simple-query-sequence ["select id, aoid, name, created, (select count(*) as cnt from drawing where floor=f.id) as drawings from floor f where building=? order by name" building-id]
                       "read-floor-list")))
 
 (defn read-floor-info
@@ -92,7 +113,7 @@
 (defn read-drawing-list
     [floor-id]
     (if floor-id
-        (simple-query-sequence ["select id, sap, name from drawing where floor=? order by name" floor-id]
+        (simple-query-sequence ["select id, aoid, name, created, modified, version from drawing where floor=? order by name" floor-id]
                       "read-drawing-list")))
 
 (defn read-drawing-info
