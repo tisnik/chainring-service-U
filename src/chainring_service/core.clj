@@ -16,6 +16,7 @@
 (require '[ring.adapter.jetty      :as jetty])
 (require '[ring.middleware.params  :as http-params])
 (require '[ring.middleware.cookies :as cookies])
+(require '[ring.middleware.session :as session])
 
 (require '[clojure.tools.cli       :as cli])
 (require '[clojure.tools.logging   :as log])
@@ -32,6 +33,7 @@
     "Definition of a Ring-based application behaviour."
     (-> server/handler            ; handle all events
         (middleware/inject-configuration configuration) ; inject configuration structure into the parameter
+        session/wrap-session
         cookies/wrap-cookies      ; we need to work with cookies
         http-params/wrap-params)) ; and to process request parameters, of course
 
