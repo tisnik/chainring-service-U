@@ -44,14 +44,19 @@
             (db-interface/get-new-user-id))))
 
 (defn finish-processing
-    [request response-html]
-    (let [cookies   (:cookies request)
-          user-id   (get-user-id request)]
-        (log/info "Incoming cookies: " cookies)
-        (log/info "user-id:          " user-id)
-        (-> (http-response/response response-html)
-            (http-response/set-cookie "user-id" user-id {:max-age 36000000})
-            (http-response/content-type "text/html; charset=utf-8"))))
+    (   [request response-html]
+        ; use the previous session as the new one
+        (finish-processing request response-html (:session request)))
+    (   [request response-html session]
+        (let [cookies   (:cookies request)
+              user-id   (get-user-id request)]
+            (log/info "Incoming cookies: " cookies)
+            (log/info "user-id:          " user-id)
+            (-> (http-response/response response-html)
+                (http-response/set-cookie "user-id" user-id {:max-age 36000000})
+                ; use the explicitly specified new session with a map of values
+                (assoc :session session)
+                (http-response/content-type "text/html; charset=utf-8")))))
 
 (defn process-front-page
     "Function that prepares data for the front page."
