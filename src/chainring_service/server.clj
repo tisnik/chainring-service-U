@@ -101,6 +101,24 @@
                 (finish-processing request (html-renderer/render-error-page "Databáze projektů je prázdná")))
             (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k databázi")))))
 
+(defn process-project-info-page
+    [request]
+    (let [params         (:params request)
+          project-id     (get params "project-id")
+          project-info   (db-interface/read-detailed-project-info project-id)
+          building-count (db-interface/read-building-count-for-project project-id)]
+          (log/info "Project ID:" project-id)
+          (log/info "Building count:" building-count)
+          (log/info "Project info" project-info)
+          (println "----------------")
+          (pprint/pprint (:session request))
+          (println "----------------")
+          (if project-id
+              (if project-info
+                  (finish-processing request (html-renderer/render-project-info project-id project-info building-count))
+                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném projektu")))
+              (finish-processing request (html-renderer/render-error-page "Žádný projekt nebyl vybrán")))))
+
 (defn process-project-page
     "Function that prepares data for the page with list of projects."
     [request]
@@ -235,6 +253,7 @@
         "/store-settings"             (process-store-settings-page request)
         "/db-stats"                   (process-db-statistic-page request)
         "/project-list"               (process-project-list-page request)
+        "/project-info"               (process-project-info-page request)
         "/project"                    (process-project-page request)
         "/floor"                      (process-floor-page request)
         "/building"                   (process-building-page request)
