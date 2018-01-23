@@ -15,6 +15,7 @@
 
 (require '[ring.util.response      :as http-response])
 (require '[clojure.tools.logging   :as log])
+(require '[clojure.pprint          :as pprint])
 
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.html-renderer    :as html-renderer])
@@ -193,11 +194,14 @@
           building-id   (get params "building-id")
           floor-id      (get params "floor-id")
           project-info  (db-interface/read-project-info project-id)
-          building-info (db-interface/read-building-info building-id)]
+          building-info (db-interface/read-building-info building-id)
+          floor-info    (db-interface/read-floor-info floor-id)]
           (log/info "Project ID:" project-id)
           (log/info "Project info" project-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
+          (log/info "Floor ID:" floor-id)
+          (log/info "Floor info" floor-info)
           (if building-id
               (let [drawings (db-interface/read-drawing-list building-id)]
                   (log/info "Drawings" drawings)
@@ -210,17 +214,24 @@
     "Function that prepares data for the page with selected drawing."
     [request]
     (let [params        (:params request)
+          session       (:session request)
           project-id    (get params "project-id")
           building-id   (get params "building-id")
+          floor-id      (get params "floor-id")
           drawing-id    (get params "drawing-id")
           project-info  (db-interface/read-project-info project-id)
           building-info (db-interface/read-building-info building-id)
+          floor-info    (db-interface/read-floor-info floor-id)
           drawing-info  (db-interface/read-drawing-info drawing-id)
-          rooms         (db-interface/read-room-list drawing-id)]
+          rooms         {}; (db-interface/read-room-list drawing-id)
+          session       (assoc session :drawing-id drawing-id)
+          ]
           (log/info "Project ID:" project-id)
           (log/info "Project info" project-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
+          (log/info "Floor ID:" floor-id)
+          (log/info "Floor info" floor-info)
           (log/info "Drawing ID:" drawing-id)
           (log/info "Drawing info" drawing-info)
           (log/info "Rooms" rooms)
