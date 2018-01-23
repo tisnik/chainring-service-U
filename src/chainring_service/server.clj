@@ -119,6 +119,21 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném projektu")))
               (finish-processing request (html-renderer/render-error-page "Žádný projekt nebyl vybrán")))))
 
+(defn process-building-info-page
+    [request]
+    (let [params         (:params request)
+          building-id    (get params "building-id")
+          building-info  (db-interface/read-building-info building-id)
+          floor-count    (db-interface/read-floor-count-for-building building-id)]
+          (log/info "Building ID:" building-id)
+          (log/info "Floor count:" floor-count)
+          (log/info "Building info" building-info)
+          (if building-id
+              (if building-info
+                  (finish-processing request (html-renderer/render-building-info building-id building-info floor-count))
+                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
+              (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
+
 (defn process-project-page
     "Function that prepares data for the page with list of projects."
     [request]
