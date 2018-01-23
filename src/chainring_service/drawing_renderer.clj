@@ -14,6 +14,7 @@
     "Namespace that contains functions to render drawings into raster images.")
 
 (require '[ring.util.response :as http-response])
+(require '[clojure.tools.logging   :as log])
 
 (import java.awt.image.BufferedImage)
 (import java.io.ByteArrayInputStream)
@@ -32,22 +33,29 @@
     (-> image-data
         (http-response/response)
         (http-response/content-type "image/png")
-        cache-control-headers
-        ))
+        cache-control-headers))
 
-(defn raster-drawing
-    "REST API handler for the /api/raster-drawing endpoint."
+(defn perform-raster-drawing
     [request]
     (let [params         (:params request)
           drawing-id     (get params "drawing-id")
           width          (get params "width" 640)
           height         (get params "height" 480)
           selected       (get params "selected")
-          ]
-    )
-    (let [image (new BufferedImage 256 256 BufferedImage/TYPE_INT_RGB)
+          image          (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
           ; serialize image into output stream
           (ImageIO/write image "png" image-output-stream)
-          (png-response (new ByteArrayInputStream (.toByteArray image-output-stream)))))
+          (let [end-time (System/currentTimeMillis)]
+          (new ByteArrayInputStream (.toByteArray image-output-stream)))))
+
+(defn raster-drawing
+    "REST API handler for the /api/raster-drawing endpoint."
+    [request]
+    (let [start-time          (System/currentTimeMillis)
+          input-stream        (perform-raster-drawing request)
+          end-time            (System/currentTimeMillis)]
+          (log/info "Rendering time (ms):" (- end-time start-time))
+          (log/info "Image size (bytes): " (.available input-stream))
+          (png-response input-stream)))
 
