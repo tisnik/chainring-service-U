@@ -72,7 +72,7 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:a {:href "project-list" :class "btn btn-success" :role "button" :style "width:10em"} "Seznam projektů"]
+                [:a {:href "project-list" :class "btn btn-success" :role "button" :style "width:10em"} "Seznam areálů"]
                 [:div {:style "height: 10ex"}]
                 [:h3 "Další volby"]
                 [:a {:href "settings" :class "btn btn-default" :role "button" :style "width:10em"} "Nastavení"]
@@ -108,7 +108,7 @@
                     [:fieldset {:class "form-group"}
                         [:label {:for "resolution"} "Výchozí velikost půdorysu"]
                         [:br]
-                        (form/drop-down "resolution" ["640x480" "800x600" "1024x768"])
+                        (form/drop-down "resolution" ["320x240", "400x300", "640x480" "800x600" "1024x768"])
                     ]
                     [:fieldset {:class "form-group"}
                         [:label {:for "selected-room-color"} "Barva výplně vybrané místnosti"]
@@ -181,16 +181,21 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
+                [:h1 "Seznam areálů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
-                         [:th "Projekt"]
-                         [:th "SAP"]
-                         [:th "Vytvořeno"]]
+                         [:th "Jméno"]
+                         [:th "AOID"]
+                         [:th "Vytvořeno"]
+                         [:th ""]]
                     (for [project projects]
                             [:tr [:td (:id project)]
                                  [:td [:a {:href (str "project?project-id=" (:id project))}(:name project)]]
-                                 [:td (:sap project)]
-                                 [:td (:created project)]])
+                                 [:td (:aoid project)]
+                                 [:td (:created project)]
+                                 [:td [:a {:title "Podrobnější informace o areálu"
+                                           :href (str "project-info?project-id=" (:id project))}
+                                           [:img {:src "info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -205,20 +210,24 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:h2 (:name project-info)]
-                [:h4 (:sap project-info)]
+                [:h1 (str "Seznam budov v areálu '" (:name project-info) "'")]
+                [:h4 (:aoid project-info)]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Budova"]
-                         [:th "SAP"]
-                         [:th "Vytvořeno"]]
+                         [:th "AOID"]
+                         [:th "Vytvořeno"]
+                         [:th ""]]
                     (for [building buildings]
                             [:tr [:td (:id building)]
                                  [:td [:a {:href (str "building?project-id=" project-id "&building-id=" (:id building))}
                                           (:name building)]]
-                                 [:td (:sap building)]
-                                 [:td (:created building)]])
+                                 [:td (:aoid building)]
+                                 [:td (:created building)]
+                                 [:td [:a {:title "Podrobnější informace o budově"
+                                           :href (str "building-info?building-id=" (:id building))}
+                                           [:img {:src "info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
