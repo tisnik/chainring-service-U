@@ -225,6 +225,29 @@
         ] ; </body>
 ))
 
+(defn render-building-info
+    [building-id building-info floor-count]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 (str "Informace o budově '" (:name building-info) "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"] [:td building-id]]
+                    [:tr [:th "Jméno"] [:td (:name building-info)]]
+                    [:tr [:th "AOID"] [:td (:aoid building-info)]]
+                    [:tr [:th "Vytvořeno"] [:td (:created building-info)]]
+                    [:tr [:th "Modifikováno"] [:td (:modified building-info)]]
+                    [:tr [:th "Počet podlaží"] [:td [:a {:href (str "/building?building-id=" building-id)} (get floor-count :cnt "nelze zjistit")]]]
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+
 (defn render-building-list
     [project-id project-info buildings]
     (page/xhtml
