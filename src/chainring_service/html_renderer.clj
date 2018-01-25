@@ -203,6 +203,28 @@
         ] ; </body>
 ))
 
+(defn render-project-info
+    [project-id project-info building-count]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 (str "Informace o areálu '" (:name project-info) "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"] [:td project-id]]
+                    [:tr [:th "Jméno"] [:td (:name project-info)]]
+                    [:tr [:th "AOID"] [:td (:aoid project-info)]]
+                    [:tr [:th "Vytvořeno"] [:td (:created project-info)]]
+                    [:tr [:th "Modifikováno"] [:td (:modified project-info)]]
+                    [:tr [:th "Počet budov"] [:td [:a {:href (str "/project?project-id=" project-id)} (get building-count :cnt "nelze zjistit")]]]
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 (defn render-building-list
     [project-id project-info buildings]
     (page/xhtml
