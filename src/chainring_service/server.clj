@@ -206,7 +206,7 @@
               (let [drawings (db-interface/read-drawing-list building-id)]
                   (log/info "Drawings" drawings)
                   (if (seq drawings)
-                      (finish-processing request (html-renderer/render-drawing-list project-id building-id project-info building-info drawings))
+                      (finish-processing request (html-renderer/render-drawing-list project-id building-id floor-id project-info building-info floor-info drawings))
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
@@ -237,7 +237,7 @@
           (log/info "Rooms" rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing project-id building-id drawing-id project-info building-info drawing-info rooms))
+                  (finish-processing request (html-renderer/render-drawing project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms) session)
                   (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
@@ -280,26 +280,36 @@
                                        (rest-api/unknown-endpoint request uri)
         )))
 
+(defn uri->image-name
+    [uri]
+    (subs uri (inc (.lastIndexOf uri "/"))))
+
 (defn gui-call-handler
     "This function is used to handle all GUI calls. Three parameters are expected:
      data structure containing HTTP request, string with URI, and the HTTP method."
     [request uri method]
-    (condp = uri
-        "/favicon.ico"                (return-file "favicon.ico" "image/x-icon")
-        "/bootstrap.min.css"          (return-file "bootstrap.min.css" "text/css")
-        "/chainring.css"              (return-file "chainring.css" "text/css")
-        "/bootstrap.min.js"           (return-file "bootstrap.min.js" "application/javascript")
-        "/"                           (process-front-page request)
-        "/settings"                   (process-settings-page request)
-        "/store-settings"             (process-store-settings-page request)
-        "/db-stats"                   (process-db-statistic-page request)
-        "/project-list"               (process-project-list-page request)
-        "/project-info"               (process-project-info-page request)
-        "/project"                    (process-project-page request)
-        "/floor"                      (process-floor-page request)
-        "/building"                   (process-building-page request)
-        "/drawing"                    (process-drawing-page request)
-        ))
+    (cond (.endsWith uri ".gif") (return-file (uri->image-name uri) "image/gif")
+          (.endsWith uri ".png") (return-file (uri->image-name uri) "image/png")
+          :else
+        (condp = uri
+            "/favicon.ico"                (return-file "favicon.ico" "image/x-icon")
+            "/bootstrap.min.css"          (return-file "bootstrap.min.css" "text/css")
+            "/chainring.css"              (return-file "chainring.css" "text/css")
+            "/bootstrap.min.js"           (return-file "bootstrap.min.js" "application/javascript")
+            "/"                           (process-front-page request)
+            "/settings"                   (process-settings-page request)
+            "/store-settings"             (process-store-settings-page request)
+            "/db-stats"                   (process-db-statistic-page request)
+            "/project-list"               (process-project-list-page request)
+            "/project-info"               (process-project-info-page request)
+            "/project"                    (process-project-page request)
+            "/building-info"              (process-building-info-page request)
+            "/floor"                      (process-floor-page request)
+            "/floor-info"                 (process-floor-info-page request)
+            "/building"                   (process-building-page request)
+            "/drawing"                    (process-drawing-page request)
+            "/raster-drawing"             (drawing-renderer/raster-drawing request)
+            )))
 
 (defn handler
     "Handler that is called by Ring for all requests received from user(s)."
