@@ -102,7 +102,7 @@
 (defn read-floor-list
     [building-id]
     (if building-id
-        (simple-query-sequence ["select id, aoid, name, created, (select count(*) as cnt from drawing where floor=f.id) as drawings from floor f where building=? order by name" building-id]
+        (simple-query-sequence ["select id, aoid, name, created, (select count(*) as cnt from drawing where floor=f.id) as drawings from floor f where building=? order by id" building-id]
                       "read-floor-list")))
 
 (defn read-floor-info

@@ -203,7 +203,7 @@
           (log/info "Floor ID:" floor-id)
           (log/info "Floor info" floor-info)
           (if building-id
-              (let [drawings (db-interface/read-drawing-list building-id)]
+              (let [drawings (db-interface/read-drawing-list floor-id)]
                   (log/info "Drawings" drawings)
                   (if (seq drawings)
                       (finish-processing request (html-renderer/render-drawing-list project-id building-id floor-id project-info building-info floor-info drawings))
