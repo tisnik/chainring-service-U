@@ -310,21 +310,37 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:h2 (:name project-info)]
-                [:h4 (:sap project-info)]
-                [:h3 "Budova: " (:name building-info)]
-                [:h5 (:sap building-info)]
+                [:h1 (str "Seznam podlaží v areálu '" (:name project-info) "' a budově '" (:name building-info) "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr
+                        [:th "Areál"]  [:td (:name project-info)]
+                        [:th "AOID"]   [:td (:aoid project-info)]
+                        [:td [:a {:title "Podrobnější informace o areálu"
+                                  :href (str "project-info?project-id=" project-id)}
+                                  [:img {:src "info.gif"}]]]]
+                    [:tr
+                        [:th "Budova"] [:td (:name building-info)]
+                        [:th "AOID"]   [:td (:aoid building-info)]
+                        [:td [:a {:title "Podrobnější informace o budově"
+                                  :href (str "building-info?building-id=" building-id)}
+                                  [:img {:src "info.gif"}]]]]
+                ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Podlaží"]
-                         [:th "SAP"]
-                         [:th "Vytvořeno"]]
+                         [:th "AOID"]
+                         [:th "Vytvořeno"]
+                         [:th "Výkresů"]]
                     (for [floor floors]
                             [:tr [:td (:id floor)]
                                  [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:id floor))} (:name floor)]]
-                                 [:td (:sap floor)]
-                                 [:td (:created floor)]])
+                                 [:td (:aoid floor)]
+                                 [:td (:created floor)]
+                                 [:td (:drawings floor)]
+                                 [:td [:a {:title "Podrobnější informace o podlaží"
+                                           :href (str "floor-info?floor-id=" (:id floor))}
+                                           [:img {:src "info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
