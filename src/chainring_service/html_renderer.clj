@@ -350,25 +350,48 @@
 
 (defn render-drawing-list
     "Render page with list of drawings."
-    [project-id building-id project-info building-info drawings]
+    [project-id building-id floor-id project-info building-info floor-info drawings]
     (page/xhtml
         (render-html-header "/")
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:h2 (:name project-info)]
-                [:h4 (:sap project-info)]
-                [:h3 "Budova: " (:name building-info)]
-                [:h5 (:sap building-info)]
+                [:h1 (str "Výkresy pro areál '" (:name project-info) "', budovu '" (:name building-info) "' a podlaží '" "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr
+                        [:th "Areál"]  [:td (:name project-info)]
+                        [:th "AOID"]   [:td (:aoid project-info)]
+                        [:td [:a {:title "Podrobnější informace o areálu"
+                                  :href (str "project-info?project-id=" project-id)}
+                                  [:img {:src "info.gif"}]]]]
+                    [:tr
+                        [:th "Budova"] [:td (:name building-info)]
+                        [:th "AOID"]   [:td (:aoid building-info)]
+                        [:td [:a {:title "Podrobnější informace o budově"
+                                  :href (str "building-info?building-id=" building-id)}
+                                  [:img {:src "info.gif"}]]]]
+                    [:tr
+                        [:th "Podlaží"] [:td (:name floor-info)]
+                        [:th "AOID"]   [:td (:aoid floor-info)]
+                        [:td [:a {:title "Podrobnější informace o podlaží"
+                                  :href (str "floor-info?floor-id=" building-id)}
+                                  [:img {:src "info.gif"}]]]]
+                ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Výkres"]
-                         [:th "SAP"]]
+                         [:th "AOID"]
+                         [:th "Vytvořeno"]
+                         [:th "Modifikováno"]
+                         [:th "Verze"]]
                     (for [drawing drawings]
                             [:tr [:td (:id drawing)]
-                                 [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&drawing-id=" (:id drawing))} (:name drawing)]]
-                                 [:td (:sap drawing)]])
+                                 [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&drawing-id=" (:id drawing))} (:name drawing)]]
+                                 [:td (:aoid drawing)]
+                                 [:td (:created drawing)]
+                                 [:td (:modified drawing)]
+                                 [:td (:version drawing)]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
