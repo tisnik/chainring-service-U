@@ -11,7 +11,7 @@
 --
 
 
--- also named 'Areal' in SAP
+-- also named 'Hospodářská jednotka' in SAP
 create table PROJECT (
     id       integer primary key asc,
     name     text not null,
@@ -41,16 +41,20 @@ create table FLOOR (
 );
 
 create table SAP_ROOM (
-    id         integer primary key asc,
-    floor      integer not null,
-    label      text, -- oznaceni
-    room_type  integer not null,
-    AOID       text,
-    created    text,
-    modified   text,
-    valid_from text,
-    valid_to   text,
-    area       float,
+    id          integer primary key asc,
+    version     char, -- 'C'-current 'N'-new change in SAP
+    floor       integer not null,
+    name        text, -- oznaceni
+    AOID        text,
+    room_type   integer not null,
+    created     text,
+    modified    text,
+    valid_from  text,
+    valid_to    text,
+    area        float,
+    capacity    integer,
+    occupation  char, -- 'E'-external 'I'-internal 'F'-free
+    occupied_by text,
     foreign key (room_type) references ROOM_TYPE(id),
     foreign key (floor) references FLOOR(id)
 );
