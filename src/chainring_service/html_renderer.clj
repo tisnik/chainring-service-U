@@ -433,25 +433,27 @@
                                       [:img {:src "info.gif"}]]]]
                     ]
                     [:table
-                        [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
-                        [:tr [:td "Scale:"] [:td [:div "1"]]]
-                        [:tr [:td "X-pos:"] [:td [:div "0"]]]
-                        [:tr [:td "Y-pos:"] [:td [:div "0"]]]
+                        ; not needed, let's use debugger instead
+                        ; [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
+                        ; [:tr [:td "Scale:"] [:td [:div {:id "scale"} "1"]]]
+                        ; [:tr [:td "X-pos:"] [:td [:div {:id "xpos"} "0"]]]
+                        ; [:tr [:td "Y-pos:"] [:td [:div {:id "ypos"} "0"]]]
                     ]
                     [:td {:class "tools"}
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "viewmag_plus.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "viewmag_minus.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "viewmag_1_1.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "viewmag_fit.gif" :border "0"}] "&nbsp;"
+                         [:img {:src "viewmag_plus.gif"  :border "0" :onclick "onViewMagPlusClick()"}] "&nbsp;"
+                         [:img {:src "viewmag_minus.gif" :border "0" :onclick "onViewMagMinusClick()"}] "&nbsp;"
+                         [:img {:src "viewmag_1_1.gif"   :border "0" :onclick "onViewMag11Click()"}] "&nbsp;"
+                         [:img {:src "viewmag_fit.gif"   :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "arrow1l.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "arrow1d.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "arrow1u.gif" :border "0"}] "&nbsp;"
-                         [:img {:src "arrow1r.gif" :border "0"}] "&nbsp;"
+                         [:img {:src "arrow1l.gif"       :border "0" :onclick "onArrowLeftClick()"}] "&nbsp;"
+                         [:img {:src "arrow1d.gif"       :border "0" :onclick "onArrowDownClick()"}] "&nbsp;"
+                         [:img {:src "arrow1u.gif"       :border "0" :onclick "onArrowUpClick()"}] "&nbsp;"
+                         [:img {:src "arrow1r.gif"       :border "0" :onclick "onArrowRightClick()"}] "&nbsp;"
+                         [:img {:src "center.gif"        :border "0" :onclick "onCenterViewClick()"}] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "view_boundary.png" :border "0"}] "&nbsp;"
-                         [:img {:src "view_grid.png" :border "0"}] "&nbsp;"
+                         [:img {:src "view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
+                         [:img {:src "view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
                     ]
                 ;[:tr [:td [:img {:id "drawing" :src "/raster-drawing?command=reset_view"}]]]
                 [:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
