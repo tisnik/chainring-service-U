@@ -19,7 +19,7 @@
 
 (defn render-html-header
     "Renders part of HTML page - the header."
-    [url-prefix]
+    [url-prefix & [include-raphael?]]
     [:head
         [:title "Chainring"]
         [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
@@ -28,6 +28,10 @@
         (page/include-css (str url-prefix "bootstrap.min.css"))
         (page/include-css (str url-prefix "chainring.css"))
         (page/include-js  (str url-prefix "bootstrap.min.js"))
+        (if include-raphael?
+            (page/include-js (str url-prefix "raphael.min.js")))
+        (if include-raphael?
+            (page/include-js (str url-prefix "drawing.js")))
     ] ; head
 )
 
@@ -403,7 +407,7 @@
     "Render page with drawing."
     [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
     (page/xhtml
-        (render-html-header "/")
+        (render-html-header "/" true)
         [:body {:class "body-drawing"}
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
@@ -429,6 +433,7 @@
                                       [:img {:src "info.gif"}]]]]
                     ]
                     [:table
+                        [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
                         [:tr [:td "Scale:"] [:td [:div "1"]]]
                         [:tr [:td "X-pos:"] [:td [:div "0"]]]
                         [:tr [:td "Y-pos:"] [:td [:div "0"]]]
@@ -448,7 +453,8 @@
                          [:img {:src "view_boundary.png" :border "0"}] "&nbsp;"
                          [:img {:src "view_grid.png" :border "0"}] "&nbsp;"
                     ]
-                [:tr [:td [:img {:id "drawing" :src "/raster-drawing?command=reset_view"}]]]
+                ;[:tr [:td [:img {:id "drawing" :src "/raster-drawing?command=reset_view"}]]]
+                [:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
             ]]]
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
             (render-html-footer)
