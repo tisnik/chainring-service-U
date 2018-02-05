@@ -16,6 +16,8 @@
 (require '[ring.util.response :as http-response])
 (require '[clojure.tools.logging   :as log])
 
+(require '[chainring-service.http-utils  :as http-utils])
+
 (import java.awt.image.BufferedImage)
 (import java.io.ByteArrayInputStream)
 (import java.io.ByteArrayOutputStream)
@@ -58,4 +60,29 @@
           (log/info "Rendering time (ms):" (- end-time start-time))
           (log/info "Image size (bytes): " (.available input-stream))
           (png-response input-stream)))
+
+(defn send-drawing
+    [request mime-type extension]
+    [request]
+    (let [params     (:params request)
+          drawing-id (get params "drawing-id")]
+          (log/info "Drawing ID:" drawing-id)
+          (if drawing-id
+              (try
+                  (let [drawing-name (format (str "%05d." extension) (Integer/parseInt drawing-id))]
+                       (log/info "Drawing name:" drawing-name)
+                       (http-utils/return-file "drawings" drawing-name mime-type))
+                  (catch Exception e
+                      (log/error e))))))
+
+
+(defn vector-drawing
+    "REST API handler for the /api/vector-drawing endpoint."
+    [request]
+    (send-drawing request "text/plain" "drw"))
+
+(defn vector-drawing-as-json
+    "REST API handler for the /api/vector-drawing-as-json endpoint."
+    [request]
+    (send-drawing request "application/json" "json"))
 
