@@ -2,6 +2,84 @@ var paper = null;
 var drawing_input = null;
 var drawing = null;
 
+var scale = 1.0;
+var xpos = 0;
+var ypos = 0;
+var grid = false;
+var boundary = false;
+
+function changeXpos(delta) {
+    xpos += delta;
+}
+
+function changeYpos(delta) {
+    ypos += delta;
+}
+
+function setXpos(value) {
+    xpos = value;
+}
+
+function setYpos(value) {
+    ypos = value;
+}
+
+function changeScaleBy(mag) {
+    scale *= mag;
+}
+
+function resetScale() {
+    scale = 1.0;
+}
+
+function onViewMagPlusClick() {
+    changeScaleBy(1.1);
+}
+
+function onViewMagMinusClick() {
+    changeScaleBy(0.9);
+}
+
+function onViewMag11Click() {
+    resetScale();
+}
+
+function onViewMagFitClick() {
+    resetScale();
+}
+
+function onArrowLeftClick() {
+    changeXpos(-10);
+}
+
+function onArrowRightClick() {
+    changeXpos(10);
+}
+
+function onArrowUpClick() {
+    changeYpos(-10);
+}
+
+function onArrowDownClick() {
+    changeYpos(10);
+}
+
+function onCenterViewClick() {
+    setXpos(0);
+    setYpos(0);
+}
+
+function onViewBoundaryClick() {
+}
+
+function onViewGridClick() {
+}
+
+function setElementValue(elementId, value) {
+    var e = document.getElementById(elementId);
+    e.innerText = value;
+}
+
 function callAjax(url, callback) {
     var xmlHttpRequest = null;
     xmlHttpRequest = new XMLHttpRequest();
