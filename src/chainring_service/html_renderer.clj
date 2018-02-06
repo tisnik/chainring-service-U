@@ -25,11 +25,11 @@
         [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
         [:meta {:name "Generator" :content "Clojure"}]
         [:meta {:http-equiv "Content-type" :content "text/html; charset=utf-8"}]
-        (page/include-css (str url-prefix "bootstrap.min.css"))
+        (page/include-css (str url-prefix "bootstrap/bootstrap.min.css"))
         (page/include-css (str url-prefix "chainring.css"))
-        (page/include-js  (str url-prefix "bootstrap.min.js"))
+        (page/include-js  (str url-prefix "bootstrap/bootstrap.min.js"))
         (if include-raphael?
-            (page/include-js (str url-prefix "raphael.min.js")))
+            (page/include-js (str url-prefix "raphael/raphael.min.js")))
         (if include-raphael?
             (page/include-js (str url-prefix "drawing.js")))
     ] ; head
@@ -199,7 +199,7 @@
                                  [:td (:created project)]
                                  [:td [:a {:title "Podrobnější informace o areálu"
                                            :href (str "project-info?project-id=" (:id project))}
-                                           [:img {:src "info.gif"}]]]])
+                                           [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -299,7 +299,7 @@
                                  [:td (:created building)]
                                  [:td [:a {:title "Podrobnější informace o budově"
                                            :href (str "building-info?building-id=" (:id building))}
-                                           [:img {:src "info.gif"}]]]])
+                                           [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -321,13 +321,13 @@
                         [:th "AOID"]   [:td (:aoid project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
                                   :href (str "project-info?project-id=" project-id)}
-                                  [:img {:src "info.gif"}]]]]
+                                  [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:name building-info)]
                         [:th "AOID"]   [:td (:aoid building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id)}
-                                  [:img {:src "info.gif"}]]]]
+                                  [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
@@ -341,10 +341,14 @@
                                  [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:id floor))} (:name floor)]]
                                  [:td (:aoid floor)]
                                  [:td (:created floor)]
-                                 [:td (:drawings floor)]
+                                 [:td
+                                 (if (zero? (:drawings floor))
+                                     [:div {:class "no-drawings"} 0]
+                                     [:div {:class "has-drawings"} (:drawings floor)])
+                                 ]
                                  [:td [:a {:title "Podrobnější informace o podlaží"
                                            :href (str "floor-info?floor-id=" (:id floor))}
-                                           [:img {:src "info.gif"}]]]])
+                                           [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -367,19 +371,19 @@
                         [:th "AOID"]   [:td (:aoid project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
                                   :href (str "project-info?project-id=" project-id)}
-                                  [:img {:src "info.gif"}]]]]
+                                  [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:name building-info)]
                         [:th "AOID"]   [:td (:aoid building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id)}
-                                  [:img {:src "info.gif"}]]]]
+                                  [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Podlaží"] [:td (:name floor-info)]
                         [:th "AOID"]   [:td (:aoid floor-info)]
                         [:td [:a {:title "Podrobnější informace o podlaží"
                                   :href (str "floor-info?floor-id=" building-id)}
-                                  [:img {:src "info.gif"}]]]]
+                                  [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
@@ -418,19 +422,19 @@
                             [:th "AOID"]   [:td (:aoid project-info)]
                             [:td [:a {:title "Podrobnější informace o areálu"
                                       :href (str "project-info?project-id=" project-id)}
-                                      [:img {:src "info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]]
                         [:tr
                             [:th "Budova"] [:td (:name building-info)]
                             [:th "AOID"]   [:td (:aoid building-info)]
                             [:td [:a {:title "Podrobnější informace o budově"
                                       :href (str "building-info?building-id=" building-id)}
-                                      [:img {:src "info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]]
                         [:tr
                             [:th "Podlaží"] [:td (:name floor-info)]
                             [:th "AOID"]   [:td (:aoid floor-info)]
                             [:td [:a {:title "Podrobnější informace o podlaží"
                                       :href (str "floor-info?floor-id=" building-id)}
-                                      [:img {:src "info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]]
                     ]
                     [:table
                         ; not needed, let's use debugger instead
@@ -441,19 +445,19 @@
                     ]
                     [:td {:class "tools"}
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "viewmag_plus.gif"  :border "0" :onclick "onViewMagPlusClick()"}] "&nbsp;"
-                         [:img {:src "viewmag_minus.gif" :border "0" :onclick "onViewMagMinusClick()"}] "&nbsp;"
-                         [:img {:src "viewmag_1_1.gif"   :border "0" :onclick "onViewMag11Click()"}] "&nbsp;"
-                         [:img {:src "viewmag_fit.gif"   :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
+                         [:img {:src "icons/viewmag_plus.gif"  :border "0" :onclick "onViewMagPlusClick()"}] "&nbsp;"
+                         [:img {:src "icons/viewmag_minus.gif" :border "0" :onclick "onViewMagMinusClick()"}] "&nbsp;"
+                         [:img {:src "icons/viewmag_1_1.gif"   :border "0" :onclick "onViewMag11Click()"}] "&nbsp;"
+                         [:img {:src "icons/viewmag_fit.gif"   :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "arrow1l.gif"       :border "0" :onclick "onArrowLeftClick()"}] "&nbsp;"
-                         [:img {:src "arrow1d.gif"       :border "0" :onclick "onArrowDownClick()"}] "&nbsp;"
-                         [:img {:src "arrow1u.gif"       :border "0" :onclick "onArrowUpClick()"}] "&nbsp;"
-                         [:img {:src "arrow1r.gif"       :border "0" :onclick "onArrowRightClick()"}] "&nbsp;"
-                         [:img {:src "center.gif"        :border "0" :onclick "onCenterViewClick()"}] "&nbsp;"
+                         [:img {:src "icons/arrow1l.gif"       :border "0" :onclick "onArrowLeftClick()"}] "&nbsp;"
+                         [:img {:src "icons/arrow1d.gif"       :border "0" :onclick "onArrowDownClick()"}] "&nbsp;"
+                         [:img {:src "icons/arrow1u.gif"       :border "0" :onclick "onArrowUpClick()"}] "&nbsp;"
+                         [:img {:src "icons/arrow1r.gif"       :border "0" :onclick "onArrowRightClick()"}] "&nbsp;"
+                         [:img {:src "icons/center.gif"        :border "0" :onclick "onCenterViewClick()"}] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
-                         [:img {:src "view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
+                         [:img {:src "icons/view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
+                         [:img {:src "icons/view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
                     ]
                 ;[:tr [:td [:img {:id "drawing" :src "/raster-drawing?command=reset_view"}]]]
                 [:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]

@@ -271,7 +271,7 @@
 
 (defn uri->file-name
     [uri]
-    (subs uri (inc (.lastIndexOf uri "/"))))
+    (subs uri (inc (.indexOf uri "/"))))
 
 (defn gui-call-handler
     "This function is used to handle all GUI calls. Three parameters are expected:
