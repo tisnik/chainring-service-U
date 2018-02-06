@@ -33,7 +33,7 @@
                    [org.clojars.tisnik/clj-utils "0.1.0-SNAPSHOT"]
                    [org.clojars.tisnik/clj-middleware "0.1.0-SNAPSHOT"]
                    [org.clojars.tisnik/clj-config-loader "0.1.0-SNAPSHOT"]
-                   [org.clojars.tisnik/clj-fileutils "0.2.0-SNAPSHOT"]]
+                   [org.clojars.tisnik/clj-fileutils "0.3.0-SNAPSHOT"]]
     :dev-dependencies [[lein-ring "0.8.10"]]
     :main ^:skip-aot chainring-service.core
     :plugins [[lein-ring "0.8.10"]
