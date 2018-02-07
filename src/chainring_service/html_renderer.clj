@@ -83,6 +83,8 @@
                 [:br]
                 [:br]
                 [:a {:href "db-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav databáze"]
+                "&nbsp;"
+                [:a {:href "drawings-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav výkresů"]
                 (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
@@ -168,6 +170,28 @@
                     [:tr [:td "Data výkresů"]           [:td (:drawings-data db-stats)]]
                     [:tr [:td "Místnosti na výkresech"] [:td (:drawing-rooms db-stats)]]
                     [:tr [:td "Uživatelé"]              [:td (:users db-stats)]]
+                ]
+                [:br]
+                (form/form-to [:get "/"]
+                    [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
+                )
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-drawings-statistic-page
+    [drawings-count json-count]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 "Stav výkresů"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Formát"]        [:th "Počet výkresů"] [:th ""]]
+                    [:tr [:td "Drw"]           [:td json-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
+                    [:tr [:td "JSON"]          [:td json-count] [:td [:a {:href "/json-list"} "seznam"]]]
                 ]
                 [:br]
                 (form/form-to [:get "/"]

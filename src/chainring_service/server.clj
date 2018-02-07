@@ -17,6 +17,8 @@
 (require '[clojure.tools.logging   :as log])
 (require '[clojure.pprint          :as pprint])
 
+(require '[clj-fileutils.fileutils :as fileutils])
+
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.html-renderer    :as html-renderer])
 (require '[chainring-service.rest-api         :as rest-api])
@@ -79,6 +81,14 @@
     (let [db-stats (db-interface/get-db-status)]
         (log/info "db stats" db-stats)
         (finish-processing request (html-renderer/render-db-statistic-page db-stats))))
+
+(defn process-drawings-statistic-page
+    [request]
+    (let [drawings-count (count (fileutils/filelist "drawings/" ".drw"))
+          json-count (count (fileutils/filelist "drawings/" ".json"))]
+        (log/info "drawings counts" drawings-count)
+        (log/info "json counts" json-count)
+        (finish-processing request (html-renderer/render-drawings-statistic-page drawings-count json-count))))
 
 (defn process-project-list-page
     "Function that prepares data for the page with project list."
@@ -288,6 +298,7 @@
             "/settings"                   (process-settings-page request)
             "/store-settings"             (process-store-settings-page request)
             "/db-stats"                   (process-db-statistic-page request)
+            "/drawings-stats"             (process-drawings-statistic-page request)
             "/project-list"               (process-project-list-page request)
             "/project-info"               (process-project-info-page request)
             "/project"                    (process-project-page request)
