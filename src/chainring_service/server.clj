@@ -84,11 +84,23 @@
 
 (defn process-drawings-statistic-page
     [request]
-    (let [drawings-count (count (fileutils/filelist "drawings/" ".drw"))
-          json-count (count (fileutils/filelist "drawings/" ".json"))]
+    (let [drawings-count (count (fileutils/filename-list "drawings/" ".drw"))
+          json-count (count (fileutils/filename-list "drawings/" ".json"))]
         (log/info "drawings counts" drawings-count)
         (log/info "json counts" json-count)
         (finish-processing request (html-renderer/render-drawings-statistic-page drawings-count json-count))))
+
+(defn process-drawings-list
+    [request]
+    (let [drawings (fileutils/file-list "drawings/" ".drw")]
+        (log/info "drawings" drawings)
+        (finish-processing request (html-renderer/render-drawings-list drawings))))
+
+(defn process-json-list
+    [request]
+    (let [jsons (fileutils/file-list "drawings/" ".json")]
+        (log/info "json drawings" jsons)
+        (finish-processing request (html-renderer/render-json-list jsons))))
 
 (defn process-project-list-page
     "Function that prepares data for the page with project list."
@@ -310,6 +322,8 @@
             "/vector-drawing"             (drawing-renderer/vector-drawing request)
             "/vector-drawing-as-json"     (drawing-renderer/vector-drawing-as-json request)
             "/raster-drawing"             (drawing-renderer/raster-drawing request)
+            "/drawings-list"              (process-drawings-list request)
+            "/json-list"                  (process-json-list request)
             )))
 
 (defn handler

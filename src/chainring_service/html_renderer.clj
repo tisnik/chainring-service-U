@@ -202,6 +202,52 @@
         ] ; </body>
 ))
 
+(defn render-drawings-list
+    [drawings]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 "Seznam výkresů ve formátu Drw"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Výkres"] [:th "Velikost"]]
+                    (for [drawing drawings]
+                        [:tr [:td (.getName drawing)] [:td (.length drawing) " B"]]
+                    )
+                ]
+                [:br]
+                (form/form-to [:get "/drawings-stats"]
+                    [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
+                )
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+(defn render-json-list
+    [drawings]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 "Seznam výkresů ve formátu JSON"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Výkres"] [:th "Velikost"]]
+                    (for [drawing drawings]
+                        [:tr [:td (.getName drawing)] [:td (.length drawing) " B"]]
+                    )
+                ]
+                [:br]
+                (form/form-to [:get "/drawings-stats"]
+                    [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
+                )
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 (defn render-project-list
     [projects]
     (page/xhtml
