@@ -72,6 +72,12 @@
     (if project-id
         (simple-query ["select * from project where id=?" project-id] "read-detailed-project-info")))
 
+(defn read-all-buildings
+    "Read list of all buildings."
+    []
+    (simple-query-sequence ["select id, aoid, project, name, created from building order by name"]
+                  "read-all-buildings"))
+
 (defn read-building-list
     "Read list of buildings for given project ID."
     [project-id]
@@ -99,6 +105,12 @@
     (if floor-id
         (simple-query ["select count(*) as cnt from drawing where floor=?" floor-id] "read-drawing-count-for-floor")))
 
+(defn read-all-floors
+    "Read list of all floors."
+    []
+    (simple-query-sequence ["select id, aoid, building, name, created from floor f order by id"]
+                  "read-all-floors"))
+
 (defn read-floor-list
     [building-id]
     (if building-id
@@ -109,6 +121,11 @@
     [floor-id]
     (if floor-id
         (simple-query ["select * from floor where id=?" floor-id] "read-floor-info")))
+
+(defn read-all-drawings
+    []
+    (simple-query-sequence ["select id, aoid, floor, name, created, modified, version from drawing order by name"]
+                  "read-all-drawings"))
 
 (defn read-drawing-list
     [floor-id]
