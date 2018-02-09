@@ -84,8 +84,12 @@ function callAjax(url, callback) {
     var xmlHttpRequest = null;
     xmlHttpRequest = new XMLHttpRequest();
     xmlHttpRequest.onreadystatechange = function() {
-        if (xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200) {
-            callback(xmlHttpRequest.responseText);
+        if (xmlHttpRequest.readyState == 4) {
+            if (xmlHttpRequest.status == 200) {
+                callback(xmlHttpRequest.responseText);
+            } else {
+                window.alert("Load failed")
+            }
         }
     }
     xmlHttpRequest.open("GET", url, true);
@@ -107,7 +111,7 @@ function initializePaper(elementId, width, height) {
     paper.clear();
 }
 
-function downloadDrawing(drawingId) {
+function downloadDrawingById(drawingId) {
     var url = "/vector-drawing?drawing-id=" + drawingId;
     // window.alert(url);
     callAjax(url, onLoadDrawing);
@@ -115,7 +119,7 @@ function downloadDrawing(drawingId) {
 
 // Initialize container when document is loaded
 window.onload = function () {
-    downloadDrawing(1);
+    downloadDrawingById(drawing_id);
     initializePaper("drawing_canvas", 800, 600);
     var circle = paper.circle(100, 100, 80);
     for (var i = 0; i < 5; i+=1) {
