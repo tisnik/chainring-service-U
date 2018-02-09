@@ -221,6 +221,16 @@
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
+(defn process-drawing-preview-page
+    [request]
+    (let [params        (:params request)
+          session       (:session request)
+          drawing-name  (get params "drawing")]
+          (log/info "Drawing name:" drawing-name)
+          (if drawing-name
+              (finish-processing request (html-renderer/render-drawing-preview drawing-name))
+              (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
+
 (defn process-drawing-page
     "Function that prepares data for the page with selected drawing."
     [request]
@@ -286,6 +296,7 @@
             [:get  "building"]         (rest-api/building-handler request uri)
             [:get  "floor"]            (rest-api/floor-handler request uri)
             [:get  "drawing"]          (rest-api/drawing-handler request uri)
+            [:get  "all-drawings"]     (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
             [:get  "raster-drawing"]   (drawing-renderer/raster-drawing request)
                                        (rest-api/unknown-endpoint request uri)
@@ -319,6 +330,7 @@
             "/floor-info"                 (process-floor-info-page request)
             "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
+            "/drawing-preview"            (process-drawing-preview-page request)
             "/vector-drawing"             (drawing-renderer/vector-drawing request)
             "/vector-drawing-as-json"     (drawing-renderer/vector-drawing-as-json request)
             "/raster-drawing"             (drawing-renderer/raster-drawing request)
