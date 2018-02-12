@@ -17,7 +17,7 @@ body {
 .navbar-inverse .navbar-nav > li > a:hover, 
 .navbar-inverse .navbar-nav > li > a:focus {
     color: white;
-   // background-color: #a0a0a0;
+    /* background-color: #a0a0a0; */
     font-size: 150%;
 }
 
@@ -66,3 +66,9 @@ body {
 .has-drawings {
     color: #00a000;
 }
+
+.vcell {
+    vertical-align: top;
+    font-size: 90%;
+}
+
