@@ -207,8 +207,29 @@
                   (send-error-response "no drawing info" uri request :internal-server-error))
               (send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
+(defn all-projects
+    "REST API handler for the /api/{version}/projects endpoint."
+    [request uri]
+    (let [params    (:params request)
+          projects  (db-interface/read-project-list)]
+         (send-response projects request)))
+
+(defn all-buildings
+    "REST API handler for the /api/{version}/buildings endpoint."
+    [request uri]
+    (let [params    (:params request)
+          buildings (db-interface/read-all-buildings)]
+         (send-response buildings request)))
+
+(defn all-floors
+    "REST API handler for the /api/{version}/floors endpoint."
+    [request uri]
+    (let [params    (:params request)
+          floors    (db-interface/read-all-floors)]
+         (send-response floors request)))
+
 (defn all-drawings-handler
-    "REST API handler for the /api/{version}/all-drawings endpoint."
+    "REST API handler for the /api/{version}/drawings endpoint."
     [request uri]
     (let [params    (:params request)
           projects  (db-interface/read-project-list)
