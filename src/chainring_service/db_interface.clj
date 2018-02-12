@@ -143,6 +143,16 @@
     (if drawing-id
         (simple-query-sequence ["select * from room where drawing=?" drawing-id] "read-room-list")))
  
+(defn read-sap-room-list
+    [floor-id version]
+    (if floor-id
+        (simple-query-sequence ["select *, (select label from room_type where room_type.id=s.room_type) as room_type_str from sap_room s where floor=? and version=? order by aoid" floor-id version] "read-sap-room-list")))
+
+(defn read-sap-room-count
+    [floor-id version]
+    (if floor-id
+        (simple-query ["select count(*) as cnt from sap_room where floor=? and version=?" floor-id version] "read-sap-room-count")))
+
 (defn store-drawing-raw-data
     [drawing-id raw-data]
     (if (and drawing-id raw-data)
