@@ -130,7 +130,7 @@
 (defn read-drawing-list
     [floor-id]
     (if floor-id
-        (simple-query-sequence ["select id, aoid, name, created, modified, version from drawing where floor=? order by name" floor-id]
+        (simple-query-sequence ["select id, aoid, name, created, modified, version from drawing where floor=? order by aoid" floor-id]
                       "read-drawing-list")))
 
 (defn read-drawing-info
