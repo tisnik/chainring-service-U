@@ -22,7 +22,8 @@
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.html-renderer    :as html-renderer])
 (require '[chainring-service.rest-api         :as rest-api])
-(require '[chainring-service.drawing-renderer :as drawing-renderer])
+(require '[chainring-service.raster-renderer  :as raster-renderer])
+(require '[chainring-service.vector-renderer  :as vector-renderer])
 (require '[chainring-service.config           :as config])
 (require '[chainring-service.http-utils       :as http-utils])
 
@@ -314,7 +315,7 @@
             [:get  "floors"]           (rest-api/all-floors request uri)
             [:get  "drawings"]         (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
-            [:get  "raster-drawing"]   (drawing-renderer/raster-drawing request)
+            [:get  "raster-drawing"]   (raster-renderer/raster-drawing request)
                                        (rest-api/unknown-endpoint request uri)
         )))
 
@@ -351,6 +352,7 @@
             "/vector-drawing"             (drawing-renderer/vector-drawing request)
             "/vector-drawing-as-json"     (drawing-renderer/vector-drawing-as-json request)
             "/raster-drawing"             (drawing-renderer/raster-drawing request)
+            "/raster-drawing"             (raster-renderer/raster-drawing request)
             "/drawings-list"              (process-drawings-list request)
             "/json-list"                  (process-json-list request)
             )))
