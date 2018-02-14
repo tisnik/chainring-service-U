@@ -243,10 +243,20 @@
     [request]
     (let [params        (:params request)
           session       (:session request)
-          drawing-name  (get params "drawing")]
+          drawing-name  (get params "drawing-name")]
           (log/info "Drawing name:" drawing-name)
           (if drawing-name
               (finish-processing request (html-renderer/render-drawing-preview drawing-name))
+              (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
+
+(defn process-raster-preview-page
+    [request]
+    (let [params        (:params request)
+          session       (:session request)
+          drawing-name  (get params "drawing-name")]
+          (log/info "Drawing name:" drawing-name)
+          (if drawing-name
+              (finish-processing request (html-renderer/render-raster-preview drawing-name))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
 (defn process-drawing-page
@@ -262,7 +272,7 @@
           building-info (db-interface/read-building-info building-id)
           floor-info    (db-interface/read-floor-info floor-id)
           drawing-info  (db-interface/read-drawing-info drawing-id)
-          rooms         {}; (db-interface/read-room-list drawing-id)
+          rooms         (db-interface/read-sap-room-list floor-id "C")
           session       (assoc session :drawing-id drawing-id)
           ]
           (log/info "Project ID:" project-id)
@@ -353,9 +363,9 @@
             "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
             "/drawing-preview"            (process-drawing-preview-page request)
-            "/vector-drawing"             (drawing-renderer/vector-drawing request)
-            "/vector-drawing-as-json"     (drawing-renderer/vector-drawing-as-json request)
-            "/raster-drawing"             (drawing-renderer/raster-drawing request)
+            "/raster-preview"             (process-raster-preview-page request)
+            "/vector-drawing"             (vector-renderer/vector-drawing request)
+            "/vector-drawing-as-json"     (vector-renderer/vector-drawing-as-json request)
             "/raster-drawing"             (raster-renderer/raster-drawing request)
             "/drawings-list"              (process-drawings-list request)
             "/json-list"                  (process-json-list request)
