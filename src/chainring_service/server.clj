@@ -161,6 +161,19 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném podlaží")))
               (finish-processing request (html-renderer/render-error-page "Žádné podlaží nebylo vybráno")))))
 
+(defn process-room-list
+    [request]
+    (let [params     (:params request)
+          floor-id   (get params "floor-id")
+          floor-info (db-interface/read-floor-info floor-id)
+          version    (get params "version")
+          rooms      (db-interface/read-sap-room-list floor-id version)]
+          (log/info "Floor ID:" floor-id)
+          (log/info "Floor info" floor-info)
+          (log/info "Rooms count:" (count rooms))
+          (finish-processing request (html-renderer/render-room-list floor-id floor-info version rooms))
+    ))
+
 (defn process-project-page
     "Function that prepares data for the page with list of buildings for selected project"
     [request]
@@ -328,6 +341,7 @@
             "/building-info"              (process-building-info-page request)
             "/floor"                      (process-floor-page request)
             "/floor-info"                 (process-floor-info-page request)
+            "/room-list"                  (process-room-list request)
             "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
             "/drawing-preview"            (process-drawing-preview-page request)
