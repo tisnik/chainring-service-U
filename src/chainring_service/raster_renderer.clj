@@ -10,14 +10,23 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.drawing-renderer
+(ns chainring-service.raster-renderer
     "Namespace that contains functions to render drawings into raster images.")
 
-(require '[ring.util.response :as http-response])
-(require '[clojure.tools.logging   :as log])
+(require '[clojure.string        :as str])
 
-(require '[chainring-service.http-utils  :as http-utils])
+(require '[ring.util.response    :as http-response])
+(require '[clojure.tools.logging :as log])
+(require '[clojure.data.json     :as json])
 
+(require '[chainring-service.http-utils :as http-utils])
+(require '[chainring-service.db-interface :as db-interface])
+
+(import java.awt.Color)
+(import java.awt.Font)
+(import java.awt.BasicStroke)
+(import java.awt.RenderingHints)
+(import java.awt.Polygon)
 (import java.awt.image.BufferedImage)
 (import java.io.ByteArrayInputStream)
 (import java.io.ByteArrayOutputStream)
