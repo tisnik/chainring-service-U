@@ -19,7 +19,7 @@
 
 (defn render-html-header
     "Renders part of HTML page - the header."
-    [url-prefix & [include-raphael?]]
+    [url-prefix & [options]]
     [:head
         [:title "Chainring"]
         [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
@@ -28,9 +28,26 @@
         (page/include-css (str url-prefix "bootstrap/bootstrap.min.css"))
         (page/include-css (str url-prefix "chainring.css"))
         (page/include-js  (str url-prefix "bootstrap/bootstrap.min.js"))
-        (if include-raphael?
+        (if (and options (:drawing-id options))
+            [:script (str "var drawing_id = " (:drawing-id options) ";")]
+            [:script "var drawing_id = null;"])
+        (if (and options (:floor-id options))
+            [:script (str "var floor_id = " (:floor-id options) ";")]
+            [:script "var floor_id = null;"])
+        (if (and options (:version options))
+            [:script (str "var version = '" (:version options) "';")]
+            [:script "var version = null;"])
+        (if (and options (:raster-drawing-id options))
+            [:script (str "var raster_drawing_id = " (:raster-drawing-id options) ";")]
+            [:script "var raster_drawing_id = null;"])
+        (if (and options (:drawing-name options))
+            [:script (str "var drawing_name = '" (:drawing-name options) "';")]
+            [:script "var drawing_name = null;"])
+        (if (and options (:include-raphael? options))
             (page/include-js (str url-prefix "raphael/raphael.min.js")))
-        (if include-raphael?
+        (if (and options (:include-raphael? options))
+            (page/include-js (str url-prefix "raphael/raphael_adds.js")))
+        (if (and options (:include-drawing-js? options))
             (page/include-js (str url-prefix "drawing.js")))
     ] ; head
 )
