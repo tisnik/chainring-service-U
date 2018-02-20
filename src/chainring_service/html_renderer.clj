@@ -459,6 +459,58 @@
         ] ; </body>
 ))
 
+(defn sap-href
+    [room]
+    "")
+
+(defn render-room-list
+    [floor-id floor-info version rooms]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 (str "Informace místnostech na podlaží '" (:name floor-info) "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
+                    [:tr [:th "Jméno"] [:td (:name floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "AOID"] [:td (:aoid floor-info)] [:td "&nbsp;"]]]
+                [:h4 "Místnosti"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID"]
+                         [:th "Jméno"]
+                         [:th "AOID"]
+                         [:th "Vytvořeno"]
+                         [:th "Modifikováno"]
+                         [:th "Platnost od"]
+                         [:th "Platnost do"]
+                         [:th "Kapacita"]
+                         [:th "Typ"]
+                         [:th "Obsazení"]
+                         [:th "Interní/externí"]
+                         [:th "Plocha"]
+                         [:th ""]]
+                    (for [room rooms]
+                            [:tr [:td (:id room)]
+                                 [:td (:name room)]
+                                 [:td [:a {:href (sap-href room)} (:aoid room)]]
+                                 [:td (:created room)]
+                                 [:td (:modified room)]
+                                 [:td (:valid_from room)]
+                                 [:td (:valid_to room)]
+                                 [:td (:capacity room)]
+                                 [:td (:room_type_str room)]
+                                 [:td (:occupied_by room)]
+                                 [:td (if (= (:occupation room) "I") "interní" "externí")]
+                                 [:td (:area room) "m<sup>2</sup>"]
+                            ])
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 (defn render-drawing-list
     "Render page with list of drawings."
     [project-id building-id floor-id project-info building-info floor-info drawings]
