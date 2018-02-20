@@ -145,7 +145,7 @@
  
 (defn read-sap-room-list
     [floor-id version]
-    (if floor-id
+    (if (and floor-id version)
         (simple-query-sequence ["select *, (select label from room_type where room_type.id=s.room_type) as room_type_str from sap_room s where floor=? and version=? order by aoid" floor-id version] "read-sap-room-list")))
 
 (defn read-sap-room-count
