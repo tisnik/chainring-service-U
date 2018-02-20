@@ -207,7 +207,7 @@
                 [:h1 "Stav výkresů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Formát"]        [:th "Počet výkresů"] [:th ""]]
-                    [:tr [:td "Drw"]           [:td json-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
+                    [:tr [:td "Drw"]           [:td drawings-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
                     [:tr [:td "JSON"]          [:td json-count] [:td [:a {:href "/json-list"} "seznam"]]]
                 ]
                 [:br]
@@ -228,10 +228,13 @@
                 (render-navigation-bar-section "/")
                 [:h1 "Seznam výkresů ve formátu Drw"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "Výkres"] [:th "Velikost"]]
+                    [:tr [:th "Výkres"] [:th "Velikost"]]; [:th {:colspan "2"} "Náhled"]]
                     (for [drawing drawings]
-                        [:tr [:td (.getName drawing)] [:td (.length drawing) " B"]]
-                    )
+                        [:tr [:td (.getName drawing)]
+                             [:td (.length drawing) " B"]
+                             ;[:td [:a {:href (str "/drawing-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/draw.png"}]]]
+                             ;[:td [:a {:href (str "/raster-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/image.png"}]]]
+                    ])
                 ]
                 [:br]
                 (form/form-to [:get "/drawings-stats"]
@@ -251,9 +254,12 @@
                 (render-navigation-bar-section "/")
                 [:h1 "Seznam výkresů ve formátu JSON"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "Výkres"] [:th "Velikost"]]
+                    [:tr [:th "Výkres"] [:th "Velikost"] [:th {:colspan "2"} "Náhled"]]
                     (for [drawing drawings]
-                        [:tr [:td (.getName drawing)] [:td (.length drawing) " B"]]
+                        [:tr [:td (.getName drawing)]
+                             [:td (.length drawing) " B"]
+                             [:td [:a {:href (str "/drawing-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/draw.png"}]]]
+                             [:td [:a {:href (str "/raster-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/image.png"}]]]]
                     )
                 ]
                 [:br]
