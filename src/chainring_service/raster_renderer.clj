@@ -46,6 +46,20 @@
         (http-response/content-type "image/png")
         cache-control-headers))
 
+(defn proper-scale?
+    [item width height]
+    (and (= (:width item)  width)
+         (= (:height item) height)))
+
+(defn get-scale
+    [data width height]
+    (let [scales (get data :scales)]
+        (first (filter #(proper-scale? % width height) scales))))
+
+(defn transform
+    [coordinate scale offset]
+    (int (* scale (+ coordinate offset))))
+
 (defn perform-raster-drawing
     [request]
     (let [params         (:params request)
