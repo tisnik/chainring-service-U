@@ -7,6 +7,8 @@ var xpos = 0;
 var ypos = 0;
 var grid = false;
 var boundary = false;
+var clickedX = null;
+var clickedY = null;
 
 function changeXpos(delta) {
     xpos += delta;
@@ -182,14 +184,52 @@ function downloadJSONDrawingByName(drawingName) {
     callAjax(url, onLoadDrawingJSON);
 }
 
+function getEvent(e)
+{
+    return !e ? window.event : e;
+}
+
+function rasterDrawingUrl(drawing_id, floor_id, version) {
+    return "/raster-drawing?drawing-id=" + raster_drawing_id + "&floor-id=" + floor_id+ "&version=" + version;
+}
+
+function onImageClick(obj, e) {
+    var evt = getEvent(e);
+    var boundingRect = obj.getBoundingClientRect();
+
+    if (evt.pageX)
+    {
+        clickedX = Math.round(evt.pageX - boundingRect.left);
+        clickedY = Math.round(evt.pageY - boundingRect.top);
+    }
+    else if (evt.clientX)
+    {
+        clickedX = evt.offsetX;
+        clickedY = evt.offsetY;
+    }
+    //console.log(clickedX, clickedY);
+    var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
+    //console.log(url);
+    document.getElementById('drawing').src=url;
+}
+
+function onRoomSelect(aoid) {
+    console.log("Selecting room: " + aoid);
+    var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&selected=" + aoid;
+    document.getElementById('drawing').src=url;
+}
+
 // Initialize container when document is loaded
 window.onload = function () {
-    downloadDrawingById(drawing_id);
-    initializePaper("drawing_canvas", 800, 600);
-    var circle = paper.circle(100, 100, 80);
-    for (var i = 0; i < 5; i+=1) {
-        var multiplier = i*5;
-        paper.circle(250 + (2*multiplier), 100 + multiplier, 50 - multiplier);
+    // drawGrid
+    console.log(version);
+    if (drawing_id !== null) {
+        initializePaper("drawing_canvas", 800, 600);
+        downloadJSONDrawingById(drawing_id);
+    }
+    else if (drawing_name !== null) {
+        initializePaper("drawing_canvas", 800, 600);
+        downloadJSONDrawingByName(drawing_name);
     }
 };
 
