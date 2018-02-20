@@ -346,7 +346,7 @@
 
 
 (defn render-floor-info
-    [floor-id floor-info drawing-count]
+    [floor-id floor-info drawing-count rooms-current-version rooms-new-version]
     (page/xhtml
         (render-html-header "/")
         [:body
@@ -354,12 +354,22 @@
                 (render-navigation-bar-section "/")
                 [:h1 (str "Informace o podlaží '" (:name floor-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"] [:td floor-id]]
-                    [:tr [:th "Jméno"] [:td (:name floor-info)]]
-                    [:tr [:th "AOID"] [:td (:aoid floor-info)]]
-                    [:tr [:th "Vytvořeno"] [:td (:created floor-info)]]
-                    [:tr [:th "Modifikováno"] [:td (:modified floor-info)]]
-                    [:tr [:th "Počet verzí výkresů"] [:td (get drawing-count :cnt "nelze zjistit")]]
+                    [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
+                    [:tr [:th "Jméno"] [:td (:name floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "AOID"] [:td (:aoid floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "Počet verzí výkresů"] [:td (get drawing-count :cnt "nelze zjistit")] [:td "&nbsp;"]]
+                    [:tr [:th "Počet místností (stávacící veze)"]
+                         [:td (get rooms-current-version :cnt "nelze zjistit")]
+                         [:td [:a {:title "Seznam mísností"
+                                   :href (str "room-list?version=C&floor-id=" floor-id)}
+                                   [:img {:src "icons/info.gif"}]]]]
+                    [:tr [:th "Počet místností (nová veze)"]
+                         [:td (get rooms-new-version :cnt "nelze zjistit")]
+                         [:td [:a {:title "Seznam mísností"
+                                   :href (str "room-list?version=N&floor-id=" floor-id)}
+                                   [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
