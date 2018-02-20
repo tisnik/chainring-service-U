@@ -60,6 +60,19 @@
     [coordinate scale offset]
     (int (* scale (+ coordinate offset))))
 
+(defn setup-graphics-context
+    [image gc width height]
+    (let [rh (new RenderingHints RenderingHints/KEY_RENDERING RenderingHints/VALUE_RENDER_QUALITY)]
+        (.put rh RenderingHints/KEY_TEXT_ANTIALIASING RenderingHints/VALUE_TEXT_ANTIALIAS_ON)
+        (.put rh RenderingHints/KEY_ANTIALIASING      RenderingHints/VALUE_ANTIALIAS_ON)
+        (.setRenderingHints gc rh))
+    (let [font (new Font "Helvetica" Font/PLAIN 8)]
+        (.setFont gc font))
+    (.setBackground gc (new Color 0.9 0.9 0.8))
+    (.clearRect gc 0 0 width height)
+    (.setColor gc Color/BLACK)
+    (.drawRect gc 0 0 (dec width) (dec height)))
+
 (defn perform-raster-drawing
     [request]
     (let [params         (:params request)
