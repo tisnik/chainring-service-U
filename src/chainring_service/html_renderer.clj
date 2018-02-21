@@ -562,6 +562,23 @@
         ] ; </body>
 ))
 
+(defn render-drawing-preview
+    [drawing-name]
+    (page/xhtml
+        (render-html-header "/" {:include-raphael? true
+                                 :include-drawing-js? true
+                                 :drawing-name drawing-name})
+        [:body {:class "body-drawing"}
+            [:div {:class "container"}
+            (render-navigation-bar-section "/")
+            [:div {:class "canvas" :id "drawing_canvas"}]
+            [:br]
+            [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+            (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 (defn render-drawing
     "Render page with drawing."
     [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
@@ -619,6 +636,22 @@
             ]]]
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
             (render-html-footer)
+        ] ; </body>
+))
+
+(defn render-raster-preview
+    [drawing-name]
+    (page/xhtml
+        (render-html-header "/")
+        [:body {:class "body-drawing"}
+            [:div {:class "container"}
+            (render-navigation-bar-section "/")
+            [:img {:id "drawing" :src (str "/raster-drawing?drawing-name=" drawing-name) }]
+            [:br]
+            [:br]
+            [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+            (render-html-footer)
+            ] ; </div class="container">
         ] ; </body>
 ))
 
