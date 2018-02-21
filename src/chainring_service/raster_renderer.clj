@@ -110,6 +110,37 @@
                 nil
         )))
 
+(defn draw-room-background
+    [gc xpoints ypoints background-color]
+    (.setColor gc background-color)
+    (.fillPolygon gc (int-array xpoints)
+                     (int-array ypoints)
+                     (count xpoints)))
+
+(defn draw-room-contour
+    [gc xpoints ypoints foreground-color]
+    (.setColor gc foreground-color)
+    (.drawPolygon gc (int-array xpoints)
+                     (int-array ypoints)
+                     (count xpoints)))
+
+(defn draw-selected-room
+    [gc xpoints ypoints]
+    (draw-room-background gc xpoints ypoints (new Color 1.0 1.0 0.5 0.5))
+    (draw-room-contour    gc xpoints ypoints Color/RED))
+
+(defn draw-highlighted-room
+    [gc xpoints ypoints aoid room-colors]
+    (let [colors (get room-colors aoid)
+          foreground-color (:foreground colors)
+          background-color (:background colors)]
+          (draw-room-background gc xpoints ypoints background-color)
+          (draw-room-contour    gc xpoints ypoints foreground-color)))
+
+(defn draw-regular-room
+    [gc xpoints ypoints]
+    (draw-room-contour gc xpoints ypoints Color/BLUE))
+
 (defn perform-raster-drawing
     [request]
     (let [params         (:params request)
