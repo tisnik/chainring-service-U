@@ -583,7 +583,11 @@
     "Render page with drawing."
     [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
     (page/xhtml
-        (render-html-header "/" true)
+        ;(render-html-header "/" {:include-raphael? true :drawing-id nil})
+        (render-html-header "/" {:include-drawing-js? true
+                                 :floor-id floor-id
+                                 :raster-drawing-id drawing-id
+                                 :version "C"})
         [:body {:class "body-drawing"}
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
@@ -608,7 +612,24 @@
                                       :href (str "floor-info?floor-id=" building-id)}
                                       [:img {:src "icons/info.gif"}]]]]
                     ]
-                    [:table
+                    [:table {:class "table table-stripped table-hover" :style "width:auto;"}
+                        [:tr {:class "vcell"} [:th "Jméno"]
+                             [:th "AOID"]
+                             [:th "Platnost<br>od/do"]
+                             [:th "Typ"]
+                             [:th "Kapacita/<br>plocha"]
+                             [:th "Obsazení"]]
+                        (for [room rooms]
+                                [:tr {:class "vcell"} [:td (:name room)]
+                                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:aoid room) "')")} (:aoid room)]]
+                                     [:td (:valid_from room) "<br>"
+                                          (:valid_to room)]
+                                     [:td (:room_type_str room)]
+                                     [:td (:capacity room) "<br>"
+                                          (:area room) "m<sup>2</sup>"]
+                                     [:td (:occupied_by room) "<br>"
+                                          (if (= (:occupation room) "I") "interní" "externí")]
+                                ])
                         ; not needed, let's use debugger instead
                         ; [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
                         ; [:tr [:td "Scale:"] [:td [:div {:id "scale"} "1"]]]
@@ -631,8 +652,11 @@
                          [:img {:src "icons/view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
                          [:img {:src "icons/view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
                     ]
-                ;[:tr [:td [:img {:id "drawing" :src "/raster-drawing?command=reset_view"}]]]
-                [:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
+                [:tr [:td [:div {:style "position:relative;"} [:img {:id "drawing"
+                                 :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
+                                 :border "0"
+                                 :onclick "onImageClick(this, event)"}]]]]
+                ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
             ]]]
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
             (render-html-footer)
