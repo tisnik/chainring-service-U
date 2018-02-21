@@ -73,6 +73,43 @@
     (.setColor gc Color/BLACK)
     (.drawRect gc 0 0 (dec width) (dec height)))
 
+(defn draw-line
+    [gc entity scale x-offset y-offset]
+    (let [x1 (transform (:x1 entity) scale x-offset)
+          y1 (transform (:y1 entity) scale y-offset)
+          x2 (transform (:x2 entity) scale x-offset)
+          y2 (transform (:y2 entity) scale y-offset)]
+          (.drawLine gc x1 y1 x2 y2)))
+
+(defn draw-arc
+    [gc entity scale x-offset y-offset]
+    (let [x (transform (:x entity) scale x-offset)
+          y (transform (:y entity) scale y-offset)
+          r (int (* scale (:r entity)))
+          a1 (:a1 entity)
+          a2 (:a2 entity)
+          delta (int (- a2 a1))
+          extent (if (neg? delta) (+ delta 360) delta)]
+          (.drawArc gc (- x r) (- y r) (* r 2) (*  r 2) a1 extent)))
+
+(defn draw-text
+    [gc entity scale x-offset y-offset]
+    (let [x (transform (:x entity) scale x-offset)
+          y (transform (:y entity) scale y-offset)
+          t (:text entity)]
+          (.drawString gc t x y)))
+
+(defn draw-entities
+    [gc entities scale x-offset y-offset]
+    (.setColor gc Color/BLACK)
+    (doseq [entity entities]
+        (condp = (:T entity) 
+            "L" (draw-line gc entity scale x-offset y-offset)
+            "A" (draw-arc  gc entity scale x-offset y-offset)
+            "T" (draw-text gc entity scale x-offset y-offset)
+                nil
+        )))
+
 (defn perform-raster-drawing
     [request]
     (let [params         (:params request)
