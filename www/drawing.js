@@ -10,6 +10,10 @@ var boundary = false;
 var clickedX = null;
 var clickedY = null;
 
+var roomInfoVisible = true;
+var roomListVisible = true;
+var filtersVisible = true;
+
 function changeXpos(delta) {
     xpos += delta;
 }
@@ -232,4 +236,30 @@ window.onload = function () {
         downloadJSONDrawingByName(drawing_name);
     }
 };
+
+function showHideSomething(elementId, iconId, hide) {
+    if (hide) {
+        document.getElementById(elementId).className = "hidden";
+        document.getElementById(iconId).src = "icons/1uparrow.gif";
+    }
+    else {
+        document.getElementById(elementId).className = "table table-stripped table-hover";
+        document.getElementById(iconId).src = "icons/1downarrow.gif";
+    }
+}
+
+function showHideRoomInfo() {
+    roomInfoVisible = !roomInfoVisible;
+    showHideSomething("room_info", "show_hide_room_info", !roomInfoVisible);
+}
+
+function showHideRoomList() {
+    roomListVisible = !roomListVisible;
+    showHideSomething("room_list", "show_hide_room_list", !roomListVisible);
+}
+
+function showHideFilters() {
+    filtersVisible = !filtersVisible;
+    showHideSomething("filters", "show_hide_filters", !filtersVisible);
+}
 
