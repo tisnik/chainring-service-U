@@ -591,28 +591,30 @@
         [:body {:class "body-drawing"}
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
-                [:tr [:td {:rowspan 2 :style "vertical-align:top"}
-                    [:table {:class "table table-stripped table-hover" :style "width:auto;"}
-                        [:tr
+                [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
+                    [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]]
+                    [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
+                        [:tr {:class "vcell"}
                             [:th "Areál"]  [:td (:name project-info)]
                             [:th "AOID"]   [:td (:aoid project-info)]
                             [:td [:a {:title "Podrobnější informace o areálu"
                                       :href (str "project-info?project-id=" project-id)}
                                       [:img {:src "icons/info.gif"}]]]]
-                        [:tr
+                        [:tr {:class "vcell"}
                             [:th "Budova"] [:td (:name building-info)]
                             [:th "AOID"]   [:td (:aoid building-info)]
                             [:td [:a {:title "Podrobnější informace o budově"
                                       :href (str "building-info?building-id=" building-id)}
                                       [:img {:src "icons/info.gif"}]]]]
-                        [:tr
+                        [:tr {:class "vcell"}
                             [:th "Podlaží"] [:td (:name floor-info)]
                             [:th "AOID"]   [:td (:aoid floor-info)]
                             [:td [:a {:title "Podrobnější informace o podlaží"
-                                      :href (str "floor-info?floor-id=" building-id)}
+                                      :href (str "floor-info?floor-id=" floor-id)}
                                       [:img {:src "icons/info.gif"}]]]]
                     ]
-                    [:table {:class "table table-stripped table-hover" :style "width:auto;"}
+                    [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]]
+                    [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"} [:th "Jméno"]
                              [:th "AOID"]
                              [:th "Platnost<br>od/do"]
@@ -636,6 +638,10 @@
                         ; [:tr [:td "X-pos:"] [:td [:div {:id "xpos"} "0"]]]
                         ; [:tr [:td "Y-pos:"] [:td [:div {:id "ypos"} "0"]]]
                     ]
+                    [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]]
+                    [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
+                    ]
+                    ]
                     [:td {:class "tools"}
                          [:span {:class "tools-spacer"}]
                          [:img {:src "icons/viewmag_plus.gif"  :border "0" :onclick "onViewMagPlusClick()"}] "&nbsp;"
@@ -652,12 +658,13 @@
                          [:img {:src "icons/view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
                          [:img {:src "icons/view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
                     ]
-                [:tr [:td [:div {:style "position:relative;"} [:img {:id "drawing"
+                [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
                                  :border "0"
-                                 :onclick "onImageClick(this, event)"}]]]]
+                                 :onclick "onImageClick(this, event)"}]]
+                                 [:div {:style "height:100ex"} "&nbsp;"]]]
                 ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
-            ]]]
+            ]]
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
             (render-html-footer)
         ] ; </body>
