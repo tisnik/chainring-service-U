@@ -141,15 +141,152 @@
     [gc xpoints ypoints]
     (draw-room-contour gc xpoints ypoints Color/BLUE))
 
+(defn coords-in-polygon
+    [xpoints ypoints coordsx coordsy]
+    (if (and coordsx coordsy)
+        (let [polygon (new Polygon (int-array xpoints) (int-array ypoints) (count xpoints))]
+             (.contains polygon (double coordsx) (double coordsy)))))
+
+(defn selected-room?
+    [aoid selected transformed-xpoints transformed-ypoints coordsx coordsy]
+    (or (= aoid selected) (coords-in-polygon transformed-xpoints transformed-ypoints coordsx coordsy)))
+
+(defn highlighted-room?
+    [aoid room-colors]
+    (get room-colors aoid nil))
+
+(defn draw-rooms
+    [gc rooms scale x-offset y-offset selected room-colors coordsx coordsy]
+    (.setStroke gc (new BasicStroke 2))
+    (doseq [room rooms]
+         (let [polygon (:polygon room)
+               aoid    (:room_id room)
+               xpoints (map first polygon)
+               ypoints (map second polygon)
+               transformed-xpoints (map #(transform % scale x-offset) xpoints)
+               transformed-ypoints (map #(transform % scale x-offset) ypoints)]
+               (if (seq xpoints)
+                   (cond
+                       (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy)
+                           (draw-selected-room gc transformed-xpoints transformed-ypoints)
+                       (highlighted-room? aoid room-colors)
+                           (draw-highlighted-room gc transformed-xpoints transformed-ypoints aoid room-colors)
+                       :else (draw-regular-room gc transformed-xpoints transformed-ypoints))))))
+
+(defn drawing-full-name
+    [drawing-id drawing-name]
+    (if drawing-id
+        (format (str "drawings/%05d.json") (Integer/parseInt drawing-id))
+        (if drawing-name
+            (str "drawings/" drawing-name))))
+
+(defn draw-into-image
+    [image drawing-id drawing-name width height selected room-colors coordsx coordsy]
+    (let [full-name  (drawing-full-name drawing-id drawing-name)]
+        (if full-name
+        (let [data       (json/read-str (slurp full-name) :key-fn clojure.core/keyword)
+              scale-info (get-scale data width height)
+              x-offset   (:xoffset scale-info)
+              y-offset   (:yoffset scale-info)
+              scale      (:scale scale-info)
+              entities   (:entities data)
+              rooms      (:rooms data)
+              gc         (.createGraphics image)]
+            (log/info "full drawing name:" full-name)
+            (log/info "width" width)
+            (log/info "height" height)
+            (log/info "x-offset" x-offset)
+            (log/info "y-offset" y-offset)
+            (log/info "scale:" scale)
+            (log/info "scale-info:" scale-info)
+            (log/info "entities:" (count entities))
+            (log/info "rooms" (count rooms))
+            (log/info "selected" selected)
+            (log/info "coordsx" coordsx)
+            (log/info "coordsy" coordsy)
+            (setup-graphics-context image gc width height)
+            (log/info "gc:" gc)
+            (draw-entities gc entities scale x-offset y-offset)
+            (draw-rooms gc rooms scale x-offset y-offset selected room-colors coordsx coordsy)
+        )
+    )))
+
+;;;{:capacity 0, :occupied_by , :area 15.0
+;;;
+;;;        boolean selectArea         = "area".equals(configuration.selectType);
+;;;        boolean selectCapacity     = "capacity".equals(configuration.selectType);
+;;;        boolean selectOwner        = "owner".equals(configuration.selectType);
+;;;        boolean selectAvailability = "availability".equals(configuration.selectType);
+;;;        boolean selectPozadavek    = "pozadavek".equals(configuration.selectType);                             ]
+;;;
+
+(def occupation-colors
+    {"I" {:foreground (new Color 200 100 100)
+          :background (new Color 200 100 100 127)}
+     "E" {:foreground (new Color 100 100 200)
+          :background (new Color 100 100 200 127)}
+    })
+
+(def room-type-colors
+    {1 {:foreground (new Color 200 150 100)
+        :background (new Color 200 150 100 127)}
+     2 {:foreground (new Color 100 150 200)
+        :background (new Color 100 150 200 127)}
+     3 {:foreground (new Color 200 140 200)
+        :background (new Color 200 140 200 127)}
+     4 {:foreground (new Color 100 200 200)
+        :background (new Color 100 200 200 127)}
+     5 {:foreground (new Color 200 200 100)
+        :background (new Color 200 200 100 127)}
+    })
+
+(defn color-for-room-capacity
+    [capacity]
+    (cond (zero? capacity) {:foreground Color/BLACK :background (new Color 50 50 50 127)}
+          (== capacity 1)  {:foreground Color/GRAY :background (new Color 100 100 100 127)}
+          (== capacity 2)  {:foreground Color/GRAY :background (new Color 150 150 150 127)}
+          :else            {:foreground Color/GRAY :background (new Color 200 200 200 127)}))
+
+(defn compute-room-color
+    [highlight-groups room]
+    (if highlight-groups
+        (or (and (contains? highlight-groups "occupation") (get occupation-colors (:occupation room)))
+            (and (contains? highlight-groups "room-type")  (get room-type-colors  (:room_type room)))
+            (and (contains? highlight-groups "capacity") (color-for-room-capacity (:capacity room)))
+    )))
+
+(defn compute-room-colors
+    [floor-id version highlight-groups]
+    (let [rooms (db-interface/read-sap-room-list floor-id version)]
+         (zipmap (map #(:aoid %) rooms)
+                 (map #(compute-room-color highlight-groups %) rooms))))
+
 (defn perform-raster-drawing
     [request]
-    (let [params         (:params request)
-          drawing-id     (get params "drawing-id")
-          width          (get params "width" 640)
-          height         (get params "height" 480)
-          selected       (get params "selected")
-          image          (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
+    (let [params              (:params request)
+          floor-id            (get params "floor-id")
+          version             (get params "version")
+          drawing-id          (get params "drawing-id")
+          drawing-name        (get params "drawing-name")
+          width               (get params "width" 800)
+          height              (get params "height" 600)
+          user-x-offset       (get params "x-offset")
+          user-y-offset       (get params "y-offset")
+          user-scale          (get params "scale")
+          selected            (get params "selected")
+          highlight-p         (get params "highlight")
+          highlight-groups    (into #{} (if highlight-p (str/split highlight-p #",")))
+          coordsx             (get params "coordsx")
+          coordsy             (get params "coordsy")
+          coordsx-f           (if coordsx (Double/parseDouble coordsx))
+          coordsy-f           (if coordsx (Double/parseDouble coordsy))
+          image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
+          room-colors         (compute-room-colors floor-id version highlight-groups)
           image-output-stream (ByteArrayOutputStream.)]
+          (try
+              (draw-into-image image drawing-id drawing-name width height selected room-colors coordsx-f coordsy-f)
+              (catch Exception e
+                  (log/error "error during drawing!" e)))
           ; serialize image into output stream
           (ImageIO/write image "png" image-output-stream)
           (let [end-time (System/currentTimeMillis)]
@@ -164,29 +301,4 @@
           (log/info "Rendering time (ms):" (- end-time start-time))
           (log/info "Image size (bytes): " (.available input-stream))
           (png-response input-stream)))
-
-(defn send-drawing
-    [request mime-type extension]
-    [request]
-    (let [params     (:params request)
-          drawing-id (get params "drawing-id")]
-          (log/info "Drawing ID:" drawing-id)
-          (if drawing-id
-              (try
-                  (let [drawing-name (format (str "%05d." extension) (Integer/parseInt drawing-id))]
-                       (log/info "Drawing name:" drawing-name)
-                       (http-utils/return-file "drawings" drawing-name mime-type))
-                  (catch Exception e
-                      (log/error e))))))
-
-
-(defn vector-drawing
-    "REST API handler for the /api/vector-drawing endpoint."
-    [request]
-    (send-drawing request "text/plain" "drw"))
-
-(defn vector-drawing-as-json
-    "REST API handler for the /api/vector-drawing-as-json endpoint."
-    [request]
-    (send-drawing request "application/json" "json"))
 
