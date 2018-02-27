@@ -14,6 +14,8 @@ var roomInfoVisible = true;
 var roomListVisible = true;
 var filtersVisible = true;
 
+var selectedRoom = null;
+
 function changeXpos(delta) {
     xpos += delta;
 }
@@ -197,30 +199,94 @@ function rasterDrawingUrl(drawing_id, floor_id, version) {
     return "/raster-drawing?drawing-id=" + raster_drawing_id + "&floor-id=" + floor_id+ "&version=" + version;
 }
 
+function rasterDrawingHighlight() {
+    url = "";
+    var highlightRoomType = checkBoxValue("room-type-checkbox");
+    var highlightRoomCapacity = checkBoxValue("room-capacity-checkbox");
+    var highlightRoomOccupation = checkBoxValue("room-ocupation-checkbox");
+    var highlightRoomOccupationBy = checkBoxValue("room-occupied-by-checkbox");
+    if (highlightRoomType || highlightRoomCapacity || highlightRoomOccupation || highlightRoomOccupationBy) {
+        var firstItem = true;
+        url += "&highlight=";
+        if (highlightRoomType) {
+            url += "room_type"
+            firstItem = false;
+        }
+        if (highlightRoomCapacity) {
+            if (!firstItem) {
+                url += ",";
+            }
+            url += "capacity";
+            firstItem = false;
+        }
+        if (highlightRoomOccupation) {
+            if (!firstItem) {
+                url += ",";
+            }
+            url += "occupation";
+            firstItem = false;
+        }
+    }
+    return url;
+}
+
 function onImageClick(obj, e) {
     var evt = getEvent(e);
     var boundingRect = obj.getBoundingClientRect();
+    var top = (window.pageYOffset || obj.scrollTop)  - (obj.clientTop || 0);
+    console.log(top);
 
     if (evt.pageX)
     {
         clickedX = Math.round(evt.pageX - boundingRect.left);
-        clickedY = Math.round(evt.pageY - boundingRect.top);
+        clickedY = Math.round(evt.pageY - boundingRect.top) - top;
     }
     else if (evt.clientX)
     {
         clickedX = evt.offsetX;
         clickedY = evt.offsetY;
     }
-    //console.log(clickedX, clickedY);
+    console.log(clickedX, clickedY);
     var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
+    url += rasterDrawingHighlight();
     //console.log(url);
+    document.getElementById('drawing').src=url;
+}
+
+function reloadImage() {
+    var url = rasterDrawingUrl(drawing_id, floor_id, version);
+    if (selectedRoom != null) {
+        url += "&selected=" + selectedRoom;
+    }
+    url += rasterDrawingHighlight();
+    console.log(url);
     document.getElementById('drawing').src=url;
 }
 
 function onRoomSelect(aoid) {
     console.log("Selecting room: " + aoid);
-    var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&selected=" + aoid;
-    document.getElementById('drawing').src=url;
+    selectedRoom = aoid;
+    reloadImage();
+}
+
+function checkBoxValue(id) {
+    return document.getElementById(id).checked;
+}
+
+function roomTypeCheckBoxClicked() {
+    reloadImage();
+}
+
+function roomCapacityCheckBoxClicked() {
+    reloadImage();
+}
+
+function roomOccupationCheckBoxClicked() {
+    reloadImage();
+}
+
+function roomOccupiedByCheckBoxClicked() {
+    reloadImage();
 }
 
 // Initialize container when document is loaded
@@ -262,4 +328,3 @@ function showHideFilters() {
     filtersVisible = !filtersVisible;
     showHideSomething("filters", "show_hide_filters", !filtersVisible);
 }
-
