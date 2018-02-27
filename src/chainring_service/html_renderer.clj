@@ -107,12 +107,16 @@
         ] ; </body>
 ))
 
+(defn passive-color-box
+    [html-color]
+    [:div {:class "color-box" :style (str "background-color:" html-color "; display:inline-block")}])
+
 (defn color-box
     [html-color value]
     [:a {:href "#" :onclick
         (str "document.getElementById('selected-room-color').value='" value "';"
              "document.getElementById('selected-room-color-code').value='" html-color "'")}
-        [:div {:class "color-box" :style (str "background-color:" html-color "; display:inline-block")}]])
+        (passive-color-box html-color)])
 
 (defn render-settings-page
     [user-id]
@@ -593,7 +597,7 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
                     [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]]
-                    [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
+                    [:table {:id "room_info" :class "hidden table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"}
                             [:th "Areál"]  [:td (:name project-info)]
                             [:th "AOID"]   [:td (:aoid project-info)]
@@ -640,6 +644,36 @@
                     ]
                     [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]]
                     [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
+                        [:tr {:class "vcell"}
+                            [:td "Typ"]
+                            [:td (form/check-box {:onclick "roomTypeCheckBoxClicked();"} "room-type-checkbox")]
+                            [:td (passive-color-box "rgb(200,150,100)") "Kancelář" [:br]
+                                 (passive-color-box "rgb(100,150,200)") "Chodba" [:br]
+                                 (passive-color-box "rgb(200,140,200)") "Hala" [:br]
+                                 (passive-color-box "rgb(100,200,200)") "WC" [:br]
+                                 (passive-color-box "rgb(200,200,100)") "Technická místnost" [:br]
+                                 ]
+                        [:tr {:class "vcell"}
+                            [:td "Kapacita"]
+                            [:td (form/check-box {:onclick "roomCapacityCheckBoxClicked();"} "room-capacity-checkbox")]
+                            [:td (passive-color-box "rgb(50,50,50)") "0" [:br]
+                                 (passive-color-box "rgb(100,100,100)") "1" [:br]
+                                 (passive-color-box "rgb(150,150,150)") "2" [:br]
+                                 (passive-color-box "rgb(200,200,200)") "&gt;2" [:br]
+                            ]
+                        ]
+                        [:tr {:class "vcell"}
+                            [:td "Obsazení"]
+                            [:td (form/check-box {:onclick "roomOccupationCheckBoxClicked();"} "room-ocupation-checkbox")]
+                            [:td (passive-color-box "rgb(200,100,100)") "interní" [:br]
+                                 (passive-color-box "rgb(100,100,200)") "externí" [:br]
+                            ]
+                        ]
+                        [:tr {:class "vcell"}
+                            [:td "Nájemce"]
+                            [:td (form/check-box {:onclick "roomOccupiedByCheckBoxClicked();"} "room-occupied-by-checkbox")]
+                            ]
+                        ]
                     ]
                     ]
                     [:td {:class "tools"}
