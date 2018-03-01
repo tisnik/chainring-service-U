@@ -329,6 +329,8 @@
             [:get  "floors"]           (rest-api/all-floors request uri)
             [:get  "drawings"]         (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data"] (rest-api/store-drawing-raw-data request)
+            [:get  "drawing"]          (rest-api/deserialize-drawing request)
+            [:put  "drawing"]          (rest-api/serialize-drawing request)
             [:get  "raster-drawing"]   (raster-renderer/raster-drawing request)
                                        (rest-api/unknown-endpoint request uri)
         )))

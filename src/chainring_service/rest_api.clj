@@ -19,8 +19,11 @@
 (require '[clojure.tools.logging      :as log])
 (require '[clj-fileutils.fileutils    :as file-utils])
 
-(require '[chainring-service.db-interface  :as db-interface])
-(require '[chainring-service.config   :as config])
+(require '[chainring-service.db-interface    :as db-interface])
+(require '[chainring-service.config          :as config])
+(require '[chainring-service.drawing-storage :as drawing-storage])
+
+(use     '[clj-utils.utils])
 
 ; HTTP codes used by several REST API responses
 (def http-codes {
@@ -246,9 +249,9 @@
 (defn store-drawing-raw-data
     "REST API handler for the /api/{version}/drawing-raw-data endpoint."
     [request]
-    (let [params (:params request)
+    (let [params     (:params request)
           drawing-id (get params "drawing")
-          raw-data (read-request-body request)]
+          raw-data   (read-request-body request)]
         (if (and drawing-id raw-data)
             (try
                 (db-interface/store-drawing-raw-data drawing-id raw-data)
@@ -259,3 +262,40 @@
             (send-error-response "send drawing ID as parameter and raw data in the body" "wrong input" request :bad-request)
         )))
 
+(defn deserialize-drawing
+    [request]
+    (let [params     (:params request)
+          drawing-id (get params "drawing")]
+    ))
+
+(defn missing-parameter
+    [request parameter]
+    (let [message (str "missing required parameter '" parameter "'")]
+        (send-error-response message "wrong input" request :bad-request)))
+
+(defn try-to-store-drawing
+    [drawing-id store-format raw-data configuration]
+    (let [id        (parse-int drawing-id)
+          directory (-> configuration :drawings :directory)]
+          (drawing-storage/store-drawing-as id directory store-format raw-data)))
+
+(defn serialize-drawing
+    [request]
+    (let [params        (:params request)
+          configuration (:configuration request)
+          drawing-id    (get params "drawing")
+          store-format  (get params "format")
+          raw-data      (read-request-body request)]
+          (cond (and drawing-id format raw-data)
+                (try
+                    (try-to-store-drawing drawing-id store-format raw-data configuration)
+                    (send-ok-response "Drawing has been saved" request)
+                    (catch Exception e
+                        (log/error e)
+                        (send-error-response "exception occured during write" (.getMessage e) request :internal-server-error)))
+                (nil? drawing-id)
+                (missing-parameter request "drawing")
+                (nil? store-format)
+                (missing-parameter request "format")
+                (nil? raw-data)
+                (send-error-response "missing body with drawing data" "wrong input" request :bad-request))))
