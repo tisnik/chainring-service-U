@@ -26,9 +26,11 @@
     "Update selected items in the configuration structure."
     [configuration]
     (-> configuration
-        (update-in [:config :verbose]        utils/parse-boolean)
-        (update-in [:config :pretty-print]   utils/parse-boolean)
-        (assoc-in  [:api    :full-prefix]    (full-prefix configuration))))
+        (update-in [:config :verbose]          utils/parse-boolean)
+        (update-in [:config :pretty-print]     utils/parse-boolean)
+        (update-in [:renderer :default_width]  utils/parse-int)
+        (update-in [:renderer :default_height] utils/parse-int)
+        (assoc-in  [:api    :full-prefix]      (full-prefix configuration))))
 
 (defn load-configuration-from-ini
     "Load configuration from the provided INI file and perform conversions
