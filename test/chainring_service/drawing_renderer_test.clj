@@ -1,6 +1,6 @@
 (ns chainring-service.drawing-renderer-test
   (:require [clojure.test :refer :all]
-            [chainring-service.drawing-renderer :refer :all]))
+            [chainring-service.raster-renderer :refer :all]))
 
 ;
 ; Common functions used by tests.
