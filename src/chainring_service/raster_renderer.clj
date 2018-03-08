@@ -33,6 +33,7 @@
 (import javax.imageio.ImageIO)
 
 (defn cache-control-headers
+    "Update the response to contain cache-control headers."
     [response]
     (-> response
         (assoc-in [:headers "Cache-Control"] ["must-revalidate" "no-cache" "no-store"])
@@ -40,6 +41,7 @@
         (assoc-in [:headers "Pragma"] "no-cache")))
 
 (defn png-response
+    "Update the response with the content type valid for PNG images."
     [image-data]
     (-> image-data
         (http-response/response)
@@ -47,20 +49,26 @@
         cache-control-headers))
 
 (defn proper-scale?
+    "Predicate if the given item contains expected width and height attributes."
     [item width height]
     (and (= (:width item)  width)
          (= (:height item) height)))
 
 (defn get-scale
+    "Return scale set up for given width and height values."
     [data width height]
     (let [scales (get data :scales)]
         (first (filter #(proper-scale? % width height) scales))))
 
 (defn transform
+    "Transform x or y coordinate using provided scale and offset."
     [coordinate scale offset]
     (int (* scale (+ coordinate offset))))
 
+; TODO: background color to be read from configuration
+; TODO: foreground color to be read from configuration
 (defn setup-graphics-context
+    "Set up graphics context."
     [image gc width height]
     (let [rh (new RenderingHints RenderingHints/KEY_RENDERING RenderingHints/VALUE_RENDER_QUALITY)]
         (.put rh RenderingHints/KEY_TEXT_ANTIALIASING RenderingHints/VALUE_TEXT_ANTIALIAS_ON)
