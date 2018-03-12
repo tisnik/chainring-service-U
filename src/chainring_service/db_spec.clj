@@ -13,8 +13,10 @@
 (ns chainring-service.db-spec
     "Namespace that contains configuration of all JDBC sources.")
 
+
 (def chainring-db
-    "Specification for SQLite database used for storing info about buldings, floors, and drawings."
+    "Specification for SQLite database used for storing info about buldings, floors, and drawings.
+     This database can be used to store drawings as well (but the system must be configured to do so)."
     {:classname   "org.sqlite.JDBC"
      :subprotocol "sqlite"
      :subname     "chainring.db"
