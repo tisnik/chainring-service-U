@@ -10,14 +10,18 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.vector-renderer)
+(ns chainring-service.vector-renderer
+    "REST API handlers for returning drawings stored on disk.")
+
 
 (require '[ring.util.response    :as http-response])
 (require '[clojure.tools.logging :as log])
 
 (require '[chainring-service.http-utils :as http-utils])
 
+
 (defn send-drawing
+    "Send drawing data to the client."
     [request mime-type extension]
     [request]
     (let [params       (:params request)
@@ -37,13 +41,21 @@
                                    (log/error e)))
                 :else nil)))
 
-(defn vector-drawing
+
+(defn vector-drawing-as-drw
     "REST API handler for the /api/vector-drawing endpoint."
     [request]
     (send-drawing request "text/plain" "drw"))
+
 
 (defn vector-drawing-as-json
     "REST API handler for the /api/vector-drawing-as-json endpoint."
     [request]
     (send-drawing request "application/json" "json"))
+
+
+(defn vector-drawing-as-binary
+    "REST API handler for the /api/vector-drawing-as-binary endpoint."
+    [request]
+    (send-drawing request "application/octet-stream" "bin"))
 
