@@ -1,4 +1,4 @@
-(ns chainring-service.drawing-renderer-test
+(ns chainring-service.raster-renderer-test
   (:require [clojure.test :refer :all]
             [chainring-service.raster-renderer :refer :all]))
 
