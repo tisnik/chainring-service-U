@@ -12,4 +12,4 @@
 #      Pavel Tisnovsky
 #
 
-curl --upload-file $1 "localhost:3000/api/v1/drawing?drawing=$2&format=json"
+curl --upload-file $1 "localhost:3000/api/v1/drawing-data?drawing=$2&format=json"
