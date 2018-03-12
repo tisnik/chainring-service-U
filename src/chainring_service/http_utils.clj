@@ -10,10 +10,13 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.http-utils)
+(ns chainring-service.http-utils
+    "Module that contains several HTTP-related utility functions.")
 
-(require '[ring.util.response      :as http-response])
-(require '[clojure.tools.logging   :as log])
+
+(require '[ring.util.response    :as http-response])
+(require '[clojure.tools.logging :as log])
+
 
 (defn return-file
     "Creates HTTP response containing content of specified file.
@@ -25,3 +28,21 @@
             (-> (http-response/response file)
                 (http-response/content-type content-type))
             (log/error "return-file(): can not access file: " (.getName file)))))
+
+
+(defn cache-control-headers
+    "Update the response to contains all cache-control headers."
+    [response]
+    (-> response
+        (assoc-in [:headers "Cache-Control"] ["must-revalidate" "no-cache" "no-store"])
+        (assoc-in [:headers "Expires"] "0")
+        (assoc-in [:headers "Pragma"] "no-cache")))
+
+
+(defn png-response
+    "Update the response with the content type valid for PNG images."
+    [image-data]
+    (-> image-data
+        (http-response/response)
+        (http-response/content-type "image/png")
+        cache-control-headers))
