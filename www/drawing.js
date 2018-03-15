@@ -174,7 +174,7 @@ function initializePaper(elementId, width, height) {
 }
 
 function downloadDrawingById(drawingId) {
-    var url = "/vector-drawing?drawing-id=" + drawingId;
+    var url = "/vector-drawing-as-drw?drawing-id=" + drawingId;
     callAjax(url, onLoadDrawing);
 }
 
