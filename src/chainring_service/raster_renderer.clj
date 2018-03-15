@@ -13,14 +13,17 @@
 (ns chainring-service.raster-renderer
     "Namespace that contains functions to render drawings into raster images.")
 
+
 (require '[clojure.string        :as str])
 
 (require '[ring.util.response    :as http-response])
 (require '[clojure.tools.logging :as log])
 (require '[clojure.data.json     :as json])
+(require '[clj-utils.utils       :as utils])
 
-(require '[chainring-service.http-utils :as http-utils])
+(require '[chainring-service.http-utils   :as http-utils])
 (require '[chainring-service.db-interface :as db-interface])
+
 
 (import java.awt.Color)
 (import java.awt.Font)
@@ -32,21 +35,6 @@
 (import java.io.ByteArrayOutputStream)
 (import javax.imageio.ImageIO)
 
-(defn cache-control-headers
-    "Update the response to contain cache-control headers."
-    [response]
-    (-> response
-        (assoc-in [:headers "Cache-Control"] ["must-revalidate" "no-cache" "no-store"])
-        (assoc-in [:headers "Expires"] "0")
-        (assoc-in [:headers "Pragma"] "no-cache")))
-
-(defn png-response
-    "Update the response with the content type valid for PNG images."
-    [image-data]
-    (-> image-data
-        (http-response/response)
-        (http-response/content-type "image/png")
-        cache-control-headers))
 
 (defn proper-scale?
     "Predicate if the given item contains expected width and height attributes."
@@ -54,16 +42,19 @@
     (and (= (:width item)  width)
          (= (:height item) height)))
 
+
 (defn get-scale
     "Return scale set up for given width and height values."
     [data width height]
     (let [scales (get data :scales)]
         (first (filter #(proper-scale? % width height) scales))))
 
+
 (defn transform
     "Transform x or y coordinate using provided scale and offset."
-    [coordinate scale offset]
-    (int (* scale (+ coordinate offset))))
+    [coordinate scale offset after-offset]
+    (int (+ after-offset (* scale (+ coordinate offset)))))
+
 
 ; TODO: background color to be read from configuration
 ; TODO: foreground color to be read from configuration
@@ -81,18 +72,20 @@
     (.setColor gc Color/BLACK)
     (.drawRect gc 0 0 (dec width) (dec height)))
 
+
 (defn draw-line
-    [gc entity scale x-offset y-offset]
-    (let [x1 (transform (:x1 entity) scale x-offset)
-          y1 (transform (:y1 entity) scale y-offset)
-          x2 (transform (:x2 entity) scale x-offset)
-          y2 (transform (:y2 entity) scale y-offset)]
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
+    (let [x1 (transform (:x1 entity) scale x-offset user-x-offset)
+          y1 (transform (:y1 entity) scale y-offset user-y-offset)
+          x2 (transform (:x2 entity) scale x-offset user-x-offset)
+          y2 (transform (:y2 entity) scale y-offset user-y-offset)]
           (.drawLine gc x1 y1 x2 y2)))
 
+
 (defn draw-arc
-    [gc entity scale x-offset y-offset]
-    (let [x (transform (:x entity) scale x-offset)
-          y (transform (:y entity) scale y-offset)
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
+    (let [x (transform (:x entity) scale x-offset user-x-offset)
+          y (transform (:y entity) scale y-offset user-y-offset)
           r (int (* scale (:r entity)))
           a1 (:a1 entity)
           a2 (:a2 entity)
@@ -100,23 +93,26 @@
           extent (if (neg? delta) (+ delta 360) delta)]
           (.drawArc gc (- x r) (- y r) (* r 2) (*  r 2) a1 extent)))
 
+
 (defn draw-text
-    [gc entity scale x-offset y-offset]
-    (let [x (transform (:x entity) scale x-offset)
-          y (transform (:y entity) scale y-offset)
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
+    (let [x (transform (:x entity) scale x-offset user-x-offset)
+          y (transform (:y entity) scale y-offset user-y-offset)
           t (:text entity)]
           (.drawString gc t x y)))
 
+
 (defn draw-entities
-    [gc entities scale x-offset y-offset]
+    [gc entities scale x-offset y-offset user-x-offset user-y-offset]
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
         (condp = (:T entity) 
-            "L" (draw-line gc entity scale x-offset y-offset)
-            "A" (draw-arc  gc entity scale x-offset y-offset)
-            "T" (draw-text gc entity scale x-offset y-offset)
+            "L" (draw-line gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "A" (draw-arc  gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "T" (draw-text gc entity scale x-offset y-offset user-x-offset user-y-offset)
                 nil
         )))
+
 
 (defn draw-room-background
     [gc xpoints ypoints background-color]
@@ -125,6 +121,7 @@
                      (int-array ypoints)
                      (count xpoints)))
 
+
 (defn draw-room-contour
     [gc xpoints ypoints foreground-color]
     (.setColor gc foreground-color)
@@ -132,10 +129,12 @@
                      (int-array ypoints)
                      (count xpoints)))
 
+
 (defn draw-selected-room
     [gc xpoints ypoints]
     (draw-room-background gc xpoints ypoints (new Color 1.0 1.0 0.5 0.5))
     (draw-room-contour    gc xpoints ypoints Color/RED))
+
 
 (defn draw-highlighted-room
     [gc xpoints ypoints aoid room-colors]
@@ -145,9 +144,11 @@
           (draw-room-background gc xpoints ypoints background-color)
           (draw-room-contour    gc xpoints ypoints foreground-color)))
 
+
 (defn draw-regular-room
     [gc xpoints ypoints]
     (draw-room-contour gc xpoints ypoints Color/BLUE))
+
 
 (defn coords-in-polygon
     [xpoints ypoints coordsx coordsy]
@@ -155,31 +156,43 @@
         (let [polygon (new Polygon (int-array xpoints) (int-array ypoints) (count xpoints))]
              (.contains polygon (double coordsx) (double coordsy)))))
 
+
 (defn selected-room?
-    [aoid selected transformed-xpoints transformed-ypoints coordsx coordsy]
+    [aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset]
     (or (= aoid selected) (coords-in-polygon transformed-xpoints transformed-ypoints coordsx coordsy)))
+
 
 (defn highlighted-room?
     [aoid room-colors]
     (get room-colors aoid nil))
 
+
 (defn draw-rooms
-    [gc rooms scale x-offset y-offset selected room-colors coordsx coordsy]
+    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
     (.setStroke gc (new BasicStroke 2))
     (doseq [room rooms]
          (let [polygon (:polygon room)
                aoid    (:room_id room)
                xpoints (map first polygon)
                ypoints (map second polygon)
-               transformed-xpoints (map #(transform % scale x-offset) xpoints)
-               transformed-ypoints (map #(transform % scale x-offset) ypoints)]
+               transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
+               transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
                (if (seq xpoints)
                    (cond
-                       (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy)
+                       (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset)
                            (draw-selected-room gc transformed-xpoints transformed-ypoints)
                        (highlighted-room? aoid room-colors)
                            (draw-highlighted-room gc transformed-xpoints transformed-ypoints aoid room-colors)
                        :else (draw-regular-room gc transformed-xpoints transformed-ypoints))))))
+
+
+(defn draw-selection-point
+    [gc x y]
+    (when (and x y)
+          (.setColor gc (new Color 0.0 0.5 0.0))
+          (.drawLine gc (- x 10) y (+ x 10) y)
+          (.drawLine gc x (- y 10) x (+ y 10))))
+
 
 (defn drawing-full-name
     [drawing-id drawing-name]
@@ -188,15 +201,26 @@
         (if drawing-name
             (str "drawings/" drawing-name))))
 
+
+(defn read-drawing-from-json
+    [filename]
+    (let [start-time (System/currentTimeMillis)
+          data       (json/read-str (slurp filename) :key-fn clojure.core/keyword)
+          end-time   (System/currentTimeMillis)]
+          (log/info "JSON loading time (ms):" (- end-time start-time))
+          data))
+
+
 (defn draw-into-image
-    [image drawing-id drawing-name width height selected room-colors coordsx coordsy]
+    [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
+     selected room-colors coordsx coordsy debug]
     (let [full-name  (drawing-full-name drawing-id drawing-name)]
         (if full-name
-        (let [data       (json/read-str (slurp full-name) :key-fn clojure.core/keyword)
+        (let [data       (read-drawing-from-json full-name)
               scale-info (get-scale data width height)
               x-offset   (:xoffset scale-info)
               y-offset   (:yoffset scale-info)
-              scale      (:scale scale-info)
+              scale      (* (:scale scale-info) user-scale)
               entities   (:entities data)
               rooms      (:rooms data)
               gc         (.createGraphics image)]
@@ -212,10 +236,15 @@
             (log/info "selected" selected)
             (log/info "coordsx" coordsx)
             (log/info "coordsy" coordsy)
-            (setup-graphics-context image gc width height)
-            (log/info "gc:" gc)
-            (draw-entities gc entities scale x-offset y-offset)
-            (draw-rooms gc rooms scale x-offset y-offset selected room-colors coordsx coordsy)
+            (log/info "debug" debug)
+            (let [start-time (System/currentTimeMillis)]
+                (setup-graphics-context image gc width height)
+                (log/info "gc:" gc)
+                (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
+                (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                (if debug
+                    (draw-selection-point gc coordsx coordsy))
+                    (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
         )
     )))
 
@@ -228,12 +257,14 @@
 ;;;        boolean selectPozadavek    = "pozadavek".equals(configuration.selectType);                             ]
 ;;;
 
+
 (def occupation-colors
     {"I" {:foreground (new Color 200 100 100)
           :background (new Color 200 100 100 127)}
      "E" {:foreground (new Color 100 100 200)
           :background (new Color 100 100 200 127)}
     })
+
 
 (def room-type-colors
     {1 {:foreground (new Color 200 150 100)
@@ -248,12 +279,14 @@
         :background (new Color 200 200 100 127)}
     })
 
+
 (defn color-for-room-capacity
     [capacity]
     (cond (zero? capacity) {:foreground Color/BLACK :background (new Color 50 50 50 127)}
           (== capacity 1)  {:foreground Color/GRAY :background (new Color 100 100 100 127)}
           (== capacity 2)  {:foreground Color/GRAY :background (new Color 150 150 150 127)}
           :else            {:foreground Color/GRAY :background (new Color 200 200 200 127)}))
+
 
 (defn compute-room-color
     [highlight-groups room]
@@ -263,11 +296,13 @@
             (and (contains? highlight-groups "capacity") (color-for-room-capacity (:capacity room)))
     )))
 
+
 (defn compute-room-colors
     [floor-id version highlight-groups]
     (let [rooms (db-interface/read-sap-room-list floor-id version)]
          (zipmap (map #(:aoid %) rooms)
                  (map #(compute-room-color highlight-groups %) rooms))))
+
 
 (defn perform-raster-drawing
     [request]
@@ -278,9 +313,9 @@
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
           height              (get params "height" 600)
-          user-x-offset       (get params "x-offset")
-          user-y-offset       (get params "y-offset")
-          user-scale          (get params "scale")
+          user-x-offset       (utils/parse-int (get params "x-offset" "0"))
+          user-y-offset       (utils/parse-int (get params "y-offset" "0"))
+          user-scale          (utils/parse-float (get params "scale" "1.0"))
           selected            (get params "selected")
           highlight-p         (get params "highlight")
           highlight-groups    (into #{} (if highlight-p (str/split highlight-p #",")))
@@ -288,17 +323,22 @@
           coordsy             (get params "coordsy")
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
+          debug               (get params "debug" nil)
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           room-colors         (compute-room-colors floor-id version highlight-groups)
           image-output-stream (ByteArrayOutputStream.)]
           (try
-              (draw-into-image image drawing-id drawing-name width height selected room-colors coordsx-f coordsy-f)
+              (draw-into-image image drawing-id drawing-name
+                               width height
+                               user-x-offset user-y-offset user-scale
+                               selected room-colors coordsx-f coordsy-f
+                               debug)
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
           (ImageIO/write image "png" image-output-stream)
-          (let [end-time (System/currentTimeMillis)]
-          (new ByteArrayInputStream (.toByteArray image-output-stream)))))
+          (new ByteArrayInputStream (.toByteArray image-output-stream))))
+
 
 (defn raster-drawing
     "REST API handler for the /api/raster-drawing endpoint."
@@ -308,5 +348,5 @@
           end-time            (System/currentTimeMillis)]
           (log/info "Rendering time (ms):" (- end-time start-time))
           (log/info "Image size (bytes): " (.available input-stream))
-          (png-response input-stream)))
+          (http-utils/png-response input-stream)))
 
