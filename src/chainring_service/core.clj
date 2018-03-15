@@ -13,6 +13,7 @@
 (ns chainring-service.core
     (:gen-class))
 
+
 (require '[ring.adapter.jetty      :as jetty])
 (require '[ring.middleware.params  :as http-params])
 (require '[ring.middleware.cookies :as cookies])
@@ -48,7 +49,8 @@
 
 
 (defn start-server
-    "Start the HTTP server on the specified port."
+    "Start the HTTP server on the specified port.
+     The port is specified as string."
     [port]
     (log/info "Starting the server at the port: " port)
     (jetty/run-jetty app {:port (read-string port)}))
@@ -62,6 +64,7 @@
 
 
 (defn show-configuration
+    "Show the configuration loaded from the standard INI file."
     [configuration]
     (clojure.pprint/pprint configuration))
 
@@ -72,6 +75,7 @@
     (let [all-options  (cli/parse-opts args cli-options)
           options      (all-options :options)
           port         (-> configuration :service :port)]
+          ; perform the selected operation according to CLI options
           (cond (:help options)         (show-help all-options)
                 (:print-config options) (show-configuration configuration)
                 :else                   (start-server    port))))
