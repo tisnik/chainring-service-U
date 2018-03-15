@@ -13,9 +13,11 @@
 (ns chainring-service.html-renderer
     "Module that contains functions used to render HTML pages sent back to the browser.")
 
+
 (require '[hiccup.core  :as hiccup])
 (require '[hiccup.page  :as page])
 (require '[hiccup.form  :as form])
+
 
 (defn render-html-header
     "Renders part of HTML page - the header."
@@ -52,10 +54,12 @@
     ] ; head
 )
 
+
 (defn render-html-footer
     "Renders part of HTML page - the footer."
     []
     [:div "<br /><br />Chainring verze 0.1"])
+
 
 (defn render-navigation-bar-section
     "Renders whole navigation bar."
@@ -85,6 +89,7 @@
         ] ; </div .container-fluid>
 ]); </nav>
 
+
 (defn render-front-page
     "Render front page of this application."
     []
@@ -107,9 +112,11 @@
         ] ; </body>
 ))
 
+
 (defn passive-color-box
     [html-color]
     [:div {:class "color-box" :style (str "background-color:" html-color "; display:inline-block")}])
+
 
 (defn color-box
     [html-color value]
@@ -117,6 +124,7 @@
         (str "document.getElementById('selected-room-color').value='" value "';"
              "document.getElementById('selected-room-color-code').value='" html-color "'")}
         (passive-color-box html-color)])
+
 
 (defn render-settings-page
     [user-id]
@@ -173,6 +181,7 @@
 ; (form/drop-down "class" ["N/A" "Noun" "Verb" "Adjective" "Adverb" "Pronoun" "Preposition" "Conjunction" "Determiner" "Exclamation"])]]
 ; (form/check-box "internal")]]
 
+
 (defn render-db-statistic-page
     [db-stats]
     (page/xhtml
@@ -201,6 +210,7 @@
         ] ; </body>
 ))
 
+
 (defn render-drawings-statistic-page
     [drawings-count json-count]
     (page/xhtml
@@ -222,6 +232,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-drawings-list
     [drawings]
@@ -249,6 +260,7 @@
         ] ; </body>
 ))
 
+
 (defn render-json-list
     [drawings]
     (page/xhtml
@@ -274,6 +286,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-project-list
     [projects]
@@ -304,6 +317,7 @@
         ] ; </body>
 ))
 
+
 (defn render-project-info
     [project-id project-info building-count]
     (page/xhtml
@@ -325,6 +339,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-building-info
     [building-id building-info floor-count]
@@ -414,6 +429,7 @@
         ] ; </body>
 ))
 
+
 (defn render-floor-list
     [project-id building-id project-info building-info floors]
     (page/xhtml
@@ -463,9 +479,11 @@
         ] ; </body>
 ))
 
+
 (defn sap-href
     [room]
     "")
+
 
 (defn render-room-list
     [floor-id floor-info version rooms]
@@ -514,6 +532,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-drawing-list
     "Render page with list of drawings."
@@ -566,6 +585,7 @@
         ] ; </body>
 ))
 
+
 (defn render-drawing-preview
     [drawing-name]
     (page/xhtml
@@ -582,6 +602,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-drawing
     "Render page with drawing."
@@ -704,6 +725,7 @@
         ] ; </body>
 ))
 
+
 (defn render-raster-preview
     [drawing-name]
     (page/xhtml
@@ -719,6 +741,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-error-page
     "Render an error page with a 'back' button."
@@ -736,6 +759,7 @@
             ] ; </div class="container">
         ] ; </body>
 ))
+
 
 (defn render-store-settings-page
     "Render an ino page with a 'back' button."
