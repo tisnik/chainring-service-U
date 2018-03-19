@@ -90,15 +90,15 @@
 
 (defn api-info-handler
     "REST API handler for the /api/{version} endpoint."
-    [request]
-    (let [response {"/"             "the schema"
-                    "/info"         "basic info about the service"
-                    "/liveness"     "check the liveness of the service"
-                    "/readiness"    "check the readiness of the service and all subcomponents"
-                    "/project-list" "list of projects"
-                    "/project"      "project metadata"
-                    "/building"     "building metadata"
-                    "/drawing"      "drawing metadata"}]
+    [request api-prefix]
+    (let [response {(str api-prefix "/")             "the schema"
+                    (str api-prefix "/info")         "basic info about the service"
+                    (str api-prefix "/liveness")     "check the liveness of the service"
+                    (str api-prefix "/readiness")    "check the readiness of the service and all subcomponents"
+                    (str api-prefix "/project-list") "list of projects"
+                    (str api-prefix "/project")      "project metadata"
+                    (str api-prefix "/building")     "building metadata"
+                    (str api-prefix "/drawing")      "drawing metadata"}]
         (send-response response request)))
 
 (defn info-handler
