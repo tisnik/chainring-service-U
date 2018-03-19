@@ -262,16 +262,41 @@
             (send-error-response "send drawing ID as parameter and raw data in the body" "wrong input" request :bad-request)
         )))
 
-(defn deserialize-drawing
-    [request]
-    (let [params     (:params request)
-          drawing-id (get params "drawing")]
-    ))
 
 (defn missing-parameter
     [request parameter]
     (let [message (str "missing required parameter '" parameter "'")]
         (send-error-response message "wrong input" request :bad-request)))
+
+
+(defn try-to-load-drawing
+    "Try to load the drawing from the filesystem."
+    [drawing-id store-format configuration]
+    (let [id        (parse-int drawing-id)
+          directory (-> configuration :drawings :directory)]
+          {"directory" directory}))
+
+
+(defn deserialize-drawing
+    "Deserialize the drawing from the filesystem."
+    [request]
+    (let [params        (:params request)
+          configuration (:configuration request)
+          drawing-id    (get params "drawing")
+          store-format  (get params "format")]
+          (cond (and drawing-id format)
+                (try
+                    (-> (try-to-load-drawing drawing-id store-format configuration)
+                        (send-response request 200))
+                    (catch Exception e
+                        (log/error e)
+                        (send-error-response "exception occured during write" (.getMessage e) request :internal-server-error)))
+                (nil? drawing-id)
+                (missing-parameter request "drawing")
+                (nil? store-format)
+                (missing-parameter request "format")
+    )))
+
 
 (defn try-to-store-drawing
     [drawing-id store-format raw-data configuration]
