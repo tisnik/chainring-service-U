@@ -16,15 +16,15 @@
 (require '[clojure.tools.logging      :as log])
 
 (defn store-drawing-as-json
-    [id directory raw-data]
+    [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.json" directory id)]
         (log/info "Storing into" filename)
-        (spit filename raw-data)))
+        (spit filename drawing-in-json)))
 
 (defn store-drawing-as-edn
-    [id directory raw-data]
+    [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.edn" directory id)
-          data      (json/read-str raw-data :key-fn keyword)]
+          data      (json/read-str drawing-in-json :key-fn keyword)]
         (log/info "Storing into" filename)
         (spit filename data)))
 
@@ -77,9 +77,42 @@
             (.writeDouble fout (:xoffset scale))
             (.writeDouble fout (:yoffset scale)))))
 
+(defn write-line
+    [fout entity]
+    (.writeDouble fout (:x1 entity))
+    (.writeDouble fout (:y1 entity))
+    (.writeDouble fout (:x2 entity))
+    (.writeDouble fout (:y2 entity)))
+
+(defn write-circle
+    [fout entity]
+    (.writeDouble fout (:x entity))
+    (.writeDouble fout (:y entity))
+    (.writeDouble fout (:r  entity)))
+
+(defn write-arc
+    [fout entity]
+    (.writeDouble fout (:x entity))
+    (.writeDouble fout (:y entity))
+    (.writeDouble fout (:r  entity))
+    (.writeDouble fout (:a1 entity))
+    (.writeDouble fout (:a2 entity)))
+
+(defn write-text
+    [fout entity]
+    (.writeDouble fout (:x entity))
+    (.writeDouble fout (:y entity))
+    (.writeInt    fout (count (:text entity)))
+    (.writeBytes  fout (:text entity)))
+
 (defn write-entity
     [fout entity]
-    (.writeByte fout (int (first (:T entity)))))
+    (.writeByte fout (int (first (:T entity))))
+    (condp = (:T entity)
+        "L" (write-line   fout entity)
+        "C" (write-circle fout entity)
+        "A" (write-arc    fout entity)
+        "T" (write-text   fout entity)))
 
 (defn write-entities
     [fout data]
@@ -89,8 +122,14 @@
 
 (defn write-room
     [fout room]
+    (.writeInt fout (:canvas_id room))
+    (.writeInt fout (count (:room_id room)))
+    (.writeBytes fout (:room_id room))
     (let [polygon (:polygon room)]
-        (.writeInt fout (count polygon))))
+        (.writeInt fout (count polygon))
+        (doseq [vertex polygon]
+            (.writeDouble fout (first vertex))
+            (.writeDouble fout (second vertex)))))
 
 (defn write-rooms
     [fout data]
@@ -99,10 +138,10 @@
             (write-room fout room))))
 
 (defn store-drawing-as-binary
-    [id directory raw-data]
+    [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.bin" directory id)]
         (log/info "Storing into" filename)
-        (let [data    (json/read-str raw-data :key-fn keyword)
+        (let [data    (json/read-str drawing-in-json :key-fn keyword)
               fos     (new java.io.FileOutputStream filename)
               fout    (new java.io.DataOutputStream fos)]
               (write-binary-header fout data)
@@ -114,8 +153,9 @@
               (write-rooms         fout data))))
 
 (defn store-drawing-as
-    [id directory store-format raw-data]
+    "Store drawing in selected format."
+    [id directory store-format drawing-in-json]
     (condp = store-format
-        "json"   (store-drawing-as-json   id directory raw-data)
-        "edn"    (store-drawing-as-edn    id directory raw-data)
-        "binary" (store-drawing-as-binary id directory raw-data)))
+        "json"   (store-drawing-as-json   id directory drawing-in-json)
+        "edn"    (store-drawing-as-edn    id directory drawing-in-json)
+        "binary" (store-drawing-as-binary id directory drawing-in-json)))
