@@ -202,6 +202,14 @@
             (str "drawings/" drawing-name))))
 
 
+(defn drawing-full-name-binary
+    [drawing-id drawing-name]
+    (if drawing-id
+        (format (str "drawings/%05d.bin") (Integer/parseInt drawing-id))
+        (if drawing-name
+            (str "drawings/" drawing-name))))
+
+
 (defn read-drawing-from-json
     [filename]
     (let [start-time (System/currentTimeMillis)
@@ -210,6 +218,72 @@
           (log/info "JSON loading time (ms):" (- end-time start-time))
           data))
 
+
+(defn prepare-data-stream
+    [filename]
+    (let [fis (new java.io.FileInputStream filename)]
+        (new java.io.DataInputStream fis)))
+
+(defn draw-into-image-from-binary-data
+    [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
+     selected room-colors coordsx coordsy debug]
+    (if-let [full-name  (drawing-full-name-binary drawing-id drawing-name)]
+        (let [fin            (prepare-data-stream full-name)
+              gc             (.createGraphics image)]
+            (try
+                (let [magic-number   (.readShort fin)
+                      file-version   (.readByte fin)
+                      data-version   (.readByte fin)
+                      created-ms     (.readLong fin)
+                      created        (new java.util.Date created-ms)
+                      entity-count   (.readInt fin)
+                      rooms-count    (.readInt fin)
+                      scales-count   (.readInt fin)
+                      bounds         {:xmin (.readDouble fin)
+                                      :ymin (.readDouble fin)
+                                      :xmax (.readDouble fin)
+                                      :ymax (.readDouble fin)}
+                ]
+                    (assert (= magic-number 0x6502))
+                    (assert (= file-version 1))
+                    (assert (= data-version 1))
+                    (log/info "full drawing name" full-name)
+                    (log/info "magic number " (Integer/toString magic-number 16))
+                    (log/info "file version" file-version)
+                    (log/info "data version" data-version)
+                    (log/info "created (ms)" created-ms)
+                    (log/info "created (ms)" (.toString created))
+                    (log/info "entities" entity-count)
+                    (log/info "rooms"    rooms-count)
+                    (log/info "scales"   scales-count)
+                    (log/info "bounds"   bounds)
+                    (log/info "width" width)
+                    (log/info "height" height)
+                    )
+                (catch Throwable e
+                    (log/error e)
+                    (.close fin)))
+;           (log/info "x-offset" x-offset)
+;           (log/info "y-offset" y-offset)
+;           (log/info "scale:" scale)
+;           (log/info "scale-info:" scale-info)
+;           (log/info "entities:" (count entities))
+;           (log/info "rooms" (count rooms))
+;           (log/info "selected" selected)
+;           (log/info "coordsx" coordsx)
+;           (log/info "coordsy" coordsy)
+;           (log/info "debug" debug)
+            (let [start-time (System/currentTimeMillis)]
+                (setup-graphics-context image gc width height)
+                (log/info "gc:" gc)
+                ;(draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
+                ;(draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                ;(if debug
+                ;    (draw-selection-point gc coordsx coordsy))
+                ;    (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
+                )
+        )
+    ))
 
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
