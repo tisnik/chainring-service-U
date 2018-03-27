@@ -45,17 +45,20 @@
 (defn vector-drawing-as-drw
     "REST API handler for the /api/vector-drawing endpoint."
     [request]
+    ; sent the vector drawing in a 'drw' format
     (send-drawing request "text/plain" "drw"))
 
 
 (defn vector-drawing-as-json
     "REST API handler for the /api/vector-drawing-as-json endpoint."
     [request]
+    ; sent the vector drawing in JSON format
     (send-drawing request "application/json" "json"))
 
 
 (defn vector-drawing-as-binary
     "REST API handler for the /api/vector-drawing-as-binary endpoint."
     [request]
+    ; sent the vector drawing in binary format
     (send-drawing request "application/octet-stream" "bin"))
 
