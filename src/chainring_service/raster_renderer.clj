@@ -21,8 +21,9 @@
 (require '[clojure.data.json     :as json])
 (require '[clj-utils.utils       :as utils])
 
-(require '[chainring-service.http-utils   :as http-utils])
-(require '[chainring-service.db-interface :as db-interface])
+(require '[chainring-service.http-utils      :as http-utils])
+(require '[chainring-service.db-interface    :as db-interface])
+(require '[chainring-service.drawing-storage :as drawing-storage])
 
 
 (import java.awt.Color)
@@ -43,11 +44,16 @@
          (= (:height item) height)))
 
 
+(defn get-scale-from-scales
+    "Return scale set up for given width and height values."
+    [scales width height]
+    (first (filter #(proper-scale? % width height) scales)))
+
+
 (defn get-scale
     "Return scale set up for given width and height values."
     [data width height]
-    (let [scales (get data :scales)]
-        (first (filter #(proper-scale? % width height) scales))))
+    (get-scale-from-scales (get data :scales)))
 
 
 (defn transform
@@ -94,6 +100,14 @@
           (.drawArc gc (- x r) (- y r) (* r 2) (*  r 2) a1 extent)))
 
 
+(defn draw-circle
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
+    (let [x (transform (:x entity) scale x-offset user-x-offset)
+          y (transform (:y entity) scale y-offset user-y-offset)
+          r (int (* scale (:r entity)))]
+          (.drawOval gc (- x r) (- y r) (* r 2) (*  r 2))))
+
+
 (defn draw-text
     [gc entity scale x-offset y-offset user-x-offset user-y-offset]
     (let [x (transform (:x entity) scale x-offset user-x-offset)
@@ -107,11 +121,25 @@
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
         (condp = (:T entity) 
-            "L" (draw-line gc entity scale x-offset y-offset user-x-offset user-y-offset)
-            "A" (draw-arc  gc entity scale x-offset y-offset user-x-offset user-y-offset)
-            "T" (draw-text gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset) 
+            "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset)
                 nil
         )))
+
+(defn draw-entities-from-binary-file
+    [gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset]
+    (.setColor gc Color/BLACK)
+    (doseq [i (range entity-count)]
+        (let [entity (drawing-storage/read-entity-from-binary fin)]
+            (condp = (:T entity) 
+                "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset)
+                "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset) 
+                "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset)
+                "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset)
+                    nil
+            ))))
 
 
 (defn draw-room-background
@@ -186,6 +214,10 @@
                        :else (draw-regular-room gc transformed-xpoints transformed-ypoints))))))
 
 
+(defn draw-rooms-from-binary
+    [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
+    )
+
 (defn draw-selection-point
     [gc x y]
     (when (and x y)
@@ -228,22 +260,18 @@
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy debug]
     (if-let [full-name  (drawing-full-name-binary drawing-id drawing-name)]
-        (let [fin            (prepare-data-stream full-name)
-              gc             (.createGraphics image)]
+        (let [fin       (prepare-data-stream full-name)
+              gc        (.createGraphics image)]
             (try
-                (let [magic-number   (.readShort fin)
-                      file-version   (.readByte fin)
-                      data-version   (.readByte fin)
-                      created-ms     (.readLong fin)
-                      created        (new java.util.Date created-ms)
-                      entity-count   (.readInt fin)
-                      rooms-count    (.readInt fin)
-                      scales-count   (.readInt fin)
-                      bounds         {:xmin (.readDouble fin)
-                                      :ymin (.readDouble fin)
-                                      :xmax (.readDouble fin)
-                                      :ymax (.readDouble fin)}
-                ]
+                (let [[magic-number file-version data-version] (drawing-storage/read-binary-header fin)
+                      [created-ms created]                     (drawing-storage/read-created-time fin)
+                      [entity-count rooms-count scales-count]  (drawing-storage/read-counters fin)
+                      bounds                                   (drawing-storage/read-bounds fin)
+                      scales                                   (drawing-storage/read-scales fin scales-count)
+                      scale-info (get-scale-from-scales scales width height)
+                      x-offset   (:xoffset scale-info)
+                      y-offset   (:yoffset scale-info)
+                      scale      (* (:scale scale-info) user-scale)]
                     (assert (= magic-number 0x6502))
                     (assert (= file-version 1))
                     (assert (= data-version 1))
@@ -257,31 +285,26 @@
                     (log/info "rooms"    rooms-count)
                     (log/info "scales"   scales-count)
                     (log/info "bounds"   bounds)
+                    (log/info "x-offset" x-offset)
+                    (log/info "y-offset" y-offset)
+                    (log/info "scale:" scale)
+                    (log/info "scale-info:" scale-info)
                     (log/info "width" width)
                     (log/info "height" height)
-                    )
+                    (doseq [scale scales]
+                        (log/info "scale" scale))
+                    (let [start-time (System/currentTimeMillis)]
+                        (setup-graphics-context image gc width height)
+                        (log/info "gc:" gc)
+                        (draw-entities-from-binary-file gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset)
+                        (draw-rooms-from-binary gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                        (if debug
+                            (draw-selection-point gc coordsx coordsy))
+                            (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
+                    ))
                 (catch Throwable e
                     (log/error e)
                     (.close fin)))
-;           (log/info "x-offset" x-offset)
-;           (log/info "y-offset" y-offset)
-;           (log/info "scale:" scale)
-;           (log/info "scale-info:" scale-info)
-;           (log/info "entities:" (count entities))
-;           (log/info "rooms" (count rooms))
-;           (log/info "selected" selected)
-;           (log/info "coordsx" coordsx)
-;           (log/info "coordsy" coordsy)
-;           (log/info "debug" debug)
-            (let [start-time (System/currentTimeMillis)]
-                (setup-graphics-context image gc width height)
-                (log/info "gc:" gc)
-                ;(draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
-                ;(draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
-                ;(if debug
-                ;    (draw-selection-point gc coordsx coordsy))
-                ;    (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
-                )
         )
     ))
 
@@ -381,6 +404,8 @@
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
+          configuration       (:configuration request)
+          use-binary?         (-> configuration :drawings :use-binary)
           floor-id            (get params "floor-id")
           version             (get params "version")
           drawing-id          (get params "drawing-id")
@@ -402,11 +427,17 @@
           room-colors         (compute-room-colors floor-id version highlight-groups)
           image-output-stream (ByteArrayOutputStream.)]
           (try
-              (draw-into-image image drawing-id drawing-name
-                               width height
-                               user-x-offset user-y-offset user-scale
-                               selected room-colors coordsx-f coordsy-f
-                               debug)
+              (if use-binary?
+                  (draw-into-image-from-binary-data image drawing-id drawing-name
+                                   width height
+                                   user-x-offset user-y-offset user-scale
+                                   selected room-colors coordsx-f coordsy-f
+                                   debug)
+                  (draw-into-image image drawing-id drawing-name
+                                   width height
+                                   user-x-offset user-y-offset user-scale
+                                   selected room-colors coordsx-f coordsy-f
+                                   debug))
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
