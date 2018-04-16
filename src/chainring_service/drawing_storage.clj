@@ -159,3 +159,84 @@
         "json"   (store-drawing-as-json   id directory drawing-in-json)
         "edn"    (store-drawing-as-edn    id directory drawing-in-json)
         "binary" (store-drawing-as-binary id directory drawing-in-json)))
+
+(defn read-binary-header
+    "Read first four bytes of binary file."
+    [fin]
+    [(.readShort fin)    ; magic number
+     (.readByte  fin)    ; file versions
+     (.readByte  fin)])  ; version
+
+(defn read-created-time
+    "Read info about the creation date of the drawing."
+    [fin]
+    (let [created-ms (.readLong fin)
+          created    (new java.util.Date created-ms)]
+         [created-ms created]))
+
+(defn read-counters
+    [fin]
+    [(.readInt fin)    ; entity count
+     (.readInt fin)    ; rooms count
+     (.readInt fin)])  ; scales
+
+(defn read-bounds
+    [fin]
+    {:xmin (.readDouble fin)
+     :ymin (.readDouble fin)
+     :xmax (.readDouble fin)
+     :ymax (.readDouble fin)})
+
+(defn read-scales
+    [fin scales-count]
+    (for [i (range scales-count)]
+        {:width   (.readInt fin)
+         :height  (.readInt fin)
+         :scale   (.readDouble fin)
+         :xoffset (.readDouble fin)
+         :yoffset (.readDouble fin)}))
+
+(defn read-line-from-binary
+    [fin]
+    {:T "L"
+     :x1 (.readDouble fin)
+     :y1 (.readDouble fin)
+     :x2 (.readDouble fin)
+     :y2 (.readDouble fin)})
+
+(defn read-circle-from-binary
+    [fin]
+    {:T "C"
+     :x (.readDouble fin)
+     :y (.readDouble fin)
+     :r (.readDouble fin)})
+
+(defn read-arc-from-binary
+    [fin]
+    {:T "A"
+     :x  (.readDouble fin)
+     :y  (.readDouble fin)
+     :r  (.readDouble fin)
+     :a1 (.readDouble fin)
+     :a2 (.readDouble fin)})
+
+(defn read-text-from-binary
+    [fin]
+    (let [x (.readDouble fin)
+          y (.readDouble fin)
+          cnt (.readInt fin)
+          byte-array (for [i (range cnt)] (.readByte fin))
+          text (apply str (map char byte-array))]
+          {:T "T"
+           :x x
+           :y y
+           :text text}))
+
+(defn read-entity-from-binary
+    [fin]
+    (let [entity-type (char (.readByte fin))]
+        (condp = entity-type
+            \L (read-line-from-binary fin)
+            \C (read-circle-from-binary fin)
+            \A (read-arc-from-binary fin)
+            \T (read-text-from-binary fin))))
