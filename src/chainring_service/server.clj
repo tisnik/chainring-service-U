@@ -86,10 +86,12 @@
 (defn process-drawings-statistic-page
     [request]
     (let [drawings-count (count (fileutils/filename-list "drawings/" ".drw"))
-          json-count (count (fileutils/filename-list "drawings/" ".json"))]
+          json-count (count (fileutils/filename-list "drawings/" ".json"))
+          binary-count (count (fileutils/filename-list "drawings/" ".bin"))]
         (log/info "drawings counts" drawings-count)
         (log/info "json counts" json-count)
-        (finish-processing request (html-renderer/render-drawings-statistic-page drawings-count json-count))))
+        (log/info "binary counts" binary-count)
+        (finish-processing request (html-renderer/render-drawings-statistic-page drawings-count json-count binary-count))))
 
 (defn process-drawings-list
     [request]
@@ -102,6 +104,12 @@
     (let [jsons (fileutils/file-list "drawings/" ".json")]
         (log/info "json drawings" jsons)
         (finish-processing request (html-renderer/render-json-list jsons))))
+
+(defn process-binary-list
+    [request]
+    (let [binaries (fileutils/file-list "drawings/" ".bin")]
+        (log/info "binary drawings" binaries)
+        (finish-processing request (html-renderer/render-binary-list binaries))))
 
 (defn process-project-list-page
     "Function that prepares data for the page with project list."
@@ -372,6 +380,7 @@
             "/raster-drawing"             (raster-renderer/raster-drawing request)
             "/drawings-list"              (process-drawings-list request)
             "/json-list"                  (process-json-list request)
+            "/binary-list"                (process-binary-list request)
             )))
 
 (defn handler

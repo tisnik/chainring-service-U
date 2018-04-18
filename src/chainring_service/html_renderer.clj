@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.html-renderer
-    "Module that contains functions used to render HTML pages sent back to the browser.")
+    "Module that contains functions used to render HTML pages sent back to the browser.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[hiccup.core  :as hiccup])
@@ -114,11 +116,13 @@
 
 
 (defn passive-color-box
+    "Render 'passive' color box into HTML page."
     [html-color]
     [:div {:class "color-box" :style (str "background-color:" html-color "; display:inline-block")}])
 
 
 (defn color-box
+    "Render 'active' color box into HTML page."
     [html-color value]
     [:a {:href "#" :onclick
         (str "document.getElementById('selected-room-color').value='" value "';"
@@ -127,6 +131,7 @@
 
 
 (defn render-settings-page
+    "Render page with settings/configuration."
     [user-id]
     (page/xhtml
         (render-html-header "/")
@@ -183,6 +188,7 @@
 
 
 (defn render-db-statistic-page
+    "Render page with database statistic."
     [db-stats]
     (page/xhtml
         (render-html-header "/")
@@ -212,7 +218,8 @@
 
 
 (defn render-drawings-statistic-page
-    [drawings-count json-count]
+    "Render page with drawings statistic."
+    [drawings-count json-count binary-count]
     (page/xhtml
         (render-html-header "/")
         [:body
@@ -223,6 +230,7 @@
                     [:tr [:th "Formát"]        [:th "Počet výkresů"] [:th ""]]
                     [:tr [:td "Drw"]           [:td drawings-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
                     [:tr [:td "JSON"]          [:td json-count] [:td [:a {:href "/json-list"} "seznam"]]]
+                    [:tr [:td "Binary"]        [:td binary-count] [:td [:a {:href "/binary-list"} "seznam"]]]
                 ]
                 [:br]
                 (form/form-to [:get "/"]
@@ -235,6 +243,7 @@
 
 
 (defn render-drawings-list
+    "Render page with list of drawings."
     [drawings]
     (page/xhtml
         (render-html-header "/")
@@ -269,6 +278,33 @@
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
                 [:h1 "Seznam výkresů ve formátu JSON"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Výkres"] [:th "Velikost"] [:th {:colspan "2"} "Náhled"]]
+                    (for [drawing drawings]
+                        [:tr [:td (.getName drawing)]
+                             [:td (.length drawing) " B"]
+                             [:td [:a {:href (str "/drawing-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/draw.png"}]]]
+                             [:td [:a {:href (str "/raster-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/image.png"}]]]]
+                    )
+                ]
+                [:br]
+                (form/form-to [:get "/drawings-stats"]
+                    [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
+                )
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+
+(defn render-binary-list
+    [drawings]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 "Seznam výkresů v binárním formátu"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Výkres"] [:th "Velikost"] [:th {:colspan "2"} "Náhled"]]
                     (for [drawing drawings]
