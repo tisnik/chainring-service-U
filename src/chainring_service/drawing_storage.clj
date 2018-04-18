@@ -240,3 +240,22 @@
             \C (read-circle-from-binary fin)
             \A (read-arc-from-binary fin)
             \T (read-text-from-binary fin))))
+
+
+(defn read-room-polygon
+    [fin vertex-count]
+    (for [i (range vertex-count)]
+        [(.readDouble fin) (.readDouble fin)]))
+
+
+(defn read-room-from-binary
+    [fin]
+    (let [canvas-id    (.readInt fin)
+          id-cnt       (.readInt fin) ; length of string
+          byte-array   (for [i (range id-cnt)] (.readByte fin))
+          room-id      (apply str (map char byte-array))
+          vertex-count (.readInt fin)
+          polygon      (read-room-polygon fin vertex-count)]
+          {:canvas_id canvas-id
+           :room_id   room-id
+           :polygon   polygon}))
