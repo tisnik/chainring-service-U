@@ -53,7 +53,7 @@
 (defn get-scale
     "Return scale set up for given width and height values."
     [data width height]
-    (get-scale-from-scales (get data :scales)))
+    (get-scale-from-scales (get data :scales) width height))
 
 
 (defn transform
@@ -195,28 +195,40 @@
     (get room-colors aoid nil))
 
 
+(defn draw-room
+    "Draw room that is passed via the 'room' parameter."
+    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
+    (let [polygon (:polygon room)
+          aoid    (:room_id room)
+          xpoints (map first polygon)
+          ypoints (map second polygon)
+          transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
+          transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
+          (if (seq xpoints)
+              (cond
+                  (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset)
+                      (draw-selected-room gc transformed-xpoints transformed-ypoints)
+                  (highlighted-room? aoid room-colors)
+                      (draw-highlighted-room gc transformed-xpoints transformed-ypoints aoid room-colors)
+                  :else (draw-regular-room gc transformed-xpoints transformed-ypoints)))))
+
+
 (defn draw-rooms
+    "Draw all rooms that are passed via the 'rooms' parameter."
     [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
     (.setStroke gc (new BasicStroke 2))
     (doseq [room rooms]
-         (let [polygon (:polygon room)
-               aoid    (:room_id room)
-               xpoints (map first polygon)
-               ypoints (map second polygon)
-               transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
-               transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
-               (if (seq xpoints)
-                   (cond
-                       (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset)
-                           (draw-selected-room gc transformed-xpoints transformed-ypoints)
-                       (highlighted-room? aoid room-colors)
-                           (draw-highlighted-room gc transformed-xpoints transformed-ypoints aoid room-colors)
-                       :else (draw-regular-room gc transformed-xpoints transformed-ypoints))))))
+        (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)))
 
 
 (defn draw-rooms-from-binary
+    "Draw rooms, data is read from the binary file."
     [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
-    )
+    (.setStroke gc (new BasicStroke 2))
+    (doseq [i (range rooms-count)]
+        (let [room (drawing-storage/read-room-from-binary fin)]
+            (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy))))
+
 
 (defn draw-selection-point
     [gc x y]
@@ -275,24 +287,25 @@
                     (assert (= magic-number 0x6502))
                     (assert (= file-version 1))
                     (assert (= data-version 1))
-                    (log/info "full drawing name" full-name)
-                    (log/info "magic number " (Integer/toString magic-number 16))
-                    (log/info "file version" file-version)
-                    (log/info "data version" data-version)
-                    (log/info "created (ms)" created-ms)
-                    (log/info "created (ms)" (.toString created))
-                    (log/info "entities" entity-count)
-                    (log/info "rooms"    rooms-count)
-                    (log/info "scales"   scales-count)
-                    (log/info "bounds"   bounds)
-                    (log/info "x-offset" x-offset)
-                    (log/info "y-offset" y-offset)
-                    (log/info "scale:" scale)
-                    (log/info "scale-info:" scale-info)
-                    (log/info "width" width)
-                    (log/info "height" height)
-                    (doseq [scale scales]
-                        (log/info "scale" scale))
+                    (when debug
+                          (log/info "full drawing name" full-name)
+                          (log/info "magic number " (Integer/toString magic-number 16))
+                          (log/info "file version" file-version)
+                          (log/info "data version" data-version)
+                          (log/info "created (ms)" created-ms)
+                          (log/info "created (ms)" (.toString created))
+                          (log/info "entities" entity-count)
+                          (log/info "rooms"    rooms-count)
+                          (log/info "scales"   scales-count)
+                          (log/info "bounds"   bounds)
+                          (log/info "x-offset" x-offset)
+                          (log/info "y-offset" y-offset)
+                          (log/info "scale:" scale)
+                          (log/info "scale-info:" scale-info)
+                          (log/info "width" width)
+                          (log/info "height" height)
+                          (doseq [scale scales]
+                              (log/info "scale" scale)))
                     (let [start-time (System/currentTimeMillis)]
                         (setup-graphics-context image gc width height)
                         (log/info "gc:" gc)
@@ -401,6 +414,14 @@
                  (map #(compute-room-color highlight-groups %) rooms))))
 
 
+(defn use-binary-rendering?
+    [use-binary? drawing-name]
+    ; if drawing-name is set, use this name to decide
+    ; otherwise use the settings 'use-binary?'
+    (if drawing-name
+        (.endsWith drawing-name ".bin")
+        use-binary?))
+
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
@@ -427,7 +448,7 @@
           room-colors         (compute-room-colors floor-id version highlight-groups)
           image-output-stream (ByteArrayOutputStream.)]
           (try
-              (if use-binary?
+              (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
                                    width height
                                    user-x-offset user-y-offset user-scale
