@@ -20,6 +20,13 @@ used to specify port on which the service should accepts all HTTP request.
 Usage:
 -p     port number
 --port port number
+-c     print configuration
+--print-config print configuration
+
+
+## Documentation
+
+[Documentation generated for all modules](doc/index.html)
 
 
 ## Examples
@@ -36,7 +43,7 @@ Usage:
 
 ## License
 
-Copyright © 2017 Pavel Tisnovsky
+Copyright © 2017, 2018 Pavel Tisnovsky
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
