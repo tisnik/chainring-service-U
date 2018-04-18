@@ -11,6 +11,9 @@
 ;
 
 (ns chainring-service.core
+    "Core module containing the -main function and the startup code.
+
+    Author: Pavel Tisnovsky"
     (:gen-class))
 
 
@@ -36,7 +39,9 @@
 
 
 ; we need to load the configuration in advance so the 'app' could use it
-(def configuration (config/load-configuration-from-ini "config.ini"))
+(def configuration
+    "Configuration structure that is loaded automatically during the startup."
+    (config/load-configuration-from-ini "config.ini"))
 
 
 (def app
