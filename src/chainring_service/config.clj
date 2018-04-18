@@ -12,7 +12,9 @@
 
 
 (ns chainring-service.config
-    "Configuration loader and parser.")
+    "Configuration loader and parser.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[clj-utils.utils :as utils])
@@ -20,7 +22,7 @@
 
 
 (defn full-prefix
-    "Construct full prefix for REST API endpoints (including API version)."
+    "Construct full prefix for all REST API endpoints (including API version)."
     [configuration]
     (str (-> configuration :api :prefix) "/" (-> configuration :api :version)))
 
