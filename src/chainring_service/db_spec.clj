@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.db-spec
-    "Namespace that contains configuration of all JDBC sources.")
+    "Namespace that contains configuration of all JDBC sources.
+
+    Author: Pavel Tisnovsky")
 
 
 (def chainring-db
