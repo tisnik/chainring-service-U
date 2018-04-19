@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.rest-api
-    "Handler for all REST API calls.")
+    "Handler for all REST API calls.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[ring.util.response         :as http-response])
@@ -28,7 +30,9 @@
 
 
 ; HTTP codes used by several REST API responses
-(def http-codes {
+(def http-codes
+    "HTTP codes used by several REST API responses."
+    {
     :ok                    200
     :bad-request           400
     :not-found             404
