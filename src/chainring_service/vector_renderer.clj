@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.vector-renderer
-    "REST API handlers for returning drawings stored on disk.")
+    "REST API handlers for returning drawings stored on disk.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[ring.util.response    :as http-response])
