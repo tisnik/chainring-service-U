@@ -21,9 +21,10 @@
 (require '[clojure.data.json     :as json])
 (require '[clj-utils.utils       :as utils])
 
-(require '[chainring-service.http-utils      :as http-utils])
-(require '[chainring-service.db-interface    :as db-interface])
-(require '[chainring-service.drawing-storage :as drawing-storage])
+(require '[chainring-service.http-utils       :as http-utils])
+(require '[chainring-service.db-interface     :as db-interface])
+(require '[chainring-service.drawings-storage :as drawings-storage])
+(require '[chainring-service.drawings-cache   :as drawings-cache])
 
 
 (import java.awt.Color)
@@ -132,7 +133,7 @@
     [gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset]
     (.setColor gc Color/BLACK)
     (doseq [i (range entity-count)]
-        (let [entity (drawing-storage/read-entity-from-binary fin)]
+        (let [entity (drawings-storage/read-entity-from-binary fin)]
             (condp = (:T entity) 
                 "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset)
                 "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset) 
@@ -226,7 +227,7 @@
     [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
     (.setStroke gc (new BasicStroke 2))
     (doseq [i (range rooms-count)]
-        (let [room (drawing-storage/read-room-from-binary fin)]
+        (let [room (drawings-storage/read-room-from-binary fin)]
             (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy))))
 
 
@@ -255,12 +256,15 @@
 
 
 (defn read-drawing-from-json
-    [filename]
-    (let [start-time (System/currentTimeMillis)
-          data       (json/read-str (slurp filename) :key-fn clojure.core/keyword)
-          end-time   (System/currentTimeMillis)]
-          (log/info "JSON loading time (ms):" (- end-time start-time))
-          data))
+    ( [filename]
+        (let [start-time (System/currentTimeMillis)
+              data       (json/read-str (slurp filename) :key-fn clojure.core/keyword)
+              end-time   (System/currentTimeMillis)]
+              (log/info "JSON loading time (ms):" (- end-time start-time))
+              data))
+    ( [filename message]
+        (log/info message)
+        (read-drawing-from-json filename)))
 
 
 (defn prepare-data-stream
@@ -275,11 +279,11 @@
         (let [fin       (prepare-data-stream full-name)
               gc        (.createGraphics image)]
             (try
-                (let [[magic-number file-version data-version] (drawing-storage/read-binary-header fin)
-                      [created-ms created]                     (drawing-storage/read-created-time fin)
-                      [entity-count rooms-count scales-count]  (drawing-storage/read-counters fin)
-                      bounds                                   (drawing-storage/read-bounds fin)
-                      scales                                   (drawing-storage/read-scales fin scales-count)
+                (let [[magic-number file-version data-version] (drawings-storage/read-binary-header fin)
+                      [created-ms created]                     (drawings-storage/read-created-time fin)
+                      [entity-count rooms-count scales-count]  (drawings-storage/read-counters fin)
+                      bounds                                   (drawings-storage/read-bounds fin)
+                      scales                                   (drawings-storage/read-scales fin scales-count)
                       scale-info (get-scale-from-scales scales width height)
                       x-offset   (:xoffset scale-info)
                       y-offset   (:yoffset scale-info)
@@ -321,20 +325,29 @@
         )
     ))
 
+(defn get-drawing-data
+    [drawing-id drawing-name use-memory-cache]
+    (when-let [full-name (drawing-full-name drawing-id drawing-name)]
+        (log/info "full drawing name:" full-name)
+        (if (and drawing-id use-memory-cache)
+            (let [data (or (drawings-cache/fetch drawing-id) (read-drawing-from-json full-name "Cache miss, must read JSON"))]
+                 (drawings-cache/store drawing-id data)
+                 data)
+            (read-drawing-from-json full-name "Forced read from JSON"))))
+
+
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy debug]
-    (let [full-name  (drawing-full-name drawing-id drawing-name)]
-        (if full-name
-        (let [data       (read-drawing-from-json full-name)
-              scale-info (get-scale data width height)
+     selected room-colors coordsx coordsy use-memory-cache debug]
+    (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
+        (if data
+        (let [scale-info (get-scale data width height)
               x-offset   (:xoffset scale-info)
               y-offset   (:yoffset scale-info)
               scale      (* (:scale scale-info) user-scale)
               entities   (:entities data)
               rooms      (:rooms data)
               gc         (.createGraphics image)]
-            (log/info "full drawing name:" full-name)
             (log/info "width" width)
             (log/info "height" height)
             (log/info "x-offset" x-offset)
@@ -427,6 +440,7 @@
     (let [params              (:params request)
           configuration       (:configuration request)
           use-binary?         (-> configuration :drawings :use-binary)
+          use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
           version             (get params "version")
           drawing-id          (get params "drawing-id")
@@ -458,6 +472,7 @@
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
+                                   use-memory-cache
                                    debug))
               (catch Exception e
                   (log/error "error during drawing!" e)))
