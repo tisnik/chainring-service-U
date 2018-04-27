@@ -32,12 +32,13 @@
      Other items are stored with string values."
     [configuration]
     (-> configuration
-        (update-in [:config   :verbose]        utils/parse-boolean)
-        (update-in [:config   :pretty-print]   utils/parse-boolean)
-        (update-in [:drawings :use-binary]     utils/parse-boolean)
-        (update-in [:renderer :default_width]  utils/parse-int)
-        (update-in [:renderer :default_height] utils/parse-int)
-        (assoc-in  [:api      :full-prefix]    (full-prefix configuration))))
+        (update-in [:config   :verbose]          utils/parse-boolean)
+        (update-in [:config   :pretty-print]     utils/parse-boolean)
+        (update-in [:drawings :use-binary]       utils/parse-boolean)
+        (update-in [:drawings :use-memory-cache] utils/parse-boolean)
+        (update-in [:renderer :default_width]    utils/parse-int)
+        (update-in [:renderer :default_height]   utils/parse-int)
+        (assoc-in  [:api      :full-prefix]      (full-prefix configuration))))
 
 
 (defn load-configuration-from-ini
