@@ -24,7 +24,8 @@
 
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.config           :as config])
-(require '[chainring-service.drawings-storage :as drawing-storage])
+(require '[chainring-service.drawings-storage :as drawings-storage])
+(require '[chainring-service.drawings-cache   :as drawings-cache])
 
 (use     '[clj-utils.utils])
 
@@ -114,7 +115,8 @@
                     (str api-prefix "/project-list")   "list of projects"
                     (str api-prefix "/project")        "project metadata"
                     (str api-prefix "/building")       "building metadata"
-                    (str api-prefix "/drawing")        "drawing metadata"}]
+                    (str api-prefix "/drawing")        "drawing metadata"
+                    (str api-prefix "/drawings-cache") "drawings cache statistic"}]
         (send-response response request)))
 
 
@@ -283,6 +285,13 @@
          ]
          (send-response response request)))
 
+
+(defn drawings-cache-info-handler
+    "REST API handler for the /api/{version}/drawings-cache endpoint."
+    [request]
+    (let [response {:cache-utilization @drawings-cache/hit-counters
+                    :cache-size (drawings-cache/cache-size)}]
+         (send-response response request)))
 
 (defn store-drawing-raw-data
     "REST API handler for the /api/{version}/drawing-raw-data endpoint."

@@ -340,6 +340,7 @@
             [:put  "drawing-raw-data-to-db"] (rest-api/store-drawing-raw-data request)
             [:get  "drawing-data"]           (rest-api/deserialize-drawing request)
             [:put  "drawing-data"]           (rest-api/serialize-drawing request)
+            [:get  "drawings-cache"]         (rest-api/drawings-cache-info-handler request)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
                                              (rest-api/unknown-endpoint request uri)
         )))
