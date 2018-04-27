@@ -1,6 +1,6 @@
-(ns chainring-service.vector-renderer-test
+(ns chainring-service.vector-drawing-test
   (:require [clojure.test :refer :all]
-            [chainring-service.vector-renderer :refer :all]))
+            [chainring-service.vector-drawing :refer :all]))
 
 ;
 ; Common functions used by tests.

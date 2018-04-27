@@ -1,6 +1,6 @@
-(ns chainring-service.drawing-storage-test
+(ns chainring-service.drawings-storage-test
   (:require [clojure.test :refer :all]
-            [chainring-service.drawing-storage :refer :all]))
+            [chainring-service.drawings-storage :refer :all]))
 
 ;
 ; Common functions used by tests.

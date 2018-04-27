@@ -10,7 +10,7 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.vector-renderer
+(ns chainring-service.vector-drawing
     "REST API handlers for returning drawings stored on disk.
 
     Author: Pavel Tisnovsky")

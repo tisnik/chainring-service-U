@@ -10,7 +10,7 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.drawing-storage)
+(ns chainring-service.drawings-storage)
 
 (require '[clojure.data.json          :as json])
 (require '[clojure.tools.logging      :as log])
