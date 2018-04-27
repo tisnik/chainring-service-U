@@ -22,9 +22,9 @@
 (require '[clojure.tools.logging      :as log])
 (require '[clj-fileutils.fileutils    :as file-utils])
 
-(require '[chainring-service.db-interface    :as db-interface])
-(require '[chainring-service.config          :as config])
-(require '[chainring-service.drawing-storage :as drawing-storage])
+(require '[chainring-service.db-interface     :as db-interface])
+(require '[chainring-service.config           :as config])
+(require '[chainring-service.drawings-storage :as drawing-storage])
 
 (use     '[clj-utils.utils])
 
@@ -106,14 +106,15 @@
 (defn api-info-handler
     "REST API handler for the /api/{version} endpoint."
     [request api-prefix]
-    (let [response {(str api-prefix "/")             "the schema"
-                    (str api-prefix "/info")         "basic info about the service"
-                    (str api-prefix "/liveness")     "check the liveness of the service"
-                    (str api-prefix "/readiness")    "check the readiness of the service and all subcomponents"
-                    (str api-prefix "/project-list") "list of projects"
-                    (str api-prefix "/project")      "project metadata"
-                    (str api-prefix "/building")     "building metadata"
-                    (str api-prefix "/drawing")      "drawing metadata"}]
+    (let [response {(str api-prefix "/")               "the schema"
+                    (str api-prefix "/info")           "basic info about the service"
+                    (str api-prefix "/liveness")       "check the liveness of the service"
+                    (str api-prefix "/readiness")      "check the readiness of the service and all subcomponents"
+                    (str api-prefix "/config")         "actual configuration"
+                    (str api-prefix "/project-list")   "list of projects"
+                    (str api-prefix "/project")        "project metadata"
+                    (str api-prefix "/building")       "building metadata"
+                    (str api-prefix "/drawing")        "drawing metadata"}]
         (send-response response request)))
 
 
@@ -141,6 +142,13 @@
     "REST API handler for the /api/{version}/readiness endpoint."
     [request]
     (let [response {:status "ok"}]
+        (send-response response request)))
+
+
+(defn config-handler
+    "REST API handler for the /api/{version}/config endpoint."
+    [request]
+    (let [response {:configuration (:configuration request)}]
         (send-response response request)))
 
 
@@ -334,7 +342,7 @@
     [drawing-id store-format raw-data configuration]
     (let [id        (parse-int drawing-id)
           directory (-> configuration :drawings :directory)]
-          (drawing-storage/store-drawing-as id directory store-format raw-data)))
+          (drawings-storage/store-drawing-as id directory store-format raw-data)))
 
 
 (defn serialize-drawing
