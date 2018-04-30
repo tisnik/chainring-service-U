@@ -654,7 +654,7 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
                     [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]]
-                    [:table {:id "room_info" :class "hidden table table-stripped table-hover" :style "width:auto;"}
+                    [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"}
                             [:th "Areál"]  [:td (:name project-info)]
                             [:th "AOID"]   [:td (:aoid project-info)]
@@ -735,19 +735,19 @@
                     ]
                     [:td {:class "tools"}
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "icons/viewmag_plus.gif"  :border "0" :onclick "onViewMagPlusClick()"}] "&nbsp;"
-                         [:img {:src "icons/viewmag_minus.gif" :border "0" :onclick "onViewMagMinusClick()"}] "&nbsp;"
-                         [:img {:src "icons/viewmag_1_1.gif"   :border "0" :onclick "onViewMag11Click()"}] "&nbsp;"
-                         [:img {:src "icons/viewmag_fit.gif"   :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
+                         [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:src "icons/viewmag_plus.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:src "icons/viewmag_minus.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Původní měřítko"  :onclick "onViewMag11Click()"}    [:img {:src "icons/viewmag_1_1.gif"}]] "&nbsp;"
+                         ;[:img {:src "icons/viewmag_fit.gif"    :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "icons/arrow1l.gif"       :border "0" :onclick "onArrowLeftClick()"}] "&nbsp;"
-                         [:img {:src "icons/arrow1d.gif"       :border "0" :onclick "onArrowDownClick()"}] "&nbsp;"
-                         [:img {:src "icons/arrow1u.gif"       :border "0" :onclick "onArrowUpClick()"}] "&nbsp;"
-                         [:img {:src "icons/arrow1r.gif"       :border "0" :onclick "onArrowRightClick()"}] "&nbsp;"
-                         [:img {:src "icons/center.gif"        :border "0" :onclick "onCenterViewClick()"}] "&nbsp;"
+                         [:a {:href "#" :title "Posunout doleva"  :onclick "onArrowLeftClick()"}  [:img {:src "icons/arrow1l.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Posunout dolů"    :onclick "onArrowDownClick()"}  [:img {:src "icons/arrow1d.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Posunout nahoru"  :onclick "onArrowUpClick()"}    [:img {:src "icons/arrow1u.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Posunout doprava" :onclick "onArrowRightClick()"} [:img {:src "icons/arrow1r.gif"}]] "&nbsp;"
+                         [:a {:href "#" :title "Vycentrovat"      :onclick "onCenterViewClick()"} [:img {:src "icons/center.gif"}]] "&nbsp;"
                          [:span {:class "tools-spacer"}]
-                         [:img {:src "icons/view_boundary.png" :border "0" :onclick "onViewBoundaryClick()"}] "&nbsp;"
-                         [:img {:src "icons/view_grid.png"     :border "0" :onclick "onViewGridClick()"}] "&nbsp;"
+                         [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
+                         [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
                     ]
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
@@ -763,6 +763,7 @@
 
 
 (defn render-raster-preview
+    "Render page with preview of selected drawing."
     [drawing-name]
     (page/xhtml
         (render-html-header "/")
@@ -798,7 +799,7 @@
 
 
 (defn render-store-settings-page
-    "Render an ino page with a 'back' button."
+    "Render page with setting dialog and a 'back' button."
     []
     (page/xhtml
         (render-html-header "/")
