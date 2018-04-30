@@ -336,29 +336,31 @@
             (read-drawing-from-json full-name "Forced read from JSON"))))
 
 
+(defn offset+scale
+    [data width height user-scale]
+    (let [scale-info (get-scale data width height)
+          x-offset   (:xoffset scale-info)
+          y-offset   (:yoffset scale-info)
+          scale      (* (:scale scale-info) user-scale)]
+          [x-offset y-offset scale]))
+
+
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy use-memory-cache debug]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
-        (let [scale-info (get-scale data width height)
-              x-offset   (:xoffset scale-info)
-              y-offset   (:yoffset scale-info)
-              scale      (* (:scale scale-info) user-scale)
+        (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
               entities   (:entities data)
               rooms      (:rooms data)
               gc         (.createGraphics image)]
-            (log/info "width" width)
-            (log/info "height" height)
-            (log/info "x-offset" x-offset)
-            (log/info "y-offset" y-offset)
+            (log/info "width x height" width height)
+            (log/info "offset" x-offset y-offset)
             (log/info "scale:" scale)
-            (log/info "scale-info:" scale-info)
             (log/info "entities:" (count entities))
             (log/info "rooms" (count rooms))
             (log/info "selected" selected)
-            (log/info "coordsx" coordsx)
-            (log/info "coordsy" coordsy)
+            (log/info "clicked" coordsx coordsy)
             (log/info "debug" debug)
             (let [start-time (System/currentTimeMillis)]
                 (setup-graphics-context image gc width height)
