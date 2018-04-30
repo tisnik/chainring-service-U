@@ -18,26 +18,32 @@ var selectedRoom = null;
 
 function changeXpos(delta) {
     xpos += delta;
+    reloadImage();
 }
 
 function changeYpos(delta) {
     ypos += delta;
+    reloadImage();
 }
 
 function setXpos(value) {
     xpos = value;
+    reloadImage();
 }
 
 function setYpos(value) {
     ypos = value;
+    reloadImage();
 }
 
 function changeScaleBy(mag) {
     scale *= mag;
+    reloadImage();
 }
 
 function resetScale() {
     scale = 1.0;
+    reloadImage();
 }
 
 function onViewMagPlusClick() {
@@ -57,19 +63,19 @@ function onViewMagFitClick() {
 }
 
 function onArrowLeftClick() {
-    changeXpos(-10);
+    changeXpos(-20);
 }
 
 function onArrowRightClick() {
-    changeXpos(10);
+    changeXpos(20);
 }
 
 function onArrowUpClick() {
-    changeYpos(-10);
+    changeYpos(-20);
 }
 
 function onArrowDownClick() {
-    changeYpos(10);
+    changeYpos(20);
 }
 
 function onCenterViewClick() {
@@ -78,9 +84,13 @@ function onCenterViewClick() {
 }
 
 function onViewBoundaryClick() {
+    boundary = !boundary;
+    reloadImage();
 }
 
 function onViewGridClick() {
+    grid = !grid;
+    reloadImage();
 }
 
 function setElementValue(elementId, value) {
@@ -230,6 +240,17 @@ function rasterDrawingHighlight() {
     return url;
 }
 
+function transformation() {
+    return "&x-offset=" + xpos +
+           "&y-offset=" + ypos +
+           "&scale=" + scale;
+}
+
+function otherOptions() {
+    return "&boundary=" + boundary +
+           "&grid=" + grid;
+}
+
 function onImageClick(obj, e) {
     var evt = getEvent(e);
     var boundingRect = obj.getBoundingClientRect();
@@ -249,6 +270,8 @@ function onImageClick(obj, e) {
     console.log(clickedX, clickedY);
     var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
     url += rasterDrawingHighlight();
+    url += transformation();
+    url += otherOptions();
     //console.log(url);
     document.getElementById('drawing').src=url;
 }
@@ -259,6 +282,8 @@ function reloadImage() {
         url += "&selected=" + selectedRoom;
     }
     url += rasterDrawingHighlight();
+    url += transformation();
+    url += otherOptions();
     console.log(url);
     document.getElementById('drawing').src=url;
 }
