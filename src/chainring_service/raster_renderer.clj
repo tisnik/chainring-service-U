@@ -373,6 +373,36 @@
         )
     )))
 
+(defn aoid+selected
+    [rooms scale x-offset user-x-offset y-offset user-y-offset
+     coordsx coordsy]
+     (for [room rooms]
+         (let [polygon (:polygon room)
+               aoid    (:room_id room)
+               xpoints (map first polygon)
+               ypoints (map second polygon)
+               transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
+               transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
+               (if (seq xpoints)
+                   {:aoid aoid
+                    :selected (coords-in-polygon transformed-xpoints transformed-ypoints coordsx coordsy)}
+                   {:aoid aoid
+                    :selected nil}))))
+
+(defn find-room
+    [drawing-id drawing-name width height
+     user-x-offset user-y-offset user-scale coordsx coordsy use-memory-cache]
+    (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
+        (if data
+            (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
+                  rooms      (:rooms data)
+                  aoids      (aoid+selected rooms scale x-offset user-x-offset y-offset user-y-offset coordsx coordsy)]
+                  ; output value
+                  (->> aoids
+                      (filter #(:selected %))
+                      first
+                      :aoid)))))
+
 ;;;{:capacity 0, :occupied_by , :area 15.0
 ;;;
 ;;;        boolean selectArea         = "area".equals(configuration.selectType);
@@ -483,6 +513,40 @@
           (new ByteArrayInputStream (.toByteArray image-output-stream))))
 
 
+(defn perform-find-room
+    [request]
+    (let [params              (:params request)
+          configuration       (:configuration request)
+          use-binary?         (-> configuration :drawings :use-binary)
+          use-memory-cache    (-> configuration :drawings :use-memory-cache)
+          floor-id            (get params "floor-id")
+          version             (get params "version")
+          drawing-id          (get params "drawing-id")
+          drawing-name        (get params "drawing-name")
+          width               (get params "width" 800)
+          height              (get params "height" 600)
+          user-x-offset       (utils/parse-int (get params "x-offset" "0"))
+          user-y-offset       (utils/parse-int (get params "y-offset" "0"))
+          user-scale          (utils/parse-float (get params "scale" "1.0"))
+          coordsx             (get params "coordsx")
+          coordsy             (get params "coordsy")
+          coordsx-f           (if coordsx (Double/parseDouble coordsx))
+          coordsy-f           (if coordsx (Double/parseDouble coordsy))]
+          (try
+              (if (use-binary-rendering? use-binary? drawing-name)
+                  nil
+                 ;(find-room-from-binary-data image drawing-id drawing-name
+                 ;                 width height
+                 ;                 user-x-offset user-y-offset user-scale
+                 ;                 selected room-colors coordsx-f coordsy-f
+                 ;                 debug)
+                  (find-room drawing-id drawing-name
+                             width height
+                             user-x-offset user-y-offset user-scale
+                             coordsx-f coordsy-f use-memory-cache))
+              (catch Exception e
+                  (log/error "error during finding room!" e)))))
+
 (defn raster-drawing
     "REST API handler for the /api/raster-drawing endpoint."
     [request]
@@ -493,3 +557,12 @@
           (log/info "Image size (bytes): " (.available input-stream))
           (http-utils/png-response input-stream)))
 
+(defn find-room-on-drawing
+    [request]
+    (let [start-time          (System/currentTimeMillis)
+          room                (perform-find-room request)
+          end-time            (System/currentTimeMillis)]
+          (log/info "Finding time (ms):" (- end-time start-time))
+          (-> (http-response/response room)
+              (http-response/content-type "text/plain")
+              (http-response/status 200))))
