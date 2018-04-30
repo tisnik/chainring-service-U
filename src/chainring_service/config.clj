@@ -38,6 +38,9 @@
         (update-in [:drawings :use-memory-cache] utils/parse-boolean)
         (update-in [:renderer :default_width]    utils/parse-int)
         (update-in [:renderer :default_height]   utils/parse-int)
+        (update-in [:renderer :grid-size]        utils/parse-int)
+        (update-in [:renderer :grid-color]       utils/parse-color)
+        (update-in [:renderer :boundary-color]   utils/parse-color)
         (assoc-in  [:api      :full-prefix]      (full-prefix configuration))))
 
 
