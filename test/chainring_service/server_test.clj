@@ -15,12 +15,6 @@
 ; Tests for functions existence
 ;
 
-(deftest test-return-file-existence
-    "Check that the chainring-service.server/return-file definition exists."
-    (testing "if the chainring-service.server/return-file definition exists."
-        (is (callable? 'chainring-service.server/return-file))))
-
-
 (deftest test-finish-processing-existence
     "Check that the chainring-service.server/finish-processing definition exists."
     (testing "if the chainring-service.server/finish-processing definition exists."
