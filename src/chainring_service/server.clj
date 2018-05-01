@@ -380,6 +380,7 @@
             "/vector-drawing-as-json"     (vector-drawing/vector-drawing-as-json request)
             "/vector-drawing-as-binary"   (vector-drawing/vector-drawing-as-binary request)
             "/raster-drawing"             (raster-renderer/raster-drawing request)
+            "/find-room-on-drawing"       (raster-renderer/find-room-on-drawing request)
             "/drawings-list"              (process-drawings-list request)
             "/json-list"                  (process-json-list request)
             "/binary-list"                (process-binary-list request)
