@@ -231,6 +231,29 @@
             (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy))))
 
 
+(defn draw-grid
+    [gc width height grid-size grid-color]
+    (.setColor gc grid-color)
+    (.setStroke gc (new BasicStroke 1))
+    (doseq [y (range 0 (inc height) grid-size)]
+        (doseq [x (range 0 (inc width) grid-size)]
+            (.drawLine gc x y x y))))
+            ;(.drawLine gc (dec x) y (inc x) y)
+            ;(.drawLine gc x (dec y) x (inc y)))))
+
+
+(defn draw-boundary
+    [gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color]
+    (.setColor gc boundary-color)
+    (.setStroke gc (new BasicStroke 1))
+    (let [x1 (transform (:xmin bounds) scale x-offset user-x-offset)
+          y1 (transform (:ymin bounds) scale y-offset user-y-offset)
+          x2 (transform (:xmax bounds) scale x-offset user-x-offset)
+          y2 (transform (:ymax bounds) scale y-offset user-y-offset)]
+          (.drawRect gc x1 y1 (- x2 x1) (- y2 y1))
+          (.drawRect gc (+ x1 2) (+ y1 2) (- x2 x1 4) (- y2 y1 4))))
+
+
 (defn draw-selection-point
     [gc x y]
     (when (and x y)
@@ -274,7 +297,7 @@
 
 (defn draw-into-image-from-binary-data
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy debug]
+     selected room-colors coordsx coordsy show-grid show-boundary grid-size grid-color boundary-color debug]
     (if-let [full-name  (drawing-full-name-binary drawing-id drawing-name)]
         (let [fin       (prepare-data-stream full-name)
               gc        (.createGraphics image)]
@@ -347,26 +370,34 @@
 
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy use-memory-cache debug]
+     selected room-colors coordsx coordsy use-memory-cache show-grid show-boundary grid-size grid-color boundary-color debug]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
         (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
               entities   (:entities data)
               rooms      (:rooms data)
+              bounds     (:bounds data)
               gc         (.createGraphics image)]
             (log/info "width x height" width height)
             (log/info "offset" x-offset y-offset)
             (log/info "scale:" scale)
             (log/info "entities:" (count entities))
             (log/info "rooms" (count rooms))
+            (log/info "bounds" bounds)
             (log/info "selected" selected)
             (log/info "clicked" coordsx coordsy)
+            (log/info "grid" show-grid grid-size grid-color)
+            (log/info "boundary" show-boundary)
             (log/info "debug" debug)
             (let [start-time (System/currentTimeMillis)]
                 (setup-graphics-context image gc width height)
                 (log/info "gc:" gc)
+                (if show-grid
+                    (draw-grid gc width height grid-size grid-color))
                 (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
                 (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                (if show-boundary
+                    (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color))
                 (if debug
                     (draw-selection-point gc coordsx coordsy))
                     (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
@@ -467,12 +498,23 @@
         (.endsWith drawing-name ".bin")
         use-binary?))
 
+
+(defn rgb->Color
+    [rgb]
+    (apply #(Color. %1 %2 %3) rgb))
+
+
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
+          grid-size           (-> configuration :renderer :grid-size)
+          grid-rgb            (-> configuration :renderer :grid-color)
+          grid-color          (rgb->Color grid-rgb)
+          boundary-rgb        (-> configuration :renderer :boundary-color)
+          boundary-color      (rgb->Color boundary-rgb)
           floor-id            (get params "floor-id")
           version             (get params "version")
           drawing-id          (get params "drawing-id")
@@ -487,6 +529,8 @@
           highlight-groups    (into #{} (if highlight-p (str/split highlight-p #",")))
           coordsx             (get params "coordsx")
           coordsy             (get params "coordsy")
+          show-grid           (get params "grid")
+          show-boundary       (get params "boundary")
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
           debug               (get params "debug" nil)
@@ -499,12 +543,14 @@
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
+                                   show-grid show-boundary grid-size grid-color boundary-color
                                    debug)
                   (draw-into-image image drawing-id drawing-name
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    use-memory-cache
+                                   show-grid show-boundary grid-size grid-color boundary-color
                                    debug))
               (catch Exception e
                   (log/error "error during drawing!" e)))
