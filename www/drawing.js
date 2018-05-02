@@ -13,37 +13,41 @@ var clickedY = null;
 var roomInfoVisible = true;
 var roomListVisible = true;
 var filtersVisible = true;
+var blipVisible = false;
+
+var debugMode = true;
 
 var selectedRoom = null;
 
+
 function changeXpos(delta) {
     xpos += delta;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function changeYpos(delta) {
     ypos += delta;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function setXpos(value) {
     xpos = value;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function setYpos(value) {
     ypos = value;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function changeScaleBy(mag) {
     scale *= mag;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function resetScale() {
     scale = 1.0;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function onViewMagPlusClick() {
@@ -85,12 +89,17 @@ function onCenterViewClick() {
 
 function onViewBoundaryClick() {
     boundary = !boundary;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function onViewGridClick() {
     grid = !grid;
-    reloadImage();
+    reloadImage(null, null);
+}
+
+function onViewBlip() {
+    blipVisible = !blipVisible;
+    reloadImage(null, null);
 }
 
 function setElementValue(elementId, value) {
@@ -127,7 +136,9 @@ function onLoadDrawing(raw_data) {
 function onLoadDrawingJSON(raw_data) {
     //drawing = JSON.parse(raw_data)
     if (typeof JSON == 'object') {
-        console.log("using JSON.parse() to deserialize drawing");
+        if (debugMode) {
+            console.log("using JSON.parse() to deserialize drawing");
+        }
         drawing = JSON.parse(raw_data);
     }
     else {
@@ -209,6 +220,10 @@ function rasterDrawingUrl(drawing_id, floor_id, version) {
     return "/raster-drawing?drawing-id=" + raster_drawing_id + "&floor-id=" + floor_id+ "&version=" + version;
 }
 
+function findRoomUrl(drawing_id, floor_id, version) {
+    return "/find-room-on-drawing?drawing-id=" + raster_drawing_id + "&floor-id=" + floor_id+ "&version=" + version;
+}
+
 function rasterDrawingHighlight() {
     url = "";
     var highlightRoomType = checkBoxValue("room-type-checkbox");
@@ -248,7 +263,61 @@ function transformation() {
 
 function otherOptions() {
     return "&boundary=" + boundary +
-           "&grid=" + grid;
+           "&grid=" + grid +
+           "&blip=" + blipVisible;
+}
+
+function selectedRoomInUrl() {
+    if (selectedRoom != null) {
+        return "&selected=" + selectedRoom;
+    }
+    else {
+        return "";
+    }
+}
+
+function findRoomOnDrawing(clickedX, clickedY) {
+    if (debugMode) {
+        console.log(clickedX, clickedY);
+    }
+    var url = findRoomUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
+    url += transformation();
+    
+    if (debugMode) {
+        console.log(url);
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, false);
+    xhr.send();
+
+    if (debugMode) {
+        console.log(xhr.status);
+        console.log(xhr.statusText);
+        console.log(xhr.responseText);
+    }
+
+    if (xhr.status == 200 && xhr.statusText == "OK") {
+        if (xhr.responseText == "") {
+            return null;
+        }
+        else {
+            return xhr.responseText;
+        }
+    }
+}
+
+function reloadImage(clickedX, clickedY) {
+    var url = rasterDrawingUrl(drawing_id, floor_id, version);
+    if (clickedX != null && clickedY != null) {
+        url += "&coordsx=" + clickedX + "&coordsy=" + clickedY;
+    }
+    url += selectedRoomInUrl();
+    url += rasterDrawingHighlight();
+    url += transformation();
+    url += otherOptions();
+    console.log(url);
+    document.getElementById('drawing').src=url;
 }
 
 function onImageClick(obj, e) {
@@ -267,31 +336,14 @@ function onImageClick(obj, e) {
         clickedX = evt.offsetX;
         clickedY = evt.offsetY;
     }
-    console.log(clickedX, clickedY);
-    var url = rasterDrawingUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
-    url += rasterDrawingHighlight();
-    url += transformation();
-    url += otherOptions();
-    //console.log(url);
-    document.getElementById('drawing').src=url;
-}
-
-function reloadImage() {
-    var url = rasterDrawingUrl(drawing_id, floor_id, version);
-    if (selectedRoom != null) {
-        url += "&selected=" + selectedRoom;
-    }
-    url += rasterDrawingHighlight();
-    url += transformation();
-    url += otherOptions();
-    console.log(url);
-    document.getElementById('drawing').src=url;
+    selectedRoom = findRoomOnDrawing(clickedX, clickedY);
+    reloadImage(clickedX, clickedY);
 }
 
 function onRoomSelect(aoid) {
     console.log("Selecting room: " + aoid);
     selectedRoom = aoid;
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function checkBoxValue(id) {
@@ -299,19 +351,19 @@ function checkBoxValue(id) {
 }
 
 function roomTypeCheckBoxClicked() {
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function roomCapacityCheckBoxClicked() {
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function roomOccupationCheckBoxClicked() {
-    reloadImage();
+    reloadImage(null, null);
 }
 
 function roomOccupiedByCheckBoxClicked() {
-    reloadImage();
+    reloadImage(null, null);
 }
 
 // Initialize container when document is loaded
