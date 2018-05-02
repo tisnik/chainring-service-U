@@ -187,8 +187,8 @@
 
 
 (defn selected-room?
-    [aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset]
-    (or (= aoid selected) (coords-in-polygon transformed-xpoints transformed-ypoints coordsx coordsy)))
+    [aoid selected]
+    (= aoid selected))
 
 
 (defn highlighted-room?
@@ -198,7 +198,7 @@
 
 (defn draw-room
     "Draw room that is passed via the 'room' parameter."
-    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
+    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
     (let [polygon (:polygon room)
           aoid    (:room_id room)
           xpoints (map first polygon)
@@ -207,7 +207,7 @@
           transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
           (if (seq xpoints)
               (cond
-                  (selected-room? aoid selected transformed-xpoints transformed-ypoints coordsx coordsy user-x-offset user-y-offset)
+                  (selected-room? aoid selected)
                       (draw-selected-room gc transformed-xpoints transformed-ypoints)
                   (highlighted-room? aoid room-colors)
                       (draw-highlighted-room gc transformed-xpoints transformed-ypoints aoid room-colors)
@@ -216,19 +216,19 @@
 
 (defn draw-rooms
     "Draw all rooms that are passed via the 'rooms' parameter."
-    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
+    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
     (.setStroke gc (new BasicStroke 2))
     (doseq [room rooms]
-        (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)))
+        (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors)))
 
 
 (defn draw-rooms-from-binary
     "Draw rooms, data is read from the binary file."
-    [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy]
+    [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
     (.setStroke gc (new BasicStroke 2))
     (doseq [i (range rooms-count)]
         (let [room (drawings-storage/read-room-from-binary fin)]
-            (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy))))
+            (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors))))
 
 
 (defn draw-grid
@@ -337,7 +337,7 @@
                         (setup-graphics-context image gc width height)
                         (log/info "gc:" gc)
                         (draw-entities-from-binary-file gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset)
-                        (draw-rooms-from-binary gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                        (draw-rooms-from-binary gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
                         (if debug
                             (draw-selection-point gc coordsx coordsy))
                             (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
@@ -395,12 +395,12 @@
                 (if show-grid
                     (draw-grid gc width height grid-size grid-color))
                 (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
-                (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors coordsx coordsy)
+                (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
                 (if show-boundary
                     (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color))
                 (if debug
                     (draw-selection-point gc coordsx coordsy))
-                    (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
+                (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
         )
     )))
 
