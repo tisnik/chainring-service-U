@@ -111,6 +111,10 @@
         (log/info "binary drawings" binaries)
         (finish-processing request (html-renderer/render-binary-list binaries))))
 
+(defn process-test
+    [request]
+    (http-utils/return-file "www" "test.html" "text/html"))
+
 (defn process-project-list-page
     "Function that prepares data for the page with project list."
     [request]
@@ -384,6 +388,7 @@
             "/drawings-list"              (process-drawings-list request)
             "/json-list"                  (process-json-list request)
             "/binary-list"                (process-binary-list request)
+            "/test"                       (process-test request)
             )))
 
 (defn handler
