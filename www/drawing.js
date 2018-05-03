@@ -18,6 +18,7 @@ var blipVisible = false;
 var debugMode = true;
 
 var selectedRoom = null;
+var counter = 0;
 
 
 function changeXpos(delta) {
@@ -316,6 +317,8 @@ function reloadImage(clickedX, clickedY) {
     url += rasterDrawingHighlight();
     url += transformation();
     url += otherOptions();
+    url += "&counter=" + counter;
+    counter++;
     console.log(url);
     document.getElementById('drawing').src=url;
 }
