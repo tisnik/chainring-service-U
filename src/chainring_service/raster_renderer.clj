@@ -255,11 +255,12 @@
 
 
 (defn draw-selection-point
-    [gc x y]
+    [gc x y blip-size blip-color]
     (when (and x y)
-          (.setColor gc (new Color 0.0 0.5 0.0))
-          (.drawLine gc (- x 10) y (+ x 10) y)
-          (.drawLine gc x (- y 10) x (+ y 10))))
+          (.setStroke gc (new BasicStroke 1))
+          (.setColor gc blip-color)
+          (.drawLine gc (- x blip-size) y (+ x blip-size) y)
+          (.drawLine gc x (- y blip-size) x (+ y blip-size))))
 
 
 (defn drawing-full-name
@@ -297,10 +298,19 @@
 
 (defn draw-into-image-from-binary-data
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy show-grid show-boundary grid-size grid-color boundary-color debug]
-    (if-let [full-name  (drawing-full-name-binary drawing-id drawing-name)]
-        (let [fin       (prepare-data-stream full-name)
-              gc        (.createGraphics image)]
+     selected room-colors coordsx coordsy show-grid show-boundary show-blips
+     debug configuration]
+    (if-let [full-name        (drawing-full-name-binary drawing-id drawing-name)]
+        (let [fin             (prepare-data-stream full-name)
+              gc              (.createGraphics image)
+              grid-size       (-> configuration :renderer :grid-size)
+              grid-rgb        (-> configuration :renderer :grid-color)
+              grid-color      (utils/rgb->Color grid-rgb)
+              boundary-rgb    (-> configuration :renderer :boundary-color)
+              boundary-color  (utils/rgb->Color boundary-rgb)
+              blip-size       (-> configuration :renderer :blip-size)
+              blip-rgb        (-> configuration :renderer :blip-color)
+              blip-color      (utils/rgb->Color blip-rgb)]
             (try
                 (let [[magic-number file-version data-version] (drawings-storage/read-binary-header fin)
                       [created-ms created]                     (drawings-storage/read-created-time fin)
@@ -338,9 +348,9 @@
                         (log/info "gc:" gc)
                         (draw-entities-from-binary-file gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset)
                         (draw-rooms-from-binary gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
-                        (if debug
-                            (draw-selection-point gc coordsx coordsy))
-                            (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
+                        (if (or debug show-blips)
+                            (draw-selection-point gc coordsx coordsy blip-size blip-color))
+                        (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
                     ))
                 (catch Throwable e
                     (log/error e)
@@ -370,14 +380,24 @@
 
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy use-memory-cache show-grid show-boundary grid-size grid-color boundary-color debug]
+     selected room-colors coordsx coordsy use-memory-cache
+     show-grid show-boundary show-blips
+     debug configuration]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
         (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
-              entities   (:entities data)
-              rooms      (:rooms data)
-              bounds     (:bounds data)
-              gc         (.createGraphics image)]
+              entities        (:entities data)
+              rooms           (:rooms data)
+              bounds          (:bounds data)
+              gc              (.createGraphics image)
+              grid-size       (-> configuration :renderer :grid-size)
+              grid-rgb        (-> configuration :renderer :grid-color)
+              grid-color      (utils/rgb->Color grid-rgb)
+              boundary-rgb    (-> configuration :renderer :boundary-color)
+              boundary-color  (utils/rgb->Color boundary-rgb)
+              blip-size       (-> configuration :renderer :blip-size)
+              blip-rgb        (-> configuration :renderer :blip-color)
+              blip-color      (utils/rgb->Color blip-rgb)]
             (log/info "width x height" width height)
             (log/info "offset" x-offset y-offset)
             (log/info "scale:" scale)
@@ -388,6 +408,7 @@
             (log/info "clicked" coordsx coordsy)
             (log/info "grid" show-grid grid-size grid-color)
             (log/info "boundary" show-boundary)
+            (log/info "blip" show-blips blip-size blip-rgb)
             (log/info "debug" debug)
             (let [start-time (System/currentTimeMillis)]
                 (setup-graphics-context image gc width height)
@@ -398,8 +419,8 @@
                 (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
                 (if show-boundary
                     (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color))
-                (if debug
-                    (draw-selection-point gc coordsx coordsy))
+                (if (or debug show-blips)
+                    (draw-selection-point gc coordsx coordsy blip-size blip-color))
                 (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
         )
     )))
@@ -499,22 +520,12 @@
         use-binary?))
 
 
-(defn rgb->Color
-    [rgb]
-    (apply #(Color. %1 %2 %3) rgb))
-
-
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
-          grid-size           (-> configuration :renderer :grid-size)
-          grid-rgb            (-> configuration :renderer :grid-color)
-          grid-color          (rgb->Color grid-rgb)
-          boundary-rgb        (-> configuration :renderer :boundary-color)
-          boundary-color      (rgb->Color boundary-rgb)
           floor-id            (get params "floor-id")
           version             (get params "version")
           drawing-id          (get params "drawing-id")
@@ -529,8 +540,10 @@
           highlight-groups    (into #{} (if highlight-p (str/split highlight-p #",")))
           coordsx             (get params "coordsx")
           coordsy             (get params "coordsy")
-          show-grid           (get params "grid")
-          show-boundary       (get params "boundary")
+          ; make sure that only 'true' is converted into truth value, nil/false otherwise
+          show-grid           (-> (get params "grid" "false")     utils/parse-boolean)
+          show-boundary       (-> (get params "boundary" "false") utils/parse-boolean)
+          show-blips          (-> (get params "blip" "false")     utils/parse-boolean)
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
           debug               (get params "debug" nil)
@@ -543,15 +556,15 @@
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
-                                   show-grid show-boundary grid-size grid-color boundary-color
-                                   debug)
+                                   show-grid show-boundary show-blips
+                                   debug configuration)
                   (draw-into-image image drawing-id drawing-name
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    use-memory-cache
-                                   show-grid show-boundary grid-size grid-color boundary-color
-                                   debug))
+                                   show-grid show-boundary show-blips
+                                   debug configuration))
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
