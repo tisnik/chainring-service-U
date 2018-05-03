@@ -10,29 +10,42 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.drawings-storage)
+(ns chainring-service.drawings-storage
+    "Drawing serialization and deserialization functions.
+    
+    Author: Pavel Tisnovsky")
+
 
 (require '[clojure.data.json          :as json])
 (require '[clojure.tools.logging      :as log])
 
+
 (defn store-drawing-as-json
+    "Store drawing into a JSON format into selected directory."
     [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.json" directory id)]
         (log/info "Storing into" filename)
         (spit filename drawing-in-json)))
 
+
 (defn store-drawing-as-edn
+    "Store drawing into an EDN format into selected directory."
     [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.edn" directory id)
           data      (json/read-str drawing-in-json :key-fn keyword)]
         (log/info "Storing into" filename)
         (spit filename data)))
 
+; ---------------------------------------------------------------------------
+; binary file part
+
 (def BINARY_FILE_MAGIC_NUMBER 0x6502)
 (def BINARY_FILE_VERSION 1)
 (def PADDING (int \ ))
 
 (def timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd HH:mm:ss"))
+
+; TODO move into clj-calendar library
 
 (defn string->date
     [data]
@@ -138,6 +151,7 @@
             (write-room fout room))))
 
 (defn store-drawing-as-binary
+    "Store drawing into binary format into selected directory."
     [id directory drawing-in-json]
     (let [filename  (format "%s/%05d.bin" directory id)]
         (log/info "Storing into" filename)
@@ -233,6 +247,7 @@
            :text text}))
 
 (defn read-entity-from-binary
+    "Read one entity from the binary file."
     [fin]
     (let [entity-type (char (.readByte fin))]
         (condp = entity-type
@@ -243,12 +258,14 @@
 
 
 (defn read-room-polygon
+    "Read polygon (for room) from the binary file."
     [fin vertex-count]
     (for [i (range vertex-count)]
         [(.readDouble fin) (.readDouble fin)]))
 
 
 (defn read-room-from-binary
+    "Read room info from the binary file."
     [fin]
     (let [canvas-id    (.readInt fin)
           id-cnt       (.readInt fin) ; length of string
