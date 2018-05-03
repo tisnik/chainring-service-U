@@ -41,6 +41,8 @@
         (update-in [:renderer :grid-size]        utils/parse-int)
         (update-in [:renderer :grid-color]       utils/parse-color)
         (update-in [:renderer :boundary-color]   utils/parse-color)
+        (update-in [:renderer :blip-color]       utils/parse-color)
+        (update-in [:renderer :blip-size]        utils/parse-int)
         (assoc-in  [:api      :full-prefix]      (full-prefix configuration))))
 
 
