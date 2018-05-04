@@ -27,3 +27,26 @@
 ; Tests for functions existence
 ;
 
+(deftest test-start-server-existence
+    "Check that the chainring-service.core/start-server definition exists."
+    (testing "if the chainring-service.core/start-server definition exists."
+        (is (callable? 'chainring-service.core/start-server))))
+
+
+(deftest test-show-help-existence
+    "Check that the chainring-service.core/show-help definition exists."
+    (testing "if the chainring-service.core/show-help definition exists."
+        (is (callable? 'chainring-service.core/show-help))))
+
+
+(deftest test-show-configuration-existence
+    "Check that the chainring-service.core/show-configuration definition exists."
+    (testing "if the chainring-service.core/show-configuration definition exists."
+        (is (callable? 'chainring-service.core/show-configuration))))
+
+
+(deftest test--main-existence
+    "Check that the chainring-service.core/-main definition exists."
+    (testing "if the chainring-service.core/-main definition exists."
+        (is (callable? 'chainring-service.core/-main))))
+
