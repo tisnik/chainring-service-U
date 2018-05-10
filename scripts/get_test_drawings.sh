@@ -12,13 +12,14 @@
 #      Pavel Tisnovsky
 #
 
+wget -O drawing00.png 'http://localhost:3000/raster-drawing?drawing-id=1&floor-id=1&version=C'
 wget -O drawing01.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C'
-wget -O drawing02.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&selected=HOST.10.0P.10'
+wget -O drawing02.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&selected=HOST.10.1S.03'
 wget -O drawing03.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=occupation'
-wget -O drawing04.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=occupation&selected=HOST.10.0P.10'
+wget -O drawing04.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=occupation&selected=HOST.10.1S.03'
 wget -O drawing05.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=room-type,occupation'
 wget -O drawing06.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=capacity'
-wget -O drawing07.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=capacity&selected=HOST.10.0P.10'
+wget -O drawing07.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&highlight=capacity&selected=HOST.10.1S.03'
 wget -O drawing08.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&scale=0.5'
 wget -O drawing09.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&scale=2'
 wget -O drawing10.png 'http://localhost:3000/raster-drawing?drawing-id=2&floor-id=1&version=C&x-offset=100'
