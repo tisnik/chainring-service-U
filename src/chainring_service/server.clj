@@ -276,6 +276,7 @@
     [request]
     (let [params        (:params request)
           session       (:session request)
+          configuration (:configuration request)
           project-id    (get params "project-id")
           building-id   (get params "building-id")
           floor-id      (get params "floor-id")
@@ -298,7 +299,7 @@
           (log/info "Rooms" rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms) session)
+                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms) session)
                   (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
@@ -345,6 +346,8 @@
             [:get  "drawing-data"]           (rest-api/deserialize-drawing request)
             [:put  "drawing-data"]           (rest-api/serialize-drawing request)
             [:get  "drawings-cache"]         (rest-api/drawings-cache-info-handler request)
+            [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
+            [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
                                              (rest-api/unknown-endpoint request uri)
         )))

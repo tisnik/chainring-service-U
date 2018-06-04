@@ -270,6 +270,37 @@
          (send-response floors request)))
 
 
+(defn get-sap-href
+    [configuration object-type]
+    (condp = object-type
+        "room" (str "SAPEVENT:ROOM_CLICK?" (:param-name-to-sap-room-id configuration) "=")
+        ""))
+
+
+(defn get-sap-selector
+    [uri]
+    (if (.contains uri "/")
+        (subs uri (inc (.lastIndexOf uri "/")))))
+
+
+(defn sap-href-handler
+    "REST API handler for the /api/{version}/sap-href endpoint."
+    [request uri]
+    (let [configuration (-> request :configuration :sap-interface)
+          object-type   (get-sap-selector uri)
+          href          (get-sap-href configuration object-type)]
+          (send-response href request)))
+
+   
+(defn sap-debug-handler
+    "REST API handler for the /api/{version}/sap-debug endpoint."
+    [request uri]
+    (let [params    (:params request)]
+         (log/info "fake SAP handler")
+         (log/info params)
+         (send-response params request)))
+
+
 (defn all-drawings-handler
     "REST API handler for the /api/{version}/drawings endpoint."
     [request uri]
