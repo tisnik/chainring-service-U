@@ -108,9 +108,23 @@ function setElementValue(elementId, value) {
     e.innerText = value;
 }
 
+function getXmlHttpRequest() {
+    if (window.XMLHttpRequest) {
+        // code for IE7+, Firefox, Chrome, Opera, Safari
+        return new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject) {
+        // code for IE6, IE5
+        return new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    else {
+        alert("Your browser does not support XMLHTTP!");
+        return null;
+    }
+}
+
 function callAjax(url, callback) {
-    var xmlHttpRequest = null;
-    xmlHttpRequest = new XMLHttpRequest();
+    var xmlHttpRequest = getXmlHttpRequest();
     xmlHttpRequest.onreadystatechange = function() {
         if (xmlHttpRequest.readyState == 4) {
             if (xmlHttpRequest.status == 200) {
@@ -288,7 +302,7 @@ function findRoomOnDrawing(clickedX, clickedY) {
         console.log(url);
     }
 
-    var xhr = new XMLHttpRequest();
+    var xhr = getXmlHttpRequest();
     xhr.open("GET", url, false);
     xhr.send();
 
