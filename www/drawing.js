@@ -337,6 +337,53 @@ function reloadImage(clickedX, clickedY) {
     document.getElementById('drawing').src=url;
 }
 
+function printSelectedRoom(selectedRoom) {
+    element = document.getElementById("selected_room");
+    if (selectedRoom != null) {
+        element.innerText = selectedRoom;
+    }
+    else {
+        element.innerText = "?";
+    }
+}
+
+function clickOnSapHref()
+{
+    var xmlhttp;
+    xmlhttp = getXmlHttpRequest();
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4)
+        {
+            var sapHref = xmlhttp.responseText;
+            if (sapHref.indexOf('"') === 0) {
+                sapHref = sapHref.substring(1 + sapHref.indexOf('"'), sapHref.lastIndexOf('"'));
+            }
+
+            // alert(sapHref);
+            console.log(sapHref);
+
+            // vytvoreni odkazu ve vybranem elementu
+            var hrefElement = document.getElementById("sap_href");
+            hrefElement.href = sapHref + selectedRoom;
+            console.log(hrefElement.href);
+
+            // simulace kliku na odkaz "SAP"
+            hrefElement.click();
+        }
+    }
+    // ziskame specialni URL vedouci do SAPu
+    console.log(sap_url);
+    xmlhttp.open("GET", "/api/v1/sap-href/room", true);
+    xmlhttp.send(null);
+}
+
+function selectRoomInSap(aoid) {
+    console.log("selectRoomInSap");
+    console.log(aoid);
+    setTimeout("clickOnSapHref()", 500);
+}
+
 function onImageClick(obj, e) {
     var evt = getEvent(e);
     var boundingRect = obj.getBoundingClientRect();
@@ -354,12 +401,20 @@ function onImageClick(obj, e) {
         clickedY = evt.offsetY;
     }
     selectedRoom = findRoomOnDrawing(clickedX, clickedY);
+    printSelectedRoom(selectedRoom);
+    if (sap_enabled) {
+        selectRoomInSap(selectedRoom);
+    }
     reloadImage(clickedX, clickedY);
 }
 
 function onRoomSelect(aoid) {
     console.log("Selecting room: " + aoid);
     selectedRoom = aoid;
+    printSelectedRoom(selectedRoom);
+    if (sap_enabled) {
+        selectRoomInSap(selectedRoom);
+    }
     reloadImage(null, null);
 }
 
