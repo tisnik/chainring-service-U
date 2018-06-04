@@ -668,19 +668,28 @@
                             [:th "AOID"]   [:td (:aoid project-info)]
                             [:td [:a {:title "Podrobnější informace o areálu"
                                       :href (str "project-info?project-id=" project-id)}
-                                      [:img {:src "icons/info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]
+                            [:td [:a {:title "Vybrat jiný areál"
+                                      :href "/project-list"}
+                                      [:img {:src "icons/view-list-tree.png"}]]]]
                         [:tr {:class "vcell"}
                             [:th "Budova"] [:td (:name building-info)]
                             [:th "AOID"]   [:td (:aoid building-info)]
                             [:td [:a {:title "Podrobnější informace o budově"
                                       :href (str "building-info?building-id=" building-id)}
-                                      [:img {:src "icons/info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]
+                            [:td [:a {:title "Vybrat jinou budovu"
+                                      :href (str "/project?project-id=" project-id)}
+                                      [:img {:src "icons/view-list-tree.png"}]]]]
                         [:tr {:class "vcell"}
                             [:th "Podlaží"] [:td (:name floor-info)]
                             [:th "AOID"]   [:td (:aoid floor-info)]
                             [:td [:a {:title "Podrobnější informace o podlaží"
                                       :href (str "floor-info?floor-id=" floor-id)}
-                                      [:img {:src "icons/info.gif"}]]]]
+                                      [:img {:src "icons/info.gif"}]]]
+                            [:td [:a {:title "Vybrat jiné podlaží"
+                                      :href (str "/building?project-id=" project-id "&building-id=" building-id)}
+                                      [:img {:src "icons/view-list-tree.png"}]]]]
                     ]
                     [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]]
                     [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
