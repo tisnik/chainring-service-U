@@ -690,6 +690,13 @@
                             [:td [:a {:title "Vybrat jiné podlaží"
                                       :href (str "/building?project-id=" project-id "&building-id=" building-id)}
                                       [:img {:src "icons/view-list-tree.png"}]]]]
+                        [:tr {:class "vcell"}
+                            [:th "Výkres"] [:td (:name floor-info)]
+                            [:th "AOID"]   [:td (:aoid floor-info)]
+                            [:td "&nbsp;"]
+                            [:td [:a {:title "Vybrat jiný výkres"
+                                      :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
+                                      [:img {:src "icons/view-list-tree.png"}]]]]
                     ]
                     [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]]
                     [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
