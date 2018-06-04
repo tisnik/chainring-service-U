@@ -42,3 +42,26 @@ def access_endpoint(context, url):
 def check_status_code(context, status):
     """Check the HTTP status code returned by the REST API."""
     assert context.response.status_code == status
+
+
+@then('I should get proper JSON data')
+def check_json_data(context):
+    """Check the data returned by the REST API."""
+    assert context.response.json is not None
+
+
+@then('I should find key {key} in received data')
+def check_key_in_json(context, key):
+    """Check the data returned by the REST API."""
+    data = context.response.json()
+    assert data is not None
+    assert key in data, "key {key} can not be found in {keys}".format(key=key, keys=", ".join(data.keys()))
+
+
+@then(u'I should find the value {value} under the key {key}')
+def check_key_and_value_in_json(context, value, key):
+    check_key_in_json(context, key)
+    data = context.response.json()
+    found = data[key]
+    assert found == value, "expected '{expected}', but '{found}' was found instead".format(expected=value, found=found)
+
