@@ -47,6 +47,12 @@
         (if (and options (:drawing-name options))
             [:script (str "var drawing_name = '" (:drawing-name options) "';")]
             [:script "var drawing_name = null;"])
+        (if (and options (:sap-enabled options))
+            [:script "var sap_enabled = true;"]
+            [:script "var sap_enabled = false;"])
+        (if (and options (:sap-url options))
+            [:script (str "var sap_url = '" (:sap-url options) "';")]
+            [:script "var sap_url = null;"])
         (if (and options (:include-raphael? options))
             (page/include-js (str url-prefix "raphael/raphael.min.js")))
         (if (and options (:include-raphael? options))
@@ -642,13 +648,15 @@
 
 (defn render-drawing
     "Render page with drawing."
-    [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
+    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
     (page/xhtml
         ;(render-html-header "/" {:include-raphael? true :drawing-id nil})
         (render-html-header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
-                                 :version "C"})
+                                 :version "C"
+                                 :sap-enabled (-> configuration :sap-interface :enabled)
+                                 :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
@@ -754,6 +762,9 @@
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
                                  :border "0"
                                  :onclick "onImageClick(this, event)"}]]
+                                 ; [:div {:id "sap_href_div" :style "display:none"} "&nbsp;"]
+                                 [:div [:strong "Vybraná místnost: "]
+                                       [:a {:id "sap_href" :name "sap_href"} [:span {:id "selected_room"} "?"]]]
                                  [:div {:style "height:100ex"} "&nbsp;"]]]
                 ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
             ]]
