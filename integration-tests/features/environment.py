@@ -11,7 +11,7 @@ import sys
 import signal
 
 # The following API endpoint is used to check if the system is started
-_API_ENDPOINT = 'api/'
+_API_ENDPOINT = 'api/v1'
 
 
 def _teardown_system(context):
@@ -77,7 +77,12 @@ def before_all(context):
     context.is_running = _is_running
 
     context.api_url = "http://localhost:3000/" + _API_ENDPOINT
-    _restart_system(context)
+
+    start_system_env = os.getenv("START_SYSTEM", "1")
+    context.start_system = start_system_env == "1"
+
+    if context.start_system:
+        _restart_system(context)
 
 
 @capture
@@ -96,7 +101,8 @@ def after_scenario(context, scenario):
 def after_all(context):
     """Perform the cleanup after the last event."""
     try:
-        _teardown_system(context)
+        if context.start_system:
+            _teardown_system(context)
     except subprocess.CalledProcessError as e:
         raise Exception('Failed to teardown system. Command "{c}" failed:\n{o}'.
                         format(c=' '.join(e.cmd), o=e.output))
