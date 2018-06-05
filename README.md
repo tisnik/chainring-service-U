@@ -31,6 +31,12 @@ Usage:
 
 ## Examples
 
+## Integration tests
+
+Integration tests assumes that the example database is used. You can create
+this database by using the script `create_database.sh` that is available in the
+`database` subdirectory.
+
 ...
 
 ### Bugs
