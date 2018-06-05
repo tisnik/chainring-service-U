@@ -1,2 +1,4 @@
 # Order of the features in this file is significant, so shuffle them carefully.
 features/smoketest.feature
+features/common_endpoints.feature
+features/projects.feature
