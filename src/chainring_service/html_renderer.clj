@@ -526,7 +526,8 @@
                          [:th "Podlaží"]
                          [:th "AOID"]
                          [:th "Vytvořeno"]
-                         [:th "Výkresů"]]
+                         [:th "Výkresů"]
+                         [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:id floor)]
                                  [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:id floor))} (:name floor)]]
@@ -638,14 +639,18 @@
                          [:th "AOID"]
                          [:th "Vytvořeno"]
                          [:th "Modifikováno"]
-                         [:th "Verze"]]
+                         [:th "Verze"]
+                         [:th ""]]
                     (for [drawing drawings]
                             [:tr [:td (:id drawing)]
                                  [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&drawing-id=" (:id drawing))} (:name drawing)]]
                                  [:td (:aoid drawing)]
                                  [:td (:created drawing)]
                                  [:td (:modified drawing)]
-                                 [:td (:version drawing)]])
+                                 [:td (:version drawing)]
+                                 [:td [:a {:title "Podrobnější informace o výkresu"
+                                           :href (str "drawing-info?drawing-id=" (:id drawing))}
+                                           [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -719,7 +724,9 @@
                         [:tr {:class "vcell"}
                             [:th "Výkres"] [:td (:name floor-info)]
                             [:th "AOID"]   [:td (:aoid floor-info)]
-                            [:td "&nbsp;"]
+                            [:td [:a {:title "Podrobnější informace o výkresu"
+                                      :href (str "drawing-info?drawing-id=" drawing-id)}
+                                      [:img {:src "icons/info.gif"}]]]
                             [:td [:a {:title "Vybrat jiný výkres"
                                       :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
                                       [:img {:src "icons/view-list-tree.png"}]]]]
