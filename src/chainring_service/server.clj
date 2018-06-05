@@ -178,6 +178,39 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném podlaží")))
               (finish-processing request (html-renderer/render-error-page "Žádné podlaží nebylo vybráno")))))
 
+
+(defn entity-count
+    [entities entity-type]
+    (count (filter #(= entity-type (:T %)) entities)))
+
+(defn prepare-drawing-info
+    [drawing-id drawing-data]
+    (let [entities (:entities drawing-data)]
+        {:entities-count {:all (:entities_count drawing-data)
+                          :lines   (entity-count entities "L")
+                          :circles (entity-count entities "C")
+                          :arcs    (entity-count entities "A")
+                          :texts   (entity-count entities "T")}
+         :rooms-count    (:rooms_count drawing-data)
+         :created        (:created drawing-data)
+         :format-version (:version drawing-data)}))
+
+
+(defn process-drawing-info
+    [request]
+    (let [params                (:params request)
+          drawing-id            (get params "drawing-id")
+          drawing-data          (raster-renderer/get-drawing-data drawing-id nil true)
+          drawing-info          (prepare-drawing-info drawing-id drawing-data)]
+          (log/info "Drawing ID:" drawing-id)
+          (log/info "Drawing info" drawing-info)
+          (if drawing-id
+              (if drawing-info
+                  (finish-processing request (html-renderer/render-drawing-info drawing-id drawing-info))
+                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném výkresu")))
+              (finish-processing request (html-renderer/render-error-page "Žádný výkres nebyl vybrán")))))
+
+
 (defn process-room-list
     [request]
     (let [params     (:params request)
@@ -381,6 +414,7 @@
             "/room-list"                  (process-room-list request)
             "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
+            "/drawing-info"               (process-drawing-info request)
             "/drawing-preview"            (process-drawing-preview-page request)
             "/raster-preview"             (process-raster-preview-page request)
             "/vector-drawing-as-drw"      (vector-drawing/vector-drawing-as-drw request)

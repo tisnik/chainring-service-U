@@ -246,6 +246,7 @@
               (send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
 
+; TODO: filters
 (defn all-projects
     "REST API handler for the /api/{version}/projects endpoint."
     [request uri]
