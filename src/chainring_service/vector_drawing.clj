@@ -23,9 +23,12 @@
 
 
 (defn send-drawing
-    "Send drawing data to the client."
+    "Send drawing data to the client.
+     Accepted parameters:
+         request:   the structure with HTTP request data
+         mime-type: the MIME type is usually set to text/plain or application/json
+         extension: can be almost anything, though 'drw', 'json', and 'bin' is currently used"
     [request mime-type extension]
-    [request]
     (let [params       (:params request)
           drawing-id   (get params "drawing-id")
           drawing-name (get params "drawing-name")]
