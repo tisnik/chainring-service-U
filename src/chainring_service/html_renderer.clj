@@ -421,7 +421,7 @@
                     [:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Počet verzí výkresů"] [:td (get drawing-count :cnt "nelze zjistit")] [:td "&nbsp;"]]
-                    [:tr [:th "Počet místností (stávacící veze)"]
+                    [:tr [:th "Počet místností (stávající veze)"]
                          [:td (get rooms-current-version :cnt "nelze zjistit")]
                          [:td [:a {:title "Seznam mísností"
                                    :href (str "room-list?version=C&floor-id=" floor-id)}
@@ -431,6 +431,32 @@
                          [:td [:a {:title "Seznam mísností"
                                    :href (str "room-list?version=N&floor-id=" floor-id)}
                                    [:img {:src "icons/info.gif"}]]]]
+                ]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+
+(defn render-drawing-info
+    [drawing-id drawing-info]
+    (page/xhtml
+        (render-html-header "/")
+        [:body
+            [:div {:class "container"}
+                (render-navigation-bar-section "/")
+                [:h1 (str "Informace o výkresu '" drawing-id "'")]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "ID výkresu"]      [:td drawing-id] [:td "&nbsp;"]]
+                    [:tr [:th "Vytvořeno"]       [:td (:created drawing-info)]]
+                    [:tr [:th "Verze formátu"]   [:td (:format-version drawing-info)]]
+                    [:tr [:th "Počet místností"] [:td (:rooms-count drawing-info)]]
+                    [:tr [:th "Celkový počet entit"] [:td (-> drawing-info :entities-count :all)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;úseček"]  [:td (-> drawing-info :entities-count :lines)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;kružnic"] [:td (-> drawing-info :entities-count :circles)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;oblouků"] [:td (-> drawing-info :entities-count :arcs)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;textů"]   [:td (-> drawing-info :entities-count :texts)]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
