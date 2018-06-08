@@ -499,7 +499,7 @@
     [highlight-groups room]
     (if highlight-groups
         (or (and (contains? highlight-groups "occupation") (get occupation-colors (:occupation room)))
-            (and (contains? highlight-groups "room-type")  (get room-type-colors  (:room_type room)))
+            (and (contains? highlight-groups "room_type")  (get room-type-colors  (:room_type room)))
             (and (contains? highlight-groups "capacity") (color-for-room-capacity (:capacity room)))
     )))
 
