@@ -64,6 +64,11 @@
                   "read-project-list"))
 
 
+(defn read-project-id
+    [project-aoid]
+    (simple-query-selector ["select id from project where aoid=?" project-aoid] :id "read-project-id"))
+
+
 (defn read-project-name
     "Read project name for given project ID.
      Nil is returned in case of any error."
@@ -95,6 +100,11 @@
                   "read-all-buildings"))
 
 
+(defn read-building-id
+    [building-aoid]
+    (simple-query-selector ["select id from building where aoid=?" building-aoid] :id "read-building-id"))
+
+
 (defn read-building-list
     "Read list of buildings for given project ID.
      Empty sequence might be returned in case of any error or when the project has no buildings yet."
@@ -118,11 +128,21 @@
         (simple-query ["select * from building where id=?" building-id] "read-building-info")))
 
 
+(defn read-floor-id
+    [floor-aoid]
+    (simple-query-selector ["select id from floor where aoid=?" floor-aoid] :id "read-floor-id"))
+
+
 (defn read-floor-count-for-building
     "Read number of floors for selected building."
     [building-id]
     (if building-id
         (simple-query ["select count(*) as cnt from floor where building=?" building-id] "read-floor-count-for-building")))
+
+
+(defn read-drawing-id
+    [drawing-aoid]
+    (simple-query-selector ["select id from drawing where aoid=? and version=1" drawing-aoid] :id "read-drawing-id"))
 
 
 (defn read-drawing-count-for-floor
