@@ -761,6 +761,70 @@
     ])
 
 
+(defn render-filters-header
+    "Render header for room filters part."
+    []
+    [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]])
+
+
+(defn render-filters
+    "Render room filters part."
+    []
+    [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
+        [:tr {:class "vcell"}
+            [:td "Typ"]
+            [:td (form/check-box {:onclick "roomTypeCheckBoxClicked();"} "room-type-checkbox")]
+            [:td (passive-color-box "rgb(200,150,100)") "Kancelář" [:br]
+                 (passive-color-box "rgb(100,150,200)") "Chodba" [:br]
+                 (passive-color-box "rgb(200,140,200)") "Hala" [:br]
+                 (passive-color-box "rgb(100,200,200)") "WC" [:br]
+                 (passive-color-box "rgb(200,200,100)") "Technická místnost" [:br]
+                 ]
+        [:tr {:class "vcell"}
+            [:td "Kapacita"]
+            [:td (form/check-box {:onclick "roomCapacityCheckBoxClicked();"} "room-capacity-checkbox")]
+            [:td (passive-color-box "rgb(50,50,50)") "0" [:br]
+                 (passive-color-box "rgb(100,100,100)") "1" [:br]
+                 (passive-color-box "rgb(150,150,150)") "2" [:br]
+                 (passive-color-box "rgb(200,200,200)") "&gt;2" [:br]
+            ]
+        ]
+        [:tr {:class "vcell"}
+            [:td "Obsazení"]
+            [:td (form/check-box {:onclick "roomOccupationCheckBoxClicked();"} "room-ocupation-checkbox")]
+            [:td (passive-color-box "rgb(200,100,100)") "interní" [:br]
+                 (passive-color-box "rgb(100,100,200)") "externí" [:br]
+            ]
+        ]
+        [:tr {:class "vcell"}
+            [:td "Nájemce"]
+            [:td (form/check-box {:onclick "roomOccupiedByCheckBoxClicked();"} "room-occupied-by-checkbox")]
+            ]
+        ]])
+
+
+(defn render-view-tools
+    "Render all view tools with icons and help."
+    []
+    [:td {:class "tools"}
+         [:span {:class "tools-spacer"}]
+         [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:src "icons/viewmag_plus.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:src "icons/viewmag_minus.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Původní měřítko"  :onclick "onViewMag11Click()"}    [:img {:src "icons/viewmag_1_1.gif"}]] "&nbsp;"
+         ;[:img {:src "icons/viewmag_fit.gif"    :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
+         [:span {:class "tools-spacer"}]
+         [:a {:href "#" :title "Posunout doleva"  :onclick "onArrowLeftClick()"}  [:img {:src "icons/arrow1l.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout dolů"    :onclick "onArrowDownClick()"}  [:img {:src "icons/arrow1d.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout nahoru"  :onclick "onArrowUpClick()"}    [:img {:src "icons/arrow1u.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout doprava" :onclick "onArrowRightClick()"} [:img {:src "icons/arrow1r.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Vycentrovat"      :onclick "onCenterViewClick()"} [:img {:src "icons/center.gif"}]] "&nbsp;"
+         [:span {:class "tools-spacer"}]
+         [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]]
+    ])
+
+
 (defn render-drawing
     "Render page with drawing."
     [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
@@ -780,57 +844,12 @@
                     (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info)
                     (render-room-list-header)
                     (render-room-list rooms)])
-                    [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]]
-                    [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
-                        [:tr {:class "vcell"}
-                            [:td "Typ"]
-                            [:td (form/check-box {:onclick "roomTypeCheckBoxClicked();"} "room-type-checkbox")]
-                            [:td (passive-color-box "rgb(200,150,100)") "Kancelář" [:br]
-                                 (passive-color-box "rgb(100,150,200)") "Chodba" [:br]
-                                 (passive-color-box "rgb(200,140,200)") "Hala" [:br]
-                                 (passive-color-box "rgb(100,200,200)") "WC" [:br]
-                                 (passive-color-box "rgb(200,200,100)") "Technická místnost" [:br]
-                                 ]
-                        [:tr {:class "vcell"}
-                            [:td "Kapacita"]
-                            [:td (form/check-box {:onclick "roomCapacityCheckBoxClicked();"} "room-capacity-checkbox")]
-                            [:td (passive-color-box "rgb(50,50,50)") "0" [:br]
-                                 (passive-color-box "rgb(100,100,100)") "1" [:br]
-                                 (passive-color-box "rgb(150,150,150)") "2" [:br]
-                                 (passive-color-box "rgb(200,200,200)") "&gt;2" [:br]
-                            ]
-                        ]
-                        [:tr {:class "vcell"}
-                            [:td "Obsazení"]
-                            [:td (form/check-box {:onclick "roomOccupationCheckBoxClicked();"} "room-ocupation-checkbox")]
-                            [:td (passive-color-box "rgb(200,100,100)") "interní" [:br]
-                                 (passive-color-box "rgb(100,100,200)") "externí" [:br]
-                            ]
-                        ]
-                        [:tr {:class "vcell"}
-                            [:td "Nájemce"]
-                            [:td (form/check-box {:onclick "roomOccupiedByCheckBoxClicked();"} "room-occupied-by-checkbox")]
-                            ]
-                        ]
+                    (render-filters-header)
+                    (render-filters)
+                    (render-filters-header)
+                    (render-filters)
                     ]
-                    ]
-                    [:td {:class "tools"}
-                         [:span {:class "tools-spacer"}]
-                         [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:src "icons/viewmag_plus.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:src "icons/viewmag_minus.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Původní měřítko"  :onclick "onViewMag11Click()"}    [:img {:src "icons/viewmag_1_1.gif"}]] "&nbsp;"
-                         ;[:img {:src "icons/viewmag_fit.gif"    :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
-                         [:span {:class "tools-spacer"}]
-                         [:a {:href "#" :title "Posunout doleva"  :onclick "onArrowLeftClick()"}  [:img {:src "icons/arrow1l.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Posunout dolů"    :onclick "onArrowDownClick()"}  [:img {:src "icons/arrow1d.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Posunout nahoru"  :onclick "onArrowUpClick()"}    [:img {:src "icons/arrow1u.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Posunout doprava" :onclick "onArrowRightClick()"} [:img {:src "icons/arrow1r.gif"}]] "&nbsp;"
-                         [:a {:href "#" :title "Vycentrovat"      :onclick "onCenterViewClick()"} [:img {:src "icons/center.gif"}]] "&nbsp;"
-                         [:span {:class "tools-spacer"}]
-                         [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
-                         [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
-                         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]]
-                    ]
+                    (render-view-tools)
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
                                  :border "0"
