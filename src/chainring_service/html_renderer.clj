@@ -683,10 +683,82 @@
     [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]])
 
 
+(defn render-floor-info-table
+    "Render info for 'Vybrane podlazi'/'Selected floor'."
+    [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info]
+    [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
+        [:tr {:class "vcell"}
+            [:th "Areál"]  [:td (:name project-info)]
+            [:th "AOID"]   [:td (:aoid project-info)]
+            [:td [:a {:title "Podrobnější informace o areálu"
+                      :href (str "project-info?project-id=" project-id)}
+                      [:img {:src "icons/info.gif"}]]]
+            [:td [:a {:title "Vybrat jiný areál"
+                      :href "/project-list"}
+                      [:img {:src "icons/view-list-tree.png"}]]]]
+        [:tr {:class "vcell"}
+            [:th "Budova"] [:td (:name building-info)]
+            [:th "AOID"]   [:td (:aoid building-info)]
+            [:td [:a {:title "Podrobnější informace o budově"
+                      :href (str "building-info?building-id=" building-id)}
+                      [:img {:src "icons/info.gif"}]]]
+            [:td [:a {:title "Vybrat jinou budovu"
+                      :href (str "/project?project-id=" project-id)}
+                      [:img {:src "icons/view-list-tree.png"}]]]]
+        [:tr {:class "vcell"}
+            [:th "Podlaží"] [:td (:name floor-info)]
+            [:th "AOID"]   [:td (:aoid floor-info)]
+            [:td [:a {:title "Podrobnější informace o podlaží"
+                      :href (str "floor-info?floor-id=" floor-id)}
+                      [:img {:src "icons/info.gif"}]]]
+            [:td [:a {:title "Vybrat jiné podlaží"
+                      :href (str "/building?project-id=" project-id "&building-id=" building-id)}
+                      [:img {:src "icons/view-list-tree.png"}]]]]
+        [:tr {:class "vcell"}
+            [:th "Výkres"] [:td (:name floor-info)]
+            [:th "AOID"]   [:td (:aoid floor-info)]
+            [:td [:a {:title "Podrobnější informace o výkresu"
+                      :href (str "drawing-info?drawing-id=" drawing-id)}
+                      [:img {:src "icons/info.gif"}]]]
+            [:td [:a {:title "Vybrat jiný výkres"
+                      :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
+                      [:img {:src "icons/view-list-tree.png"}]]]]
+    ])
+
+
 (defn render-room-list-header
     "Render header for list of rooms."
     []
     [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]])
+
+
+(defn render-room-list
+    "Render list of rooms."
+    [rooms]
+    [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
+        [:tr {:class "vcell"} [:th "Jméno"]
+             [:th "AOID"]
+             [:th "Platnost<br>od/do"]
+             [:th "Typ"]
+             [:th "Kapacita/<br>plocha"]
+             [:th "Obsazení"]]
+        (for [room rooms]
+                [:tr {:class "vcell"} [:td (:name room)]
+                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:aoid room) "')")} (:aoid room)]]
+                     [:td (:valid_from room) "<br>"
+                          (:valid_to room)]
+                     [:td (:room_type_str room)]
+                     [:td (:capacity room) "<br>"
+                          (:area room) "m<sup>2</sup>"]
+                     [:td (:occupied_by room) "<br>"
+                          (if (= (:occupation room) "I") "interní" "externí")]
+                ])
+        ; not needed, let's use debugger instead for this old part of code
+        ; [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
+        ; [:tr [:td "Scale:"] [:td [:div {:id "scale"} "1"]]]
+        ; [:tr [:td "X-pos:"] [:td [:div {:id "xpos"} "0"]]]
+        ; [:tr [:td "Y-pos:"] [:td [:div {:id "ypos"} "0"]]]
+    ])
 
 
 (defn render-drawing
@@ -705,69 +777,9 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
                     (render-floor-info-header)
-                    [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
-                        [:tr {:class "vcell"}
-                            [:th "Areál"]  [:td (:name project-info)]
-                            [:th "AOID"]   [:td (:aoid project-info)]
-                            [:td [:a {:title "Podrobnější informace o areálu"
-                                      :href (str "project-info?project-id=" project-id)}
-                                      [:img {:src "icons/info.gif"}]]]
-                            [:td [:a {:title "Vybrat jiný areál"
-                                      :href "/project-list"}
-                                      [:img {:src "icons/view-list-tree.png"}]]]]
-                        [:tr {:class "vcell"}
-                            [:th "Budova"] [:td (:name building-info)]
-                            [:th "AOID"]   [:td (:aoid building-info)]
-                            [:td [:a {:title "Podrobnější informace o budově"
-                                      :href (str "building-info?building-id=" building-id)}
-                                      [:img {:src "icons/info.gif"}]]]
-                            [:td [:a {:title "Vybrat jinou budovu"
-                                      :href (str "/project?project-id=" project-id)}
-                                      [:img {:src "icons/view-list-tree.png"}]]]]
-                        [:tr {:class "vcell"}
-                            [:th "Podlaží"] [:td (:name floor-info)]
-                            [:th "AOID"]   [:td (:aoid floor-info)]
-                            [:td [:a {:title "Podrobnější informace o podlaží"
-                                      :href (str "floor-info?floor-id=" floor-id)}
-                                      [:img {:src "icons/info.gif"}]]]
-                            [:td [:a {:title "Vybrat jiné podlaží"
-                                      :href (str "/building?project-id=" project-id "&building-id=" building-id)}
-                                      [:img {:src "icons/view-list-tree.png"}]]]]
-                        [:tr {:class "vcell"}
-                            [:th "Výkres"] [:td (:name floor-info)]
-                            [:th "AOID"]   [:td (:aoid floor-info)]
-                            [:td [:a {:title "Podrobnější informace o výkresu"
-                                      :href (str "drawing-info?drawing-id=" drawing-id)}
-                                      [:img {:src "icons/info.gif"}]]]
-                            [:td [:a {:title "Vybrat jiný výkres"
-                                      :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
-                                      [:img {:src "icons/view-list-tree.png"}]]]]
-                    ]
+                    (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info)
                     (render-room-list-header)
-                    [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
-                        [:tr {:class "vcell"} [:th "Jméno"]
-                             [:th "AOID"]
-                             [:th "Platnost<br>od/do"]
-                             [:th "Typ"]
-                             [:th "Kapacita/<br>plocha"]
-                             [:th "Obsazení"]]
-                        (for [room rooms]
-                                [:tr {:class "vcell"} [:td (:name room)]
-                                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:aoid room) "')")} (:aoid room)]]
-                                     [:td (:valid_from room) "<br>"
-                                          (:valid_to room)]
-                                     [:td (:room_type_str room)]
-                                     [:td (:capacity room) "<br>"
-                                          (:area room) "m<sup>2</sup>"]
-                                     [:td (:occupied_by room) "<br>"
-                                          (if (= (:occupation room) "I") "interní" "externí")]
-                                ])
-                        ; not needed, let's use debugger instead
-                        ; [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]
-                        ; [:tr [:td "Scale:"] [:td [:div {:id "scale"} "1"]]]
-                        ; [:tr [:td "X-pos:"] [:td [:div {:id "xpos"} "0"]]]
-                        ; [:tr [:td "Y-pos:"] [:td [:div {:id "ypos"} "0"]]]
-                    ]
+                    (render-room-list rooms)])
                     [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]]
                     [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"}
