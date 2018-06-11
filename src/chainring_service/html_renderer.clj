@@ -827,29 +827,32 @@
 
 (defn render-drawing
     "Render page with drawing."
-    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
+    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms sap?]
     (page/xhtml
         ;(render-html-header "/" {:include-raphael? true :drawing-id nil})
         (render-html-header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
                                  :version "C"
-                                 :sap-enabled (-> configuration :sap-interface :enabled)
+                                 :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
                                  :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
-                [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
-                    (render-floor-info-header)
-                    (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info)
-                    (render-room-list-header)
-                    (render-room-list rooms)])
-                    (render-filters-header)
-                    (render-filters)
-                    (render-filters-header)
-                    (render-filters)
+                ; 1st row - the whole left toolbar + view tools on the right side
+                [:tr
+                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:150em;" )}
+                        (if (not sap?)
+                            [:span
+                                (render-floor-info-header)
+                                (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info)
+                                (render-room-list-header)
+                                (render-room-list rooms)])
+                        (render-filters-header)
+                        (render-filters)
                     ]
                     (render-view-tools)
+                ; 2nd row - drawing on the right side
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
                                  :border "0"
