@@ -680,7 +680,9 @@
 (defn render-floor-info-header
     "Render header for 'Vybrane podlazi'/'Selected floor'."
     []
-    [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]])
+    [:h4 [:a {:href "#" :onclick "showHideRoomInfo()" :title "Zobrazit či skrýt informace o vybraném podlaží"}
+             [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}]
+             " Vybrané podlaží"]])
 
 
 (defn render-floor-info-table
@@ -729,7 +731,9 @@
 (defn render-room-list-header
     "Render header for list of rooms."
     []
-    [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]])
+    [:h4 [:a {:href "#" :onclick "showHideRoomList()" :title "Zobrazit či skrýt informace o místnostech"}
+             [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}]
+             " Seznam místností"]])
 
 
 (defn render-room-list
@@ -764,7 +768,9 @@
 (defn render-filters-header
     "Render header for room filters part."
     []
-    [:h4 [:a {:href "#" :onclick "showHideFilters()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}] " Filtry"]])
+    [:h4 [:a {:href "#" :onclick "showHideFilters()" :title "Zobrazit či skrýt informace o filtrech"}
+             [:img {:src "icons/1downarrow.gif" :id "show_hide_filters"}]
+             " Filtry"]])
 
 
 (defn render-filters
