@@ -677,6 +677,18 @@
 ))
 
 
+(defn render-floor-info-header
+    "Render header for 'Vybrane podlazi'/'Selected floor'."
+    []
+    [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]])
+
+
+(defn render-room-list-header
+    "Render header for list of rooms."
+    []
+    [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]])
+
+
 (defn render-drawing
     "Render page with drawing."
     [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms]
@@ -692,7 +704,7 @@
             (render-navigation-bar-section "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 [:tr [:td {:rowspan 2 :style "vertical-align:top;width:150em;"}
-                    [:h4 [:a {:href "#" :onclick "showHideRoomInfo()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_info"}] " Vybrané podlaží"]]
+                    (render-floor-info-header)
                     [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"}
                             [:th "Areál"]  [:td (:name project-info)]
@@ -731,7 +743,7 @@
                                       :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
                                       [:img {:src "icons/view-list-tree.png"}]]]]
                     ]
-                    [:h4 [:a {:href "#" :onclick "showHideRoomList()"} [:img {:src "icons/1downarrow.gif" :id "show_hide_room_list"}] " Seznam místností"]]
+                    (render-room-list-header)
                     [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
                         [:tr {:class "vcell"} [:th "Jméno"]
                              [:th "AOID"]
