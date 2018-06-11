@@ -304,6 +304,22 @@
               (finish-processing request (html-renderer/render-raster-preview drawing-name))
               (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
 
+(defn log-process-drawing-info
+    [project-id project-info building-id building-info floor-id floor-info drawing-id drawing-info rooms]
+    (log/info "Project ID:" project-id)
+    (log/info "Project info" project-info)
+    (log/info "Building ID:" building-id)
+    (log/info "Building info" building-info)
+    (log/info "Floor ID:" floor-id)
+    (log/info "Floor info" floor-info)
+    (log/info "Drawing ID:" drawing-id)
+    (log/info "Drawing info" drawing-info)
+    (log/info "Rooms" rooms))
+
+(defn no-drawing-error-page
+    [request]
+    (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
+
 (defn process-drawing-page
     "Function that prepares data for the page with selected drawing."
     [request]
@@ -321,20 +337,48 @@
           rooms         (db-interface/read-sap-room-list floor-id "C")
           session       (assoc session :drawing-id drawing-id)
           ]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
-          (log/info "Building ID:" building-id)
-          (log/info "Building info" building-info)
-          (log/info "Floor ID:" floor-id)
-          (log/info "Floor info" floor-info)
-          (log/info "Drawing ID:" drawing-id)
-          (log/info "Drawing info" drawing-info)
-          (log/info "Rooms" rooms)
+          (log-process-drawing-info project-id project-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms) session)
-                  (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
-              (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
+                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms nil) session)
+                  (no-drawing-error-page request))
+              (no-drawing-error-page request))))
+
+
+(defn process-drawing-from-sap-page
+    "Function that prepares data for the page with selected drawing."
+    [request]
+    (let [params        (:params request)
+          session       (:session request)
+          configuration (:configuration request)
+          project-aoid  (get params "project-aoid")
+          building-aoid (get params "building-aoid")
+          floor-aoid    (get params "floor-aoid")
+          drawing-aoid  (get params "drawing-aoid")
+
+          project-id    (db-interface/read-project-id project-aoid)
+          building-id   (db-interface/read-building-id building-aoid)
+          floor-id      (db-interface/read-floor-id floor-aoid)
+          drawing-id    (db-interface/read-drawing-id drawing-aoid)
+
+          project-info  (db-interface/read-project-info project-id)
+          building-info (db-interface/read-building-info building-id)
+          floor-info    (db-interface/read-floor-info floor-id)
+          drawing-info  (db-interface/read-drawing-info drawing-id)
+          rooms         (db-interface/read-sap-room-list floor-id "C")
+          session       (assoc session :drawing-id drawing-id)
+          ]
+          (log/info "Project AOID:" project-aoid)
+          (log/info "Building AOID:" project-aoid)
+          (log/info "Floor AOID:" floor-aoid)
+          (log/info "Drawing AOID:" drawing-aoid)
+          (log-process-drawing-info project-id project-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
+          (if drawing-id
+              (if drawing-info
+                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms true) session)
+                  (no-drawing-error-page request))
+              (no-drawing-error-page request))))
+
 
 (defn get-api-part-from-uri
     "Get API part (string) from the full URI. The API part string should not starts with /"
@@ -414,6 +458,7 @@
             "/room-list"                  (process-room-list request)
             "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
+            "/drawing-from-sap"           (process-drawing-from-sap-page request)
             "/drawing-info"               (process-drawing-info request)
             "/drawing-preview"            (process-drawing-preview-page request)
             "/raster-preview"             (process-raster-preview-page request)
