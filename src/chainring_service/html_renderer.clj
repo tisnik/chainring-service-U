@@ -832,14 +832,14 @@
 
 
 (defn render-drawing
-    "Render page with drawing."
+    "Render page with drawing on the right side and with configurable toolbar on the left side."
     [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms sap?]
     (page/xhtml
         ;(render-html-header "/" {:include-raphael? true :drawing-id nil})
         (render-html-header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
-                                 :version "C"
+                                 :version "C" ; TODO: how to handle this?
                                  :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
                                  :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
@@ -868,7 +868,7 @@
                                        [:a {:id "sap_href" :name "sap_href"} [:span {:id "selected_room"} "?"]]]
                                  [:div {:style "height:100ex"} "&nbsp;"]]]
                 ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
-            ]]
+            ]] ; </tr> </table>
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
             (render-html-footer)
         ] ; </body>
@@ -876,18 +876,19 @@
 
 
 (defn render-raster-preview
-    "Render page with preview of selected drawing."
+    "Render page with preview of selected drawing.
+    The drawing remains static and it won't be possible to click on rooms."
     [drawing-name]
     (page/xhtml
         (render-html-header "/")
         [:body {:class "body-drawing"}
             [:div {:class "container"}
-            (render-navigation-bar-section "/")
-            [:img {:id "drawing" :src (str "/raster-drawing?drawing-name=" drawing-name) }]
-            [:br]
-            [:br]
-            [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-            (render-html-footer)
+                (render-navigation-bar-section "/")
+                [:img {:id "drawing" :src (str "/raster-drawing?drawing-name=" drawing-name) }]
+                [:br]
+                [:br]
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (render-html-footer)
             ] ; </div class="container">
         ] ; </body>
 ))
