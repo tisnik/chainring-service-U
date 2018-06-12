@@ -272,6 +272,7 @@
 
 
 (defn get-sap-href
+    "Get the HREF to SAP prefix from the configuration."
     [configuration object-type]
     (condp = object-type
         "room" (str "SAPEVENT:ROOM_CLICK?" (:param-name-to-sap-room-id configuration) "=")
@@ -279,6 +280,7 @@
 
 
 (defn get-sap-selector
+    "Get the SAP selector from the URI."
     [uri]
     (if (.contains uri "/")
         (subs uri (inc (.lastIndexOf uri "/")))))
