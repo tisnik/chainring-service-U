@@ -48,6 +48,7 @@
 ; TODO move into clj-calendar library
 
 (defn string->date
+    "Convert string to date (given the string is in proper format)."
     [data]
     (let [created-as-str (:created data)]
         (-> timeformatter (.parse created-as-str) .getTime)))
@@ -60,11 +61,13 @@
     (.writeByte  fout (:version data)))
 
 (defn write-created
+    "Return info about when the file was created."
     [fout data]
     (let [created (string->date data)]
         (.writeLong fout created)))
 
 (defn write-counters
+    "Write all counters: number of entities, number of rooms, number of scale values."
     [fout data]
     ; use int (4 bytes) for all counters, it is more than enough
     (.writeInt fout (:entities_count data))
@@ -72,6 +75,7 @@
     (.writeInt fout (count (:scales data))))
 
 (defn write-bounds
+    "Write drawing bounds (four doubles) into the binary file."
     [fout data]
     (let [bounds (:bounds data)]
         (.writeDouble fout (:xmin bounds))
@@ -119,6 +123,7 @@
     (.writeBytes  fout (:text entity)))
 
 (defn write-entity
+    "Write information about one selected entity into the binary file."
     [fout entity]
     (.writeByte fout (int (first (:T entity))))
     (condp = (:T entity)
@@ -128,12 +133,14 @@
         "T" (write-text   fout entity)))
 
 (defn write-entities
+    "Write all entities into the binary file."
     [fout data]
     (let [entities (:entities data)]
         (doseq [entity entities]
             (write-entity fout entity))))
 
 (defn write-room
+    "Write information about one selected room into the binary file."
     [fout room]
     (.writeInt fout (:canvas_id room))
     (.writeInt fout (count (:room_id room)))
@@ -145,6 +152,7 @@
             (.writeDouble fout (second vertex)))))
 
 (defn write-rooms
+    "Write information about all rooms into the binary file."
     [fout data]
     (let [rooms (:rooms data)]
         (doseq [room rooms]
