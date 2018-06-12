@@ -19,7 +19,7 @@
 
 
 (defn return-file
-    "Creates HTTP response containing content of specified file.
+    "Create HTTP response containing content read from specified file.
      Special value nil / HTTP response 404 is returned in case of any I/O error."
     [^String prefix file-name content-type]
     (let [file (new java.io.File prefix file-name)]
@@ -45,4 +45,13 @@
     (-> image-data
         (http-response/response)
         (http-response/content-type "image/png")
+        cache-control-headers))
+
+
+(defn gif-response
+    "Update the response with the content type valid for GIF images."
+    [image-data]
+    (-> image-data
+        (http-response/response)
+        (http-response/content-type "image/gif")
         cache-control-headers))
