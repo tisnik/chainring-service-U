@@ -3,8 +3,8 @@
 
 Author: Pavel Tisnovsky</pre></div><div class="public anchor" id="var-send-drawing"><h3>send-drawing</h3><div class="usage"><code>(send-drawing request mime-type extension)</code></div><div class="doc"><pre class="plaintext">Send drawing data to the client.
 Accepted parameters:
-    *request*:
-    `mime-type`: The MIME type is usually set to text/plain or application/json
+    request:   the structure with HTTP request data
+    mime-type: the MIME type is usually set to text/plain or application/json
     extension: can be almost anything, though 'drw', 'json', and 'bin' is currently used</pre></div></div><div class="public anchor" id="var-vector-drawing-as-binary"><h3>vector-drawing-as-binary</h3><div class="usage"><code>(vector-drawing-as-binary request)</code></div><div class="doc"><pre class="plaintext">REST API handler for the /api/vector-drawing-as-binary endpoint.
 </pre></div></div><div class="public anchor" id="var-vector-drawing-as-drw"><h3>vector-drawing-as-drw</h3><div class="usage"><code>(vector-drawing-as-drw request)</code></div><div class="doc"><pre class="plaintext">REST API handler for the /api/vector-drawing endpoint.
 </pre></div></div><div class="public anchor" id="var-vector-drawing-as-json"><h3>vector-drawing-as-json</h3><div class="usage"><code>(vector-drawing-as-json request)</code></div><div class="doc"><pre class="plaintext">REST API handler for the /api/vector-drawing-as-json endpoint.
