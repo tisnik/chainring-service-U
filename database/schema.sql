@@ -13,39 +13,35 @@
 
 -- also named 'Hospodářská jednotka' in SAP
 create table PROJECT (
-    id       integer primary key asc,
+    id       text primary key not null,
     name     text not null,
-    AOID     text,
     created  text,
     modified text
 );
 
 create table BUILDING (
-    id       integer primary key asc,
-    project  integer not null,
+    id       text primary key not null,
+    project  text not null,
     name     text not null,
-    AOID     text,
     created  text,
     modified text,
     foreign key (project) references PROJECT(id)
 );
 
 create table FLOOR (
-    id       integer primary key asc,
-    building integer not null,
+    id       text primary key not null,
+    building text not null,
     name     text not null,
-    AOID     text,
     created  text,
     modified text,
     foreign key (building) references BUILDING(id)
 );
 
 create table SAP_ROOM (
-    id          integer primary key asc,
+    id          text primary key asc,
     version     char, -- 'C'-current 'N'-new change in SAP
-    floor       integer not null,
+    floor       text not null,
     name        text, -- oznaceni
-    AOID        text,
     room_type   integer not null,
     created     text,
     modified    text,
@@ -80,35 +76,20 @@ create table ROOM_TYPE (
 
 create table DRAWING (
     id       integer primary key asc,
-    floor    integer not null,
+    floor    text not null,
     name     text not null,
-    AOID     text,
     created  text,
     modified text,
     version  integer not null,
     foreign key (floor) references FLOOR(id)
 );
 
-create table DRAWING_RAW_DATA (
-    id       integer primary key asc,
-    drawing  integer not null,
-    raw_data blob,
-    foreign key (drawing) references DRAWING(id)
-);
-
-create table DRAWING_ROOM (
-    id       integer primary key asc,
-    drawing  integer not null,
-    AOID     text,
-    foreign key (drawing) references DRAWING(id)
-);
-
-create table ROOM_VERTEX (
-    id       integer primary key asc,
-    room     integer not null,
-    x        real not null,
-    y        real not null,
-    foreign key (room) references DRAWING_ROOM(id)
+create table DRAWING_NEW (
+    id            integer primary key asc,
+    area_aoid     text not null,
+    building_aoid text not null,
+    floor_aoid    text not null,
+    valid_from    integer
 );
 
 create table USERS (

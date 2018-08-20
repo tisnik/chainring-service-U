@@ -1,33 +1,37 @@
-insert into PROJECT(id, AOID, name, created, modified) values(1, 'SAP10000', 'Areal 1', datetime('now'), datetime('now'));
-insert into PROJECT(id, AOID, name, created, modified) values(2, 'SAP20000', 'Areal 2', datetime('now'), datetime('now'));
-insert into PROJECT(id, AOID, name, created, modified) values(3, 'SAP30000', 'Areal 3', datetime('now'), datetime('now'));
+insert into PROJECT(id, name, created, modified) values('HOST', 'Areal 1', datetime('now'), datetime('now'));
+insert into PROJECT(id, name, created, modified) values('SAP20000', 'Areal 2', datetime('now'), datetime('now'));
+insert into PROJECT(id, name, created, modified) values('SAP30000', 'Areal 3', datetime('now'), datetime('now'));
 
-insert into BUILDING(id, project, AOID, name, created, modified) values(1, 1, 'SAP11000', 'Budova 1', datetime('now'), datetime('now'));
-insert into BUILDING(id, project, AOID, name, created, modified) values(2, 1, 'SAP12000', 'Budova 2', datetime('now'), datetime('now'));
-insert into BUILDING(id, project, AOID, name, created, modified) values(3, 1, 'SAP13000', 'Budova 3', datetime('now'), datetime('now'));
+insert into BUILDING(id, project, name, created, modified) values('HOST.10', 'HOST', 'Budova 1', datetime('now'), datetime('now'));
+insert into BUILDING(id, project, name, created, modified) values('HOST.20', 'HOST', 'Budova 2', datetime('now'), datetime('now'));
+insert into BUILDING(id, project, name, created, modified) values('HOST.30', 'HOST', 'Budova 3', datetime('now'), datetime('now'));
 
-insert into FLOOR(id, building, AOID, name, created, modified) values(1, 1, 'SAP11100', 'Podlazi 1', datetime('now'), datetime('now'));
-insert into FLOOR(id, building, AOID, name, created, modified) values(2, 1, 'SAP11110', 'Podlazi 2', datetime('now'), datetime('now'));
-insert into FLOOR(id, building, AOID, name, created, modified) values(3, 1, 'SAP11120', 'Podlazi 3', datetime('now'), datetime('now'));
+insert into FLOOR(id, building, name, created, modified) values('HOST.10.1S', 'HOST.10', 'Podlazi 1', datetime('now'), datetime('now'));
+insert into FLOOR(id, building, name, created, modified) values('HOST.10.2S', 'HOST.10', 'Podlazi 2', datetime('now'), datetime('now'));
+insert into FLOOR(id, building, name, created, modified) values('HOST.10.3S', 'HOST.10', 'Podlazi 3', datetime('now'), datetime('now'));
 
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 1, 'C', 1, 'místnost1', 'SAP1110001', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 2, 'C', 1, 'místnost2', 'SAP1110002', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 3, 'C', 1, 'místnost3', 'SAP1110003', 3, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 4, 'C', 1, 'místnost4', 'SAP1110004', 4, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.01', 'C', 'HOST.10.1S', 'místnost1', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.02', 'C', 'HOST.10.1S', 'místnost2', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.03', 'C', 'HOST.10.1S', 'místnost3', 3, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.04', 'C', 'HOST.10.1S', 'místnost4', 4, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.05', 'C', 'HOST.10.1S', 'místnost1', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.06', 'C', 'HOST.10.1S', 'místnost2', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.07', 'C', 'HOST.10.1S', 'místnost3', 3, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.1S.08', 'C', 'HOST.10.1S', 'místnost4', 4, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
 
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 5, 'C', 2, 'místnost1', 'SAP1111001', 5, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 6, 'C', 2, 'místnost2', 'SAP1111002', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 7, 'C', 2, 'místnost3', 'SAP1111003', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 8, 'C', 2, 'místnost4', 'SAP1111004', 3, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.2S.01', 'C', 'HOST.10.2S', 'místnost1', 5, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.2S.02', 'C', 'HOST.10.2S', 'místnost2', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.2S.03', 'C', 'HOST.10.2S', 'místnost3', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.2S.04', 'C', 'HOST.10.2S', 'místnost4', 3, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
 
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values( 9, 'C', 3, 'místnost1', 'SAP1112001', 4, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values(10, 'C', 3, 'místnost2', 'SAP1112002', 5, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values(11, 'C', 3, 'místnost3', 'SAP1112003', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
-insert into SAP_ROOM(id, version, floor, name, AOID, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values(12, 'C', 3, 'místnost4', 'SAP1112004', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.3S.01', 'C', 'HOST.10.3S', 'místnost1', 4, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 10, 10, "interni 1", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.3S.02', 'C', 'HOST.10.3S', 'místnost2', 5, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 20, 1, "volna", 'F');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.3S.03', 'C', 'HOST.10.3S', 'místnost3', 1, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12',  5, 1, "interni 2", 'I');
+insert into SAP_ROOM(id, version, floor, name, room_type, created, modified, valid_from, valid_to, area, capacity, occupied_by, occupation) values('HOST.10.3S.04', 'C', 'HOST.10.3S', 'místnost4', 2, datetime('now'), datetime('now'), '2000-01-01', '2099-31-12', 15, 2, "Novak", 'E');
 
-insert into DRAWING(id, floor, name, AOID, version, created, modified) values (1, 1, "prvni verze", "AOID1", 1, datetime('now'), datetime('now'));
+insert into DRAWING(id, floor, name, version, created, modified) values (1, 'HOST.10.1S', "prvni verze", datetime('now'), datetime('now'), 1);
+insert into DRAWING(id, floor, name, version, created, modified) values (2, 'HOST.10.2S', "prvni verze", datetime('now'), datetime('now'), 1);
+insert into DRAWING(id, floor, name, version, created, modified) values (3, 'HOST.10.3S', "prvni verze", datetime('now'), datetime('now'), 1);
 
 insert into USERS(name) values('tester');
 
--- use only when the system is configured to use DB for storing drawings
---insert into drawing_raw_data(id, drawing, raw_data) values(1, 1, readfile('drawing1.drw'));
