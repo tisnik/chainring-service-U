@@ -53,10 +53,6 @@
         (if (and options (:sap-url options))
             [:script (str "var sap_url = '" (:sap-url options) "';")]
             [:script "var sap_url = null;"])
-        (if (and options (:include-raphael? options))
-            (page/include-js (str url-prefix "raphael/raphael.min.js")))
-        (if (and options (:include-raphael? options))
-            (page/include-js (str url-prefix "raphael/raphael_adds.js")))
         (if (and options (:include-drawing-js? options))
             (page/include-js (str url-prefix "drawing.js")))
     ] ; head
@@ -285,11 +281,10 @@
                 (render-navigation-bar-section "/")
                 [:h1 "Seznam výkresů ve formátu JSON"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "Výkres"] [:th "Velikost"] [:th {:colspan "2"} "Náhled"]]
+                    [:tr [:th "Výkres"] [:th "Velikost"] [:th "Náhled"]]
                     (for [drawing drawings]
                         [:tr [:td (.getName drawing)]
                              [:td (.length drawing) " B"]
-                             [:td [:a {:href (str "/drawing-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/draw.png"}]]]
                              [:td [:a {:href (str "/raster-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/image.png"}]]]]
                     )
                 ]
@@ -312,11 +307,10 @@
                 (render-navigation-bar-section "/")
                 [:h1 "Seznam výkresů v binárním formátu"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "Výkres"] [:th "Velikost"] [:th {:colspan "2"} "Náhled"]]
+                    [:tr [:th "Výkres"] [:th "Velikost"] [:th "Náhled"]]
                     (for [drawing drawings]
                         [:tr [:td (.getName drawing)]
                              [:td (.length drawing) " B"]
-                             [:td [:a {:href (str "/drawing-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/draw.png"}]]]
                              [:td [:a {:href (str "/raster-preview?drawing-name=" (.getName drawing))} [:img {:src "icons/image.png"}]]]]
                     )
                 ]
@@ -659,24 +653,6 @@
 ))
 
 
-(defn render-drawing-preview
-    [drawing-name]
-    (page/xhtml
-        (render-html-header "/" {:include-raphael? true
-                                 :include-drawing-js? true
-                                 :drawing-name drawing-name})
-        [:body {:class "body-drawing"}
-            [:div {:class "container"}
-            (render-navigation-bar-section "/")
-            [:div {:class "canvas" :id "drawing_canvas"}]
-            [:br]
-            [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-            (render-html-footer)
-            ] ; </div class="container">
-        ] ; </body>
-))
-
-
 (defn render-floor-info-header
     "Render header for 'Vybrane podlazi'/'Selected floor'."
     []
@@ -835,7 +811,6 @@
     "Render page with drawing on the right side and with configurable toolbar on the left side."
     [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms sap?]
     (page/xhtml
-        ;(render-html-header "/" {:include-raphael? true :drawing-id nil})
         (render-html-header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
@@ -847,7 +822,7 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
-                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:150em;" )}
+                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:50em;" )}
                         (if (not sap?)
                             [:span
                                 (render-floor-info-header)

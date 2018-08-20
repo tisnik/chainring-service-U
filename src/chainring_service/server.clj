@@ -284,16 +284,6 @@
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
-(defn process-drawing-preview-page
-    [request]
-    (let [params        (:params request)
-          session       (:session request)
-          drawing-name  (get params "drawing-name")]
-          (log/info "Drawing name:" drawing-name)
-          (if drawing-name
-              (finish-processing request (html-renderer/render-drawing-preview drawing-name))
-              (finish-processing request (html-renderer/render-error-page "Nebyl vybrán žádný výkres")))))
-
 (defn process-raster-preview-page
     [request]
     (let [params        (:params request)
@@ -460,7 +450,6 @@
             "/drawing"                    (process-drawing-page request)
             "/drawing-from-sap"           (process-drawing-from-sap-page request)
             "/drawing-info"               (process-drawing-info request)
-            "/drawing-preview"            (process-drawing-preview-page request)
             "/raster-preview"             (process-raster-preview-page request)
             "/vector-drawing-as-drw"      (vector-drawing/vector-drawing-as-drw request)
             "/vector-drawing-as-json"     (vector-drawing/vector-drawing-as-json request)
