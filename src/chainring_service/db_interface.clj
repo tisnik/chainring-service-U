@@ -60,7 +60,7 @@
     "Read list of all projects.
      Empty sequence might be returned if the database is empty or broken."
     []
-    (simple-query-sequence ["select id, aoid, name, created from project order by name"]
+    (simple-query-sequence ["select id, name, created from project order by name"]
                   "read-project-list"))
 
 
@@ -82,7 +82,7 @@
      Nil is returned in case of any error."
     [project-id]
     (if project-id
-        (simple-query ["select id, aoid, name, created from project where id=?" project-id] "read-project-info")))
+        (simple-query ["select id, name, created from project where id=?" project-id] "read-project-info")))
 
 
 (defn read-detailed-project-info
@@ -110,7 +110,7 @@
      Empty sequence might be returned in case of any error or when the project has no buildings yet."
     [project-id]
     (if project-id
-        (simple-query-sequence ["select id, aoid, name, created from building where project=? order by name" project-id]
+        (simple-query-sequence ["select id, name, created from building where project=? order by id" project-id]
                       "read-building-list")))
 
 
@@ -163,7 +163,7 @@
     "Read list of all floors for selected building."
     [building-id]
     (if building-id
-        (simple-query-sequence ["select id, aoid, name, created, (select count(*) as cnt from drawing where floor=f.id) as drawings from floor f where building=? order by id" building-id]
+        (simple-query-sequence ["select id, name, created, (select count(*) as cnt from drawing where floor=f.id) as drawings from floor f where building=? order by id" building-id]
                       "read-floor-list")))
 
 
@@ -185,7 +185,7 @@
     "Read list of drawings for selected floor."
     [floor-id]
     (if floor-id
-        (simple-query-sequence ["select id, aoid, name, created, modified, version from drawing where floor=? order by aoid" floor-id]
+        (simple-query-sequence ["select id, name, created, modified, version from drawing where floor=? order by id" floor-id]
                       "read-drawing-list")))
 
 
@@ -207,7 +207,7 @@
     "Read list of SAP rooms for selected floor+version"
     [floor-id version]
     (if (and floor-id version)
-        (simple-query-sequence ["select *, (select label from room_type where room_type.id=s.room_type) as room_type_str from sap_room s where floor=? and version=? order by aoid" floor-id version] "read-sap-room-list")))
+        (simple-query-sequence ["select *, (select label from room_type where room_type.id=s.room_type) as room_type_str from sap_room s where floor=? and version=? order by id" floor-id version] "read-sap-room-list")))
 
 
 (defn read-sap-room-count
