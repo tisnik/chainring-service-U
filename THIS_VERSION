@@ -1,4 +1,4 @@
 This version supports:
 
-1) multiple room attributes can be displayed
-2) all data are stored in database, including attributes etc.
+1) just one selected room attribute can be displayed
+2) database content is reduced to info about drawings
