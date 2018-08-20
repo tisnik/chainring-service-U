@@ -221,7 +221,7 @@
           (log/info "Floor ID:" floor-id)
           (log/info "Floor info" floor-info)
           (log/info "Rooms count:" (count rooms))
-          (finish-processing request (html-renderer/render-room-list floor-id floor-info version rooms))
+          (finish-processing request (html-renderer/render-room-list-page floor-id floor-info version rooms))
     ))
 
 (defn process-project-page

@@ -548,7 +548,7 @@
     "")
 
 
-(defn render-room-list
+(defn render-room-list-page
     [floor-id floor-info version rooms]
     (page/xhtml
         (render-html-header "/")
