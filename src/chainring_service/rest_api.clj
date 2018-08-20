@@ -303,6 +303,27 @@
          (log/info params)
          (send-response params request)))
 
+(defn read-attributes-for-rooms
+    [attribute]
+    [1 2 3 4])
+
+(defn sap-room-attributes
+    [request uri]
+    (let [attributes ["kapacita" "obsazenost" "typ" "plocha"]]
+        (send-response attributes request)
+    ))
+
+(defn rooms-with-attribute
+    [request uri]
+    (let [params     (:params request)
+          attribute  (get params "attribute")
+          project    (get params "project-aoid")
+          building   (get params "building-aoid")
+          floor      (get params "floor-aoid")
+          valid_from (get params "valid_from")]
+          (let [rooms     (read-attributes-for-rooms attribute)]
+              (send-response rooms request)
+          )))
 
 (defn all-drawings-handler
     "REST API handler for the /api/{version}/drawings endpoint."

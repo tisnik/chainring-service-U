@@ -416,6 +416,8 @@
             [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
             [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
+            [:get  "sap-room-attributes"]    (rest-api/sap-room-attributes request uri)
+            [:get  "rooms-with-attribute"]   (rest-api/rooms-with-attribute request uri)
                                              (rest-api/unknown-endpoint request uri)
         )))
 
