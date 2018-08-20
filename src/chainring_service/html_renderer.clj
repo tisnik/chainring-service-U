@@ -36,7 +36,7 @@
             [:script (str "var drawing_id = " (:drawing-id options) ";")]
             [:script "var drawing_id = null;"])
         (if (and options (:floor-id options))
-            [:script (str "var floor_id = " (:floor-id options) ";")]
+            [:script (str "var floor_id = '" (:floor-id options) "';")]
             [:script "var floor_id = null;"])
         (if (and options (:version options))
             [:script (str "var version = '" (:version options) "';")]
@@ -335,13 +335,11 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Jméno"]
-                         [:th "AOID"]
                          [:th "Vytvořeno"]
                          [:th ""]]
                     (for [project projects]
                             [:tr [:td (:id project)]
                                  [:td [:a {:href (str "project?project-id=" (:id project))}(:name project)]]
-                                 [:td (:aoid project)]
                                  [:td (:created project)]
                                  [:td [:a {:title "Podrobnější informace o areálu"
                                            :href (str "project-info?project-id=" (:id project))}
@@ -365,7 +363,6 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td project-id]]
                     [:tr [:th "Jméno"] [:td (:name project-info)]]
-                    [:tr [:th "AOID"] [:td (:aoid project-info)]]
                     [:tr [:th "Vytvořeno"] [:td (:created project-info)]]
                     [:tr [:th "Modifikováno"] [:td (:modified project-info)]]
                     [:tr [:th "Počet budov"] [:td [:a {:href (str "/project?project-id=" project-id)} (get building-count :cnt "nelze zjistit")]]]
@@ -388,7 +385,6 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td building-id]]
                     [:tr [:th "Jméno"] [:td (:name building-info)]]
-                    [:tr [:th "AOID"] [:td (:aoid building-info)]]
                     [:tr [:th "Vytvořeno"] [:td (:created building-info)]]
                     [:tr [:th "Modifikováno"] [:td (:modified building-info)]]
                     [:tr [:th "Počet podlaží"] [:td [:a {:href (str "/building?building-id=" building-id)} (get floor-count :cnt "nelze zjistit")]]]
@@ -401,7 +397,7 @@
 
 
 (defn render-floor-info
-    [floor-id floor-info drawing-count rooms-current-version rooms-new-version]
+    [floor-id floor-info drawing-count]
     (page/xhtml
         (render-html-header "/")
         [:body
@@ -411,20 +407,9 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
                     [:tr [:th "Jméno"] [:td (:name floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "AOID"] [:td (:aoid floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Počet verzí výkresů"] [:td (get drawing-count :cnt "nelze zjistit")] [:td "&nbsp;"]]
-                    [:tr [:th "Počet místností (stávající veze)"]
-                         [:td (get rooms-current-version :cnt "nelze zjistit")]
-                         [:td [:a {:title "Seznam mísností"
-                                   :href (str "room-list?version=C&floor-id=" floor-id)}
-                                   [:img {:src "icons/info.gif"}]]]]
-                    [:tr [:th "Počet místností (nová veze)"]
-                         [:td (get rooms-new-version :cnt "nelze zjistit")]
-                         [:td [:a {:title "Seznam mísností"
-                                   :href (str "room-list?version=N&floor-id=" floor-id)}
-                                   [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -503,13 +488,13 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
                         [:th "Areál"]  [:td (:name project-info)]
-                        [:th "AOID"]   [:td (:aoid project-info)]
+                        [:th "AOID"]   [:td (:id project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
                                   :href (str "project-info?project-id=" project-id)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:name building-info)]
-                        [:th "AOID"]   [:td (:aoid building-info)]
+                        [:th "AOID"]   [:td (:id building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id)}
                                   [:img {:src "icons/info.gif"}]]]]
@@ -609,28 +594,27 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
                         [:th "Areál"]  [:td (:name project-info)]
-                        [:th "AOID"]   [:td (:aoid project-info)]
+                        [:th "AOID"]   [:td (:id project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
                                   :href (str "project-info?project-id=" project-id)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:name building-info)]
-                        [:th "AOID"]   [:td (:aoid building-info)]
+                        [:th "AOID"]   [:td (:id building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Podlaží"] [:td (:name floor-info)]
-                        [:th "AOID"]   [:td (:aoid floor-info)]
+                        [:th "AOID"]   [:td (:id floor-info)]
                         [:td [:a {:title "Podrobnější informace o podlaží"
-                                  :href (str "floor-info?floor-id=" building-id)}
+                                  :href (str "floor-info?floor-id=" floor-id)}
                                   [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Výkres"]
-                         [:th "AOID"]
                          [:th "Vytvořeno"]
                          [:th "Modifikováno"]
                          [:th "Verze"]
@@ -638,7 +622,6 @@
                     (for [drawing drawings]
                             [:tr [:td (:id drawing)]
                                  [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&drawing-id=" (:id drawing))} (:name drawing)]]
-                                 [:td (:aoid drawing)]
                                  [:td (:created drawing)]
                                  [:td (:modified drawing)]
                                  [:td (:version drawing)]
@@ -667,7 +650,7 @@
     [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
         [:tr {:class "vcell"}
             [:th "Areál"]  [:td (:name project-info)]
-            [:th "AOID"]   [:td (:aoid project-info)]
+            [:th "AOID"]   [:td (:id project-info)]
             [:td [:a {:title "Podrobnější informace o areálu"
                       :href (str "project-info?project-id=" project-id)}
                       [:img {:src "icons/info.gif"}]]]
@@ -676,7 +659,7 @@
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Budova"] [:td (:name building-info)]
-            [:th "AOID"]   [:td (:aoid building-info)]
+            [:th "AOID"]   [:td (:id building-info)]
             [:td [:a {:title "Podrobnější informace o budově"
                       :href (str "building-info?building-id=" building-id)}
                       [:img {:src "icons/info.gif"}]]]
@@ -685,7 +668,7 @@
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Podlaží"] [:td (:name floor-info)]
-            [:th "AOID"]   [:td (:aoid floor-info)]
+            [:th "AOID"]   [:td (:id floor-info)]
             [:td [:a {:title "Podrobnější informace o podlaží"
                       :href (str "floor-info?floor-id=" floor-id)}
                       [:img {:src "icons/info.gif"}]]]
@@ -694,7 +677,7 @@
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Výkres"] [:td (:name floor-info)]
-            [:th "AOID"]   [:td (:aoid floor-info)]
+            [:th "AOID"]   [:td (:id floor-info)]
             [:td [:a {:title "Podrobnější informace o výkresu"
                       :href (str "drawing-info?drawing-id=" drawing-id)}
                       [:img {:src "icons/info.gif"}]]]
@@ -724,7 +707,7 @@
              [:th "Obsazení"]]
         (for [room rooms]
                 [:tr {:class "vcell"} [:td (:name room)]
-                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:aoid room) "')")} (:aoid room)]]
+                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:id room) "')")} (:id room)]]
                      [:td (:valid_from room) "<br>"
                           (:valid_to room)]
                      [:td (:room_type_str room)]

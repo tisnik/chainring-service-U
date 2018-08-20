@@ -512,7 +512,7 @@
 (defn compute-room-colors
     [floor-id version highlight-groups]
     (let [rooms (db-interface/read-sap-room-list floor-id version)]
-         (zipmap (map #(:aoid %) rooms)
+         (zipmap (map #(:id %) rooms)
                  (map #(compute-room-color highlight-groups %) rooms))))
 
 
