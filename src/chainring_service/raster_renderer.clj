@@ -59,8 +59,10 @@
 
 (defn transform
     "Transform x or y coordinate using provided scale and offset."
-    [coordinate scale offset after-offset]
-    (int (+ after-offset (* scale (+ coordinate offset)))))
+    [coordinate scale offset after-offset center]
+    ;(int (+ center after-offset (* scale (+ coordinate offset (- center))))))
+    (int (+ center after-offset (* scale (+ coordinate offset (- center))))))
+    ;(int (+ after-offset (* scale (+ coordinate offset)))))
 
 
 ; TODO: background color to be read from configuration
@@ -81,18 +83,18 @@
 
 
 (defn draw-line
-    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
-    (let [x1 (transform (:x1 entity) scale x-offset user-x-offset)
-          y1 (transform (:y1 entity) scale y-offset user-y-offset)
-          x2 (transform (:x2 entity) scale x-offset user-x-offset)
-          y2 (transform (:y2 entity) scale y-offset user-y-offset)]
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
+    (let [x1 (transform (:x1 entity) scale x-offset user-x-offset h-center)
+          y1 (transform (:y1 entity) scale y-offset user-y-offset v-center)
+          x2 (transform (:x2 entity) scale x-offset user-x-offset h-center)
+          y2 (transform (:y2 entity) scale y-offset user-y-offset v-center)]
           (.drawLine gc x1 y1 x2 y2)))
 
 
 (defn draw-arc
-    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
-    (let [x (transform (:x entity) scale x-offset user-x-offset)
-          y (transform (:y entity) scale y-offset user-y-offset)
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
+    (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
+          y (transform (:y entity) scale y-offset user-y-offset v-center)
           r (int (* scale (:r entity)))
           a1 (:a1 entity)
           a2 (:a2 entity)
@@ -102,30 +104,30 @@
 
 
 (defn draw-circle
-    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
-    (let [x (transform (:x entity) scale x-offset user-x-offset)
-          y (transform (:y entity) scale y-offset user-y-offset)
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
+    (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
+          y (transform (:y entity) scale y-offset user-y-offset v-center)
           r (int (* scale (:r entity)))]
           (.drawOval gc (- x r) (- y r) (* r 2) (*  r 2))))
 
 
 (defn draw-text
-    [gc entity scale x-offset y-offset user-x-offset user-y-offset]
-    (let [x (transform (:x entity) scale x-offset user-x-offset)
-          y (transform (:y entity) scale y-offset user-y-offset)
+    [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
+    (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
+          y (transform (:y entity) scale y-offset user-y-offset v-center)
           t (:text entity)]
           (.drawString gc t x y)))
 
 
 (defn draw-entities
-    [gc entities scale x-offset y-offset user-x-offset user-y-offset]
+    [gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
         (condp = (:T entity) 
-            "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset)
-            "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset) 
-            "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset)
-            "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset)
+            "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+            "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center) 
+            "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+            "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
                 nil
         )))
 
@@ -198,13 +200,13 @@
 
 (defn draw-room
     "Draw room that is passed via the 'room' parameter."
-    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
+    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
     (let [polygon (:polygon room)
           aoid    (:room_id room)
           xpoints (map first polygon)
           ypoints (map second polygon)
-          transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
-          transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
+          transformed-xpoints (map #(transform % scale x-offset user-x-offset h-center) xpoints)
+          transformed-ypoints (map #(transform % scale y-offset user-y-offset v-center) ypoints)]
           (if (seq xpoints)
               (cond
                   (selected-room? aoid selected)
@@ -216,19 +218,19 @@
 
 (defn draw-rooms
     "Draw all rooms that are passed via the 'rooms' parameter."
-    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
+    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
     (.setStroke gc (new BasicStroke 2))
     (doseq [room rooms]
-        (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors)))
+        (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)))
 
 
 (defn draw-rooms-from-binary
     "Draw rooms, data is read from the binary file."
-    [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors]
+    [gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
     (.setStroke gc (new BasicStroke 2))
     (doseq [i (range rooms-count)]
         (let [room (drawings-storage/read-room-from-binary fin)]
-            (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors))))
+            (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center))))
 
 
 (defn draw-grid
@@ -243,13 +245,13 @@
 
 
 (defn draw-boundary
-    [gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color]
+    [gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color h-center v-center]
     (.setColor gc boundary-color)
     (.setStroke gc (new BasicStroke 1))
-    (let [x1 (transform (:xmin bounds) scale x-offset user-x-offset)
-          y1 (transform (:ymin bounds) scale y-offset user-y-offset)
-          x2 (transform (:xmax bounds) scale x-offset user-x-offset)
-          y2 (transform (:ymax bounds) scale y-offset user-y-offset)]
+    (let [x1 (transform (:xmin bounds) scale x-offset user-x-offset h-center)
+          y1 (transform (:ymin bounds) scale y-offset user-y-offset v-center)
+          x2 (transform (:xmax bounds) scale x-offset user-x-offset h-center)
+          y2 (transform (:ymax bounds) scale y-offset user-y-offset v-center)]
           (.drawRect gc x1 y1 (- x2 x1) (- y2 y1))
           (.drawRect gc (+ x1 2) (+ y1 2) (- x2 x1 4) (- y2 y1 4))))
 
@@ -386,6 +388,8 @@
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
         (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
+              h-center        (/ width 2)
+              v-center        (/ height 2)
               entities        (:entities data)
               rooms           (:rooms data)
               bounds          (:bounds data)
@@ -415,10 +419,10 @@
                 (log/info "gc:" gc)
                 (if show-grid
                     (draw-grid gc width height grid-size grid-color))
-                (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset)
-                (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
+                (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+                (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)
                 (if show-boundary
-                    (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color))
+                    (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color h-center v-center))
                 (if (or debug show-blips)
                     (draw-selection-point gc coordsx coordsy blip-size blip-color))
                 (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
@@ -427,14 +431,14 @@
 
 (defn aoid+selected
     [rooms scale x-offset user-x-offset y-offset user-y-offset
-     coordsx coordsy]
+     coordsx coordsy h-center v-center]
      (for [room rooms]
          (let [polygon (:polygon room)
                aoid    (:room_id room)
                xpoints (map first polygon)
                ypoints (map second polygon)
-               transformed-xpoints (map #(transform % scale x-offset user-x-offset) xpoints)
-               transformed-ypoints (map #(transform % scale y-offset user-y-offset) ypoints)]
+               transformed-xpoints (map #(transform % scale x-offset user-x-offset h-center) xpoints)
+               transformed-ypoints (map #(transform % scale y-offset user-y-offset v-center) ypoints)]
                (if (seq xpoints)
                    {:aoid aoid
                     :selected (coords-in-polygon transformed-xpoints transformed-ypoints coordsx coordsy)}
@@ -443,12 +447,13 @@
 
 (defn find-room
     [drawing-id drawing-name width height
-     user-x-offset user-y-offset user-scale coordsx coordsy use-memory-cache]
+     user-x-offset user-y-offset user-scale coordsx coordsy use-memory-cache
+     h-center v-center]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
             (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
                   rooms      (:rooms data)
-                  aoids      (aoid+selected rooms scale x-offset user-x-offset y-offset user-y-offset coordsx coordsy)]
+                  aoids      (aoid+selected rooms scale x-offset user-x-offset y-offset user-y-offset coordsx coordsy h-center v-center)]
                   ; output value
                   (->> aoids
                       (filter #(:selected %))
@@ -584,6 +589,8 @@
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
           height              (get params "height" 600)
+          h-center            (/ width 2)
+          v-center            (/ height 2)
           user-x-offset       (utils/parse-int (get params "x-offset" "0"))
           user-y-offset       (utils/parse-int (get params "y-offset" "0"))
           user-scale          (utils/parse-float (get params "scale" "1.0"))
@@ -602,7 +609,7 @@
                   (find-room drawing-id drawing-name
                              width height
                              user-x-offset user-y-offset user-scale
-                             coordsx-f coordsy-f use-memory-cache))
+                             coordsx-f coordsy-f use-memory-cache h-center v-center))
               (catch Exception e
                   (log/error "error during finding room!" e)))))
 
