@@ -93,6 +93,32 @@ function onViewBoundaryClick() {
     reloadImage(null, null);
 }
 
+function disableScrollOnMouseWheel(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    } else {
+        e.returnValue = false;
+    }
+}
+
+function onMouseWheel(e) {
+    var e = window.event || e; // old IE support
+    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    console.log("mouse wheel: " + delta);
+
+    if (delta > 0) {
+        onViewMagPlusClick();
+    }
+    else if (delta < 0) {
+        onViewMagMinusClick();
+    }
+
+    disableScrollOnMouseWheel(e);
+
+    // no default handler
+    return false;
+}
+
 function onViewGridClick() {
     grid = !grid;
     reloadImage(null, null);
@@ -322,6 +348,17 @@ function findRoomOnDrawing(clickedX, clickedY) {
     }
 }
 
+function registerMouseWheelCallbackFunction(drawingElement) {
+    if (drawingElement.addEventListener) {
+        // IE9, Chrome, Safari, Opera
+        drawingElement.addEventListener("mousewheel", onMouseWheel, false);
+        // Firefox
+        drawingElement.addEventListener("DOMMouseScroll", onMouseWheel, false);
+    }
+    // IE 6/7/8
+    else drawingElement.attachEvent("onmousewheel", onMouseWheel);
+}
+
 function reloadImage(clickedX, clickedY) {
     var url = rasterDrawingUrl(drawing_id, floor_id, version);
     if (clickedX != null && clickedY != null) {
@@ -334,7 +371,10 @@ function reloadImage(clickedX, clickedY) {
     url += "&counter=" + counter;
     counter++;
     console.log(url);
-    document.getElementById('drawing').src=url;
+    var drawingElement = document.getElementById('drawing');
+    drawingElement.src=url;
+
+    registerMouseWheelCallbackFunction(drawingElement);
 }
 
 function printSelectedRoom(selectedRoom) {
