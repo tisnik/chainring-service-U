@@ -27,6 +27,9 @@
 (require '[chainring-service.drawings-storage :as drawings-storage])
 (require '[chainring-service.drawings-cache   :as drawings-cache])
 
+(require '[chainring-service.sap-interface         :as sap-interface])
+(require '[chainring-service.mocked-sap-interface  :as mocked-sap-interface])
+
 (use     '[clj-utils.utils])
 
 
@@ -294,7 +297,40 @@
           href          (get-sap-href configuration object-type)]
           (send-response href request)))
 
-   
+(defn sap-areals
+    [request uri]
+    (let [mock-sap-response (config/mock-sap-response? request)
+          sap-response (if mock-sap-response (sap-interface/read-areals)
+                                             (mocked-sap-interface/read-areals))]
+        (send-response sap-response request)))
+
+(defn sap-buildings
+    [request uri]
+    (let [params            (:params request)
+          mock-sap-response (config/mock-sap-response? request)
+          areal             (get params "areal")]
+        (send-response mock-sap-response request)
+    ))
+
+(defn sap-floors
+    [request uri]
+    (let [params            (:params request)
+          mock-sap-response (config/mock-sap-response? request)
+          areal             (get params "areal")
+          building          (get params "building")]
+        (send-response mock-sap-response request)
+    ))
+
+(defn sap-rooms
+    [request uri]
+    (let [params (:params request)
+          mock-sap-response (config/mock-sap-response? request)
+          areal             (get params "areal")
+          building          (get params "building")
+          floor             (get params "floor")]
+        (send-response mock-sap-response request)
+    ))
+
 (defn sap-debug-handler
     "REST API handler for the /api/{version}/sap-debug endpoint."
     [request uri]
