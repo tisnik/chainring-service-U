@@ -44,6 +44,7 @@
         (update-in [:renderer      :blip-color]       utils/parse-color)
         (update-in [:renderer      :blip-size]        utils/parse-int)
         (update-in [:sap-interface :enabled]          utils/parse-boolean)
+        (update-in [:sap-interface :mock-responses]   utils/parse-boolean)
         (assoc-in  [:api           :full-prefix]      (full-prefix configuration))))
 
 
@@ -100,3 +101,9 @@
     "Read the verbose settings (it is used for all outputs that does not went into logs)"
     [request]
     (-> request :configuration :config :verbose))
+
+
+(defn mock-sap-response?
+    "Read the settings for the mocking responses for the SAP interface."
+    [request]
+    (-> request :configuration :sap-interface :mock-responses))
