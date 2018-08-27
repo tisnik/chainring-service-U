@@ -317,18 +317,20 @@
     [request uri]
     (let [params            (:params request)
           mock-sap-response (config/mock-sap-response? request)
-          areal             (get params "areal")]
-        (send-response mock-sap-response request)
-    ))
+          areal             (get params "areal")
+          sap-response      (if mock-sap-response (mocked-sap-interface/read-buildings areal)
+                                                  (sap-interface/read-buildings areal))]
+        (send-response sap-response request)))
 
 (defn sap-floors
     [request uri]
     (let [params            (:params request)
           mock-sap-response (config/mock-sap-response? request)
           areal             (get params "areal")
-          building          (get params "building")]
-        (send-response mock-sap-response request)
-    ))
+          building          (get params "building")
+          sap-response      (if mock-sap-response (mocked-sap-interface/read-floors areal building)
+                                                  (sap-interface/read-floors areal building))]
+        (send-response sap-response request)))
 
 (defn sap-rooms
     [request uri]
@@ -336,9 +338,10 @@
           mock-sap-response (config/mock-sap-response? request)
           areal             (get params "areal")
           building          (get params "building")
-          floor             (get params "floor")]
-        (send-response mock-sap-response request)
-    ))
+          floor             (get params "floor")
+          sap-response      (if mock-sap-response (mocked-sap-interface/read-rooms areal building floor)
+                                                  (sap-interface/read-rooms areal building floor))]
+        (send-response sap-response request)))
 
 (defn sap-debug-handler
     "REST API handler for the /api/{version}/sap-debug endpoint."

@@ -78,5 +78,34 @@
 
 (defn read-areals
     []
-    @areals
-    )
+    @areals)
+
+(defn read-buildings
+    [areal]
+    (if areal
+        (let [prefix (str areal ".")]
+            (filter #(.startsWith (:AOID %) prefix) @buildings))
+        @buildings))
+
+(defn read-floors
+    [areal building]
+    (if areal
+        (if building
+            (let [prefix (str areal "." building ".")]
+                (filter #(.startsWith (:AOID %) prefix) @floors))
+            (let [prefix (str areal ".")]
+                (filter #(.startsWith (:AOID %) prefix) @floors)))
+        @floors))
+
+(defn read-rooms
+    [areal building floor]
+    (if areal
+        (if building
+            (if floor
+                (let [prefix (str areal "." building "." floor ".")]
+                    (filter #(.startsWith (:AOID %) prefix) @rooms))
+                (let [prefix (str areal "." building ".")]
+                    (filter #(.startsWith (:AOID %) prefix) @rooms)))
+            (let [prefix (str areal ".")]
+                (filter #(.startsWith (:AOID %) prefix) @rooms)))
+        @rooms))

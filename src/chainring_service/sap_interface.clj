@@ -14,5 +14,16 @@
 
 (defn read-areals
     []
-    [1 2 3]
-    )
+    [1 2])
+
+(defn read-buildings
+    [areal]
+    [1 2 3])
+
+(defn read-floors
+    [areal building]
+    [1 2 3 4])
+
+(defn read-rooms
+    [areal building floor]
+    [1 2 3 4 5])
