@@ -274,6 +274,15 @@
          (send-response floors request)))
 
 
+(defn sap-reload-mock-data
+    [request uri]
+    (let [params            (:params request)
+          mock-sap-response (config/mock-sap-response? request)]
+          (if mock-sap-response
+              (let [status (mocked-sap-interface/reload-mock-data)]
+                    (send-response status request)))))
+
+
 (defn get-sap-href
     "Get the HREF to SAP prefix from the configuration."
     [configuration object-type]
@@ -300,8 +309,8 @@
 (defn sap-areals
     [request uri]
     (let [mock-sap-response (config/mock-sap-response? request)
-          sap-response (if mock-sap-response (sap-interface/read-areals)
-                                             (mocked-sap-interface/read-areals))]
+          sap-response (if mock-sap-response (mocked-sap-interface/read-areals)
+                                             (sap-interface/read-areals))]
         (send-response sap-response request)))
 
 (defn sap-buildings

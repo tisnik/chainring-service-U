@@ -409,6 +409,7 @@
             [:get  "drawing-data"]           (rest-api/deserialize-drawing request)
             [:put  "drawing-data"]           (rest-api/serialize-drawing request)
             [:get  "drawings-cache"]         (rest-api/drawings-cache-info-handler request)
+            [:post "sap-reload-mock-data"]   (rest-api/sap-reload-mock-data request uri)
             [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
             [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
             [:get  "sap-areals"]             (rest-api/sap-areals request uri)
