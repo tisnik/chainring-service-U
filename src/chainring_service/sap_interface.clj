@@ -12,18 +12,19 @@
 
 (ns chainring-service.sap-interface)
 
-(defn read-areals
-    []
-    [1 2])
+(require '[chainring-service.config :as config])
 
-(defn read-buildings
-    [areal]
-    [1 2 3])
 
-(defn read-floors
-    [areal building]
-    [1 2 3 4])
+(defn get-sap-namespace
+    [mock-sap-response]
+    (if mock-sap-response "chainring-service.mocked-sap-interface"
+                          "chainring-service.real-sap-interface"))
 
-(defn read-rooms
-    [areal building floor]
-    [1 2 3 4 5])
+
+(defn call-sap-interface
+    [request function & params]
+    (let [mock-sap-response (config/mock-sap-response? request)
+          sap-namespace     (get-sap-namespace mock-sap-response)]
+          (apply (ns-resolve (symbol sap-namespace)
+                             (symbol (name function)))
+                 params)))
