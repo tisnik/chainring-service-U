@@ -306,42 +306,39 @@
           href          (get-sap-href configuration object-type)]
           (send-response href request)))
 
+
 (defn sap-areals
     [request uri]
-    (let [mock-sap-response (config/mock-sap-response? request)
-          sap-response (if mock-sap-response (mocked-sap-interface/read-areals)
-                                             (sap-interface/read-areals))]
+    (let [sap-response (sap-interface/call-sap-interface request "read-areals")]
         (send-response sap-response request)))
+
 
 (defn sap-buildings
     [request uri]
     (let [params            (:params request)
-          mock-sap-response (config/mock-sap-response? request)
           areal             (get params "areal")
-          sap-response      (if mock-sap-response (mocked-sap-interface/read-buildings areal)
-                                                  (sap-interface/read-buildings areal))]
+          sap-response      (sap-interface/call-sap-interface request "read-buildings" areal)]
         (send-response sap-response request)))
+
 
 (defn sap-floors
     [request uri]
     (let [params            (:params request)
-          mock-sap-response (config/mock-sap-response? request)
           areal             (get params "areal")
           building          (get params "building")
-          sap-response      (if mock-sap-response (mocked-sap-interface/read-floors areal building)
-                                                  (sap-interface/read-floors areal building))]
+          sap-response      (sap-interface/call-sap-interface request "read-floors" areal building)]
         (send-response sap-response request)))
+
 
 (defn sap-rooms
     [request uri]
     (let [params (:params request)
-          mock-sap-response (config/mock-sap-response? request)
           areal             (get params "areal")
           building          (get params "building")
           floor             (get params "floor")
-          sap-response      (if mock-sap-response (mocked-sap-interface/read-rooms areal building floor)
-                                                  (sap-interface/read-rooms areal building floor))]
+          sap-response      (sap-interface/call-sap-interface request "read-rooms" areal building floor)]
         (send-response sap-response request)))
+
 
 (defn sap-debug-handler
     "REST API handler for the /api/{version}/sap-debug endpoint."
