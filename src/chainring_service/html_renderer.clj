@@ -102,7 +102,7 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:a {:href "project-list" :class "btn btn-success" :role "button" :style "width:10em"} "Seznam areálů"]
+                [:a {:href "areals" :class "btn btn-success" :role "button" :style "width:10em"} "Seznam areálů"]
                 [:div {:style "height: 10ex"}]
                 [:h3 "Další volby"]
                 [:a {:href "settings" :class "btn btn-default" :role "button" :style "width:10em"} "Nastavení"]
@@ -335,14 +335,14 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Jméno"]
-                         [:th "Vytvořeno"]
+                         ;[:th "Vytvořeno"]
                          [:th ""]]
                     (for [project projects]
-                            [:tr [:td (:id project)]
-                                 [:td [:a {:href (str "project?project-id=" (:id project))}(:name project)]]
-                                 [:td (:created project)]
+                            [:tr [:td (:AOID project)]
+                                 [:td [:a {:href (str "areal?areal-id=" (:AOID project))}(:Label project)]]
+                                 ;[:td (:created project)]
                                  [:td [:a {:title "Podrobnější informace o areálu"
-                                           :href (str "project-info?project-id=" (:id project))}
+                                           :href (str "areal-info?areal-id=" (:AOID project))}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
@@ -361,11 +361,11 @@
                 (render-navigation-bar-section "/")
                 [:h1 (str "Informace o areálu '" (:name project-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"] [:td project-id]]
-                    [:tr [:th "Jméno"] [:td (:name project-info)]]
-                    [:tr [:th "Vytvořeno"] [:td (:created project-info)]]
-                    [:tr [:th "Modifikováno"] [:td (:modified project-info)]]
-                    [:tr [:th "Počet budov"] [:td [:a {:href (str "/project?project-id=" project-id)} (get building-count :cnt "nelze zjistit")]]]
+                    [:tr [:th "AOID"] [:td project-id]]
+                    [:tr [:th "Jméno"] [:td (:Label project-info)]]
+                    ;[:tr [:th "Vytvořeno"] [:td (:created project-info)]]
+                    ;[:tr [:th "Modifikováno"] [:td (:modified project-info)]]
+                    [:tr [:th "Počet budov"] [:td (or building-count "nelze zjistit")]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -451,21 +451,21 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:h1 (str "Seznam budov v areálu '" (:name project-info) "'")]
-                [:h4 (:aoid project-info)]
+                [:h1 (str "Seznam budov v areálu '" (:AOID project-info) "'")]
+                [:h4 (:Label project-info)]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Budova"]
-                         [:th "AOID"]
-                         [:th "Vytvořeno"]
+                         ;[:th "AOID"]
+                         ;[:th "Vytvořeno"]
                          [:th ""]]
                     (for [building buildings]
-                            [:tr [:td (:id building)]
-                                 [:td [:a {:href (str "building?project-id=" project-id "&building-id=" (:id building))}
-                                          (:name building)]]
-                                 [:td (:aoid building)]
-                                 [:td (:created building)]
+                            [:tr [:td (:AOID building)]
+                                 [:td [:a {:href (str "building?areal-id=" project-id "&building-id=" (:AOID building))}
+                                          (if (empty? (:Label building)) (:AOID building) (:Label building))]]
+                                 ;[:td (:AOID building)]
+                                 ;[:td (:created building)]
                                  [:td [:a {:title "Podrobnější informace o budově"
                                            :href (str "building-info?building-id=" (:id building))}
                                            [:img {:src "icons/info.gif"}]]]])

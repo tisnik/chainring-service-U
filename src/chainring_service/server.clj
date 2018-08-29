@@ -26,6 +26,7 @@
 (require '[chainring-service.vector-drawing   :as vector-drawing])
 (require '[chainring-service.config           :as config])
 (require '[chainring-service.http-utils       :as http-utils])
+(require '[chainring-service.sap-interface    :as sap-interface])
 
 (use     '[clj-utils.utils])
 
@@ -115,16 +116,42 @@
     [request]
     (http-utils/return-file "www" "test.html" "text/html"))
 
+(defn process-areal-list-page
+    "Function that prepares data for the page with list of areals."
+    [request]
+    (let [projects      (sap-interface/call-sap-interface request "read-areals")]
+        (log/info "Areals" projects)
+        (if projects
+            (if (seq projects)
+                (finish-processing request (html-renderer/render-project-list projects))
+                (finish-processing request (html-renderer/render-error-page "Databáze projektů (areálů) je prázdná")))
+            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k SAPu")))))
+
+(defn process-areal-info-page
+    [request]
+    (let [params         (:params request)
+          areal-id       (get params "areal-id")
+          areal-info     (sap-interface/call-sap-interface request "read-areal-info" areal-id)
+          building-count (count (sap-interface/call-sap-interface request "read-buildings" areal-id))]
+          (log/info "Areal ID:" areal-id)
+          (log/info "Building count:" building-count)
+          (log/info "Areal info" areal-info)
+          (if areal-id
+              (if areal-info
+                  (finish-processing request (html-renderer/render-project-info areal-id areal-info building-count))
+                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném areálu")))
+              (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
+
 (defn process-project-list-page
     "Function that prepares data for the page with project list."
     [request]
-    (let [projects      (db-interface/read-project-list)]
+    (let [projects      (sap-interface/call-sap-interface request "read-areals")]
         (log/info "Projects:" projects)
         (if projects
             (if (seq projects)
                 (finish-processing request (html-renderer/render-project-list projects))
-                (finish-processing request (html-renderer/render-error-page "Databáze projektů je prázdná")))
-            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k databázi")))))
+                (finish-processing request (html-renderer/render-error-page "Databáze projektů (areálů) je prázdná")))
+            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k SAPu")))))
 
 (defn process-project-info-page
     [request]
@@ -219,6 +246,22 @@
           (log/info "Rooms count:" (count rooms))
           (finish-processing request (html-renderer/render-room-list-page floor-id floor-info version rooms))
     ))
+
+(defn process-areal-page
+    "Function that prepares data for the page with list of buildings for selected areal"
+    [request]
+    (let [params       (:params request)
+          areal-id     (get params "areal-id")
+          areal-info   (sap-interface/call-sap-interface request "read-areal-info" areal-id)]
+          (log/info "Areal ID:" areal-id)
+          (log/info "Areal info:" areal-info)
+          (if areal-id
+              (let [buildings (sap-interface/call-sap-interface request "read-buildings" areal-id)]
+                  (log/info "Buildings:" buildings)
+                  (if (seq buildings)
+                      (finish-processing request (html-renderer/render-building-list areal-id areal-info buildings))
+                      (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
+              (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
 (defn process-project-page
     "Function that prepares data for the page with list of buildings for selected project"
@@ -442,6 +485,9 @@
             "/store-settings"             (process-store-settings-page request)
             "/db-stats"                   (process-db-statistic-page request)
             "/drawings-stats"             (process-drawings-statistic-page request)
+            "/areals"                     (process-areal-list-page request)
+            "/areal"                      (process-areal-page request)
+            "/areal-info"                 (process-areal-info-page request)
             "/project-list"               (process-project-list-page request)
             "/project-info"               (process-project-info-page request)
             "/project"                    (process-project-page request)
