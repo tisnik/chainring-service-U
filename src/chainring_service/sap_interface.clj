@@ -14,6 +14,8 @@
 
 (require '[chainring-service.config :as config])
 
+(require '[chainring-service.real-sap-interface])
+(require '[chainring-service.mocked-sap-interface])
 
 (defn get-sap-namespace
     [mock-sap-response]

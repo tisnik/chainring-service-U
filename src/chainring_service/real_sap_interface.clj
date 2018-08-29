@@ -27,3 +27,7 @@
 (defn read-rooms
     [areal building floor]
     [1 2 3 4 5])
+
+(defn read-building-info
+    [building-id]
+    [1 2])

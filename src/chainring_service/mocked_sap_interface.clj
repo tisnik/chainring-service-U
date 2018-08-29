@@ -91,11 +91,15 @@
             (filter #(.startsWith (:AOID %) prefix) @buildings))
         @buildings))
 
+(defn read-building-info
+    [building]
+    (first (filter #(= building (:AOID %)) @buildings)))
+
 (defn read-floors
     [areal building]
     (if areal
         (if building
-            (let [prefix (str areal "." building ".")]
+            (let [prefix (str building ".")]
                 (filter #(.startsWith (:AOID %) prefix) @floors))
             (let [prefix (str areal ".")]
                 (filter #(.startsWith (:AOID %) prefix) @floors)))

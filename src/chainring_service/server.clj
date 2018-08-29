@@ -145,9 +145,11 @@
 (defn process-building-info-page
     [request]
     (let [params         (:params request)
+          areal-id       (get params "areal-id")
           building-id    (get params "building-id")
-          building-info  (db-interface/read-building-info building-id)
-          floor-count    (db-interface/read-floor-count-for-building building-id)]
+          building-info  (sap-interface/call-sap-interface request "read-building-info" building-id)
+          floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id))]
+          (log/info "Areal ID:" building-id)
           (log/info "Building ID:" building-id)
           (log/info "Floor count:" floor-count)
           (log/info "Building info" building-info)
@@ -238,19 +240,19 @@
     "Function that prepares data for the page with list of floors for the selected building."
     [request]
     (let [params        (:params request)
-          project-id    (get params "project-id")
+          areal-id      (get params "areal-id")
           building-id   (get params "building-id")
-          project-info  (db-interface/read-project-info project-id)
-          building-info (db-interface/read-building-info building-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
+          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id)
+          building-info (sap-interface/call-sap-interface request "read-building-info" building-id)]
+          (log/info "Areal ID:" areal-id)
+          (log/info "Areal info" areal-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
           (if building-id
-              (let [floors (db-interface/read-floor-list building-id)]
+              (let [floors (sap-interface/call-sap-interface request "read-floors" areal-id building-id)]
                   (log/info "Floors" floors)
                   (if (seq floors)
-                      (finish-processing request (html-renderer/render-floor-list project-id building-id project-info building-info floors))
+                      (finish-processing request (html-renderer/render-floor-list areal-id building-id areal-info building-info floors))
                       (finish-processing request (html-renderer/render-error-page "Nebylo nalezeno žádné podlaží"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
