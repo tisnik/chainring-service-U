@@ -142,35 +142,6 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném areálu")))
               (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
-(defn process-project-list-page
-    "Function that prepares data for the page with project list."
-    [request]
-    (let [projects      (sap-interface/call-sap-interface request "read-areals")]
-        (log/info "Projects:" projects)
-        (if projects
-            (if (seq projects)
-                (finish-processing request (html-renderer/render-project-list projects))
-                (finish-processing request (html-renderer/render-error-page "Databáze projektů (areálů) je prázdná")))
-            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k SAPu")))))
-
-(defn process-project-info-page
-    [request]
-    (let [params         (:params request)
-          project-id     (get params "project-id")
-          project-info   (db-interface/read-detailed-project-info project-id)
-          building-count (db-interface/read-building-count-for-project project-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Building count:" building-count)
-          (log/info "Project info" project-info)
-          (println "----------------")
-          (pprint/pprint (:session request))
-          (println "----------------")
-          (if project-id
-              (if project-info
-                  (finish-processing request (html-renderer/render-project-info project-id project-info building-count))
-                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném projektu")))
-              (finish-processing request (html-renderer/render-error-page "Žádný projekt nebyl vybrán")))))
-
 (defn process-building-info-page
     [request]
     (let [params         (:params request)
@@ -488,8 +459,6 @@
             "/areals"                     (process-areal-list-page request)
             "/areal"                      (process-areal-page request)
             "/areal-info"                 (process-areal-info-page request)
-            "/project-list"               (process-project-list-page request)
-            "/project-info"               (process-project-info-page request)
             "/project"                    (process-project-page request)
             "/building-info"              (process-building-info-page request)
             "/floor"                      (process-floor-page request)
