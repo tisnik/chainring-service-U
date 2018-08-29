@@ -80,6 +80,10 @@
     []
     @areals)
 
+(defn read-areal-info
+    [areal]
+    (first (filter #(= areal (:AOID %)) @areals)))
+
 (defn read-buildings
     [areal]
     (if areal
