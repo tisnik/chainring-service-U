@@ -234,22 +234,6 @@
                       (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
               (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
-(defn process-project-page
-    "Function that prepares data for the page with list of buildings for selected project"
-    [request]
-    (let [params       (:params request)
-          project-id   (get params "project-id")
-          project-info (db-interface/read-project-info project-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
-          (if project-id
-              (let [buildings (db-interface/read-building-list project-id)]
-                  (log/info "Buildings:" buildings)
-                  (if (seq buildings)
-                      (finish-processing request (html-renderer/render-building-list project-id project-info buildings))
-                      (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
-              (finish-processing request (html-renderer/render-error-page "Projekt nebyl vybrán")))))
-
 (defn process-building-page
     "Function that prepares data for the page with list of floors for the selected building."
     [request]
@@ -459,7 +443,6 @@
             "/areals"                     (process-areal-list-page request)
             "/areal"                      (process-areal-page request)
             "/areal-info"                 (process-areal-info-page request)
-            "/project"                    (process-project-page request)
             "/building-info"              (process-building-info-page request)
             "/floor"                      (process-floor-page request)
             "/floor-info"                 (process-floor-info-page request)
