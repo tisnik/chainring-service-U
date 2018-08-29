@@ -159,12 +159,16 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
+(defn drawings-for-floor
+    [floor-id]
+    0)
+
 (defn process-floor-info-page
     [request]
     (let [params                (:params request)
           floor-id              (get params "floor-id")
-          floor-info            (db-interface/read-floor-info floor-id)
-          drawing-count         (db-interface/read-drawing-count-for-floor floor-id)]
+          floor-info            (sap-interface/call-sap-interface request "read-floor-info" floor-id)
+          drawing-count         (drawings-for-floor floor-id)]
           (log/info "Floor ID:" floor-id)
           (log/info "Drawing count:" drawing-count)
           (log/info "Floor info" floor-info)

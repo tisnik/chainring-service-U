@@ -403,13 +403,13 @@
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:h1 (str "Informace o podlaží '" (:name floor-info) "'")]
+                [:h1 (str "Informace o podlaží '" (or (:Label floor-info) (:AOID floor-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
-                    [:tr [:th "Jméno"] [:td (:name floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "Počet verzí výkresů"] [:td (get drawing-count :cnt "nelze zjistit")] [:td "&nbsp;"]]
+                    [:tr [:th "Jméno"] [:td (:Label floor-info)] [:td "&nbsp;"]]
+                    ;[:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
+                    ;[:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "Počet verzí výkresů"] [:td (or drawing-count "nelze zjistit")] [:td "&nbsp;"]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)
@@ -490,7 +490,7 @@
                         [:th "Areál"]  [:td (:Label project-info)]
                         [:th "AOID"]   [:td (:AOID project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
-                                  :href (str "project-info?project-id=" project-id)}
+                                  :href (str "areal-info?areal-id=" project-id)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:Label building-info)]

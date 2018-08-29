@@ -105,6 +105,10 @@
                 (filter #(.startsWith (:AOID %) prefix) @floors)))
         @floors))
 
+(defn read-floor-info
+    [floor]
+    (first (filter #(= floor (:AOID %)) @floors)))
+
 (defn read-rooms
     [areal building floor]
     (if areal
