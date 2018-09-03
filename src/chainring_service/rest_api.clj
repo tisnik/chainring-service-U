@@ -95,6 +95,28 @@
         (rest-api-utils/send-response response request)))
 
 
+(defn list-all-aoids
+    "REST API handler for the /api/{version}/aoids endpoint."
+    [request uri]
+    (try
+        (let [start-time (System/currentTimeMillis)
+              areals     (sap-interface/call-sap-interface request "read-areals")
+              buildings  (sap-interface/call-sap-interface request "read-buildings" nil)
+              floors     (sap-interface/call-sap-interface request "read-floors" nil nil)
+              end-time   (System/currentTimeMillis)
+              timestamp  (rest-api-utils/get-timestamp)
+              response {:status    :ok
+                        :duration  (- end-time start-time)
+                        :timestamp timestamp
+                        :areals    areals
+                        :buildings buildings
+                        :floors    floors}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-all-aoids")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
 (defn list-of-areals-handler
     "REST API handler for the /api/{version}/areals endpoint."
     [request uri]
