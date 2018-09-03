@@ -53,6 +53,7 @@
                     (str api-prefix "/readiness")      "check the readiness of the service and all subcomponents"
                     (str api-prefix "/config")         "actual configuration"
                     (str api-prefix "/areals")         "list of areals"
+                    (str api-prefix "/buildings")      "list of buildings"
                     (str api-prefix "/project")        "project metadata"
                     (str api-prefix "/building")       "building metadata"
                     (str api-prefix "/drawing")        "drawing metadata"
@@ -109,6 +110,27 @@
             (rest-api-utils/send-response response request))
         (catch Exception e
             (log/error e "read-areals")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn list-of-buildings-handler
+    "REST API handler for the /api/{version}/buildings endpoint."
+    [request uri]
+    (try
+        (let [start-time (System/currentTimeMillis)
+              params     (:params request)
+              areal-id   (get params "areal-id")
+              buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id)
+              end-time   (System/currentTimeMillis)
+              timestamp  (rest-api-utils/get-timestamp)
+              response {:status    :ok
+                        :duration  (- end-time start-time)
+                        :timestamp timestamp
+                        :areal-id  areal-id
+                        :buildings buildings}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-buildings")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -241,14 +263,6 @@
           object-type   (get-sap-selector uri)
           href          (get-sap-href configuration object-type)]
           (rest-api-utils/send-response href request)))
-
-
-(defn sap-buildings
-    [request uri]
-    (let [params            (:params request)
-          areal             (get params "areal")
-          sap-response      (sap-interface/call-sap-interface request "read-buildings" areal)]
-        (rest-api-utils/send-response sap-response request)))
 
 
 (defn sap-floors
