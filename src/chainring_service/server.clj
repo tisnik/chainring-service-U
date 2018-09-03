@@ -395,11 +395,18 @@
     (if (= uri prefix)
         (rest-api/api-info-handler request prefix)
         (condp = [method (get-api-command uri prefix)]
+            ; toplevel
             [:get  ""]                       (rest-api/api-info-handler request prefix)
+
+            ; common endpoints
             [:get  "info"]                   (rest-api/info-handler request)
             [:get  "liveness"]               (rest-api/liveness-handler request)
             [:get  "readiness"]              (rest-api/readiness-handler request)
             [:get  "config"]                 (rest-api/config-handler request)
+
+            ; endpoints to return list of AOIDs
+
+            ; endpoints to return information about selected AOID
             [:get  "project-list"]           (rest-api/project-list-handler request uri)
             [:get  "project"]                (rest-api/project-handler request uri)
             [:get  "building"]               (rest-api/building-handler request uri)
@@ -423,7 +430,7 @@
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
             [:get  "sap-room-attributes"]    (rest-api/sap-room-attributes request uri)
             [:get  "rooms-with-attribute"]   (rest-api/rooms-with-attribute request uri)
-                                             (rest-api/unknown-endpoint request uri)
+                                             (rest-api/unknown-endpoint-handler request uri)
         )))
 
 (defn uri->file-name
