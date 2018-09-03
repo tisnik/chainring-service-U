@@ -16,13 +16,13 @@
     Author: Pavel Tisnovsky")
 
 
-(require '[clojure.pprint             :as pprint])
-(require '[clojure.tools.logging      :as log])
+(require '[clojure.pprint                          :as pprint])
+(require '[clojure.tools.logging                   :as log])
 
-(require '[chainring-service.db-interface     :as db-interface])
-(require '[chainring-service.config           :as config])
-(require '[chainring-service.drawings-storage :as drawings-storage])
-(require '[chainring-service.drawings-cache   :as drawings-cache])
+(require '[chainring-service.db-interface          :as db-interface])
+(require '[chainring-service.config                :as config])
+(require '[chainring-service.drawings-storage      :as drawings-storage])
+(require '[chainring-service.drawings-cache        :as drawings-cache])
 
 (require '[chainring-service.sap-interface         :as sap-interface])
 (require '[chainring-service.mocked-sap-interface  :as mocked-sap-interface])
@@ -52,7 +52,7 @@
                     (str api-prefix "/liveness")       "check the liveness of the service"
                     (str api-prefix "/readiness")      "check the readiness of the service and all subcomponents"
                     (str api-prefix "/config")         "actual configuration"
-                    (str api-prefix "/project-list")   "list of projects"
+                    (str api-prefix "/areals")         "list of areals"
                     (str api-prefix "/project")        "project metadata"
                     (str api-prefix "/building")       "building metadata"
                     (str api-prefix "/drawing")        "drawing metadata"
@@ -94,14 +94,22 @@
         (rest-api-utils/send-response response request)))
 
 
-(defn project-list-handler
-    "REST API handler for the /api/{version}/project-list endpoint."
+(defn list-of-areals-handler
+    "REST API handler for the /api/{version}/areals endpoint."
     [request uri]
-    (let [projects      (db-interface/read-project-list)]
-        (log/info "Projects:" projects)
-        (if projects
-            (rest-api-utils/send-response projects request)
-            (rest-api-utils/send-error-response "database access error" uri request :internal-server-error))))
+    (try
+        (let [start-time (System/currentTimeMillis)
+              areals     (sap-interface/call-sap-interface request "read-areals")
+              end-time   (System/currentTimeMillis)
+              timestamp  (rest-api-utils/get-timestamp)
+              response {:status    :ok
+                        :duration  (- end-time start-time)
+                        :timestamp timestamp
+                        :areals    areals}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-areals")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
 (defn read-project-info
@@ -186,15 +194,6 @@
               (rest-api-utils/send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
 
 
-; TODO: filters
-(defn all-projects
-    "REST API handler for the /api/{version}/projects endpoint."
-    [request uri]
-    (let [params    (:params request)
-          projects  (db-interface/read-project-list)]
-         (rest-api-utils/send-response projects request)))
-
-
 (defn all-buildings
     "REST API handler for the /api/{version}/buildings endpoint."
     [request uri]
@@ -242,12 +241,6 @@
           object-type   (get-sap-selector uri)
           href          (get-sap-href configuration object-type)]
           (rest-api-utils/send-response href request)))
-
-
-(defn sap-areals
-    [request uri]
-    (let [sap-response (sap-interface/call-sap-interface request "read-areals")]
-        (rest-api-utils/send-response sap-response request)))
 
 
 (defn sap-buildings

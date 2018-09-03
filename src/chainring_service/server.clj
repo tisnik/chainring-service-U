@@ -405,6 +405,7 @@
             [:get  "config"]                 (rest-api/config-handler request)
 
             ; endpoints to return list of AOIDs
+            [:get  "areals"]                 (rest-api/list-of-areals-handler request uri)
 
             ; endpoints to return information about selected AOID
             [:get  "project-list"]           (rest-api/project-list-handler request uri)
@@ -423,7 +424,6 @@
             [:post "sap-reload-mock-data"]   (rest-api/sap-reload-mock-data request uri)
             [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
             [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
-            [:get  "sap-areals"]             (rest-api/sap-areals request uri)
             [:get  "sap-buildings"]          (rest-api/sap-buildings request uri)
             [:get  "sap-floors"]             (rest-api/sap-floors request uri)
             [:get  "sap-rooms"]              (rest-api/sap-rooms request uri)
