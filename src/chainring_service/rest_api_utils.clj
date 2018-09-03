@@ -34,6 +34,9 @@
     :not-implemented       501})
 
 
+(def timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd HH:mm:ss"))
+
+
 (defn read-request-body
     "Read all informations from the request body."
     [request]
@@ -82,3 +85,10 @@
     [response]
     (-> (http-response/response response)
         (http-response/content-type "application/json")))
+
+
+(defn get-timestamp
+    []
+    (->> (new java.util.Date)
+         (.format timeformatter)))
+
