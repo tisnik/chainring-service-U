@@ -410,6 +410,11 @@
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
 
             ; endpoints to return information about selected AOID
+
+            ; endpoints to work with dates
+            [:get  "dates-from"]             (rest-api/list-all-dates-from request uri)
+            [:get  "nearest-date-from"]      (rest-api/nearest-date-from request uri)
+
             [:get  "project"]                (rest-api/project-handler request uri)
             [:get  "building"]               (rest-api/building-handler request uri)
             [:get  "floor"]                  (rest-api/floor-handler request uri)

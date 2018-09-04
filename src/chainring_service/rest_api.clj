@@ -122,13 +122,16 @@
     [request uri]
     (try
         (let [start-time (System/currentTimeMillis)
-              areals     (sap-interface/call-sap-interface request "read-areals")
+              params     (:params request)
+              date-from  (get params "date-from") 
+              result     (sap-interface/call-sap-interface request "read-areals" date-from)
               end-time   (System/currentTimeMillis)
               timestamp  (rest-api-utils/get-timestamp)
               response {:status    :ok
                         :duration  (- end-time start-time)
                         :timestamp timestamp
-                        :areals    areals}]
+                        :date-from (:date-from result)
+                        :areals    (:areals result)}]
             (rest-api-utils/send-response response request))
         (catch Exception e
             (log/error e "read-areals")
@@ -153,6 +156,42 @@
             (rest-api-utils/send-response response request))
         (catch Exception e
             (log/error e "read-buildings")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn list-all-dates-from
+    [request uri]
+    (try
+        (let [start-time (System/currentTimeMillis)
+              dates      (sap-interface/call-sap-interface request "read-all-dates-from")
+              end-time   (System/currentTimeMillis)
+              timestamp  (rest-api-utils/get-timestamp)
+              response {:status     :ok
+                        :duration   (- end-time start-time)
+                        :timestamp  timestamp
+                        :dates-from dates}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-dates-from")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn nearest-date-from
+    [request uri]
+    (try
+        (let [start-time      (System/currentTimeMillis)
+              params          (:params request)
+              date-from       (get params "date-from")
+              real-date-from  (sap-interface/call-sap-interface request "get-real-date-from" date-from)
+              end-time        (System/currentTimeMillis)
+              timestamp       (rest-api-utils/get-timestamp)
+              response {:status     :ok
+                        :duration   (- end-time start-time)
+                        :timestamp  timestamp
+                        :date-from  real-date-from}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "nearest-date-from")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
