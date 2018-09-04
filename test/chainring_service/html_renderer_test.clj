@@ -142,12 +142,6 @@
         (is (callable? 'chainring-service.html-renderer/render-drawing-list))))
 
 
-(deftest test-render-drawing-preview-existence
-    "Check that the chainring-service.html-renderer/render-drawing-preview definition exists."
-    (testing "if the chainring-service.html-renderer/render-drawing-preview definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-drawing-preview))))
-
-
 (deftest test-render-drawing-existence
     "Check that the chainring-service.html-renderer/render-drawing definition exists."
     (testing "if the chainring-service.html-renderer/render-drawing definition exists."

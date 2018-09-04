@@ -75,16 +75,16 @@
         (is (callable? 'chainring-service.server/process-binary-list))))
 
 
-(deftest test-process-project-list-page-existence
-    "Check that the chainring-service.server/process-project-list-page definition exists."
-    (testing "if the chainring-service.server/process-project-list-page definition exists."
-        (is (callable? 'chainring-service.server/process-project-list-page))))
+(deftest test-process-areal-list-page-existence
+    "Check that the chainring-service.server/process-areal-list-page definition exists."
+    (testing "if the chainring-service.server/process-areal-list-page definition exists."
+        (is (callable? 'chainring-service.server/process-areal-list-page))))
 
 
-(deftest test-process-project-info-page-existence
-    "Check that the chainring-service.server/process-project-info-page definition exists."
-    (testing "if the chainring-service.server/process-project-info-page definition exists."
-        (is (callable? 'chainring-service.server/process-project-info-page))))
+(deftest test-process-areal-info-page-existence
+    "Check that the chainring-service.server/process-areal-info-page definition exists."
+    (testing "if the chainring-service.server/process-areal-info-page definition exists."
+        (is (callable? 'chainring-service.server/process-areal-info-page))))
 
 
 (deftest test-process-building-info-page-existence
@@ -105,10 +105,10 @@
         (is (callable? 'chainring-service.server/process-room-list))))
 
 
-(deftest test-process-project-page-existence
-    "Check that the chainring-service.server/process-project-page definition exists."
-    (testing "if the chainring-service.server/process-project-page definition exists."
-        (is (callable? 'chainring-service.server/process-project-page))))
+(deftest test-process-areal-page-existence
+    "Check that the chainring-service.server/process-areal-page definition exists."
+    (testing "if the chainring-service.server/process-areal-page definition exists."
+        (is (callable? 'chainring-service.server/process-areal-page))))
 
 
 (deftest test-process-building-page-existence
@@ -121,12 +121,6 @@
     "Check that the chainring-service.server/process-floor-page definition exists."
     (testing "if the chainring-service.server/process-floor-page definition exists."
         (is (callable? 'chainring-service.server/process-floor-page))))
-
-
-(deftest test-process-drawing-preview-page-existence
-    "Check that the chainring-service.server/process-drawing-preview-page definition exists."
-    (testing "if the chainring-service.server/process-drawing-preview-page definition exists."
-        (is (callable? 'chainring-service.server/process-drawing-preview-page))))
 
 
 (deftest test-process-raster-preview-page-existence

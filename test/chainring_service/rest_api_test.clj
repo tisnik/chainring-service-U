@@ -15,46 +15,10 @@
 ; Tests for functions existence
 ;
 
-(deftest test-read-request-body-existence
-    "Check that the chainring-service.rest-api/read-request-body definition exists."
-    (testing "if the chainring-service.rest-api/read-request-body definition exists."
-        (is (callable? 'chainring-service.rest-api/read-request-body))))
-
-
-(deftest test-body->results-existence
-    "Check that the chainring-service.rest-api/body->results definition exists."
-    (testing "if the chainring-service.rest-api/body->results definition exists."
-        (is (callable? 'chainring-service.rest-api/body->results))))
-
-
-(deftest test-send-response-existence
-    "Check that the chainring-service.rest-api/send-response definition exists."
-    (testing "if the chainring-service.rest-api/send-response definition exists."
-        (is (callable? 'chainring-service.rest-api/send-response))))
-
-
-(deftest test-send-ok-response-existence
-    "Check that the chainring-service.rest-api/send-ok-response definition exists."
-    (testing "if the chainring-service.rest-api/send-ok-response definition exists."
-        (is (callable? 'chainring-service.rest-api/send-ok-response))))
-
-
-(deftest test-send-error-response-existence
-    "Check that the chainring-service.rest-api/send-error-response definition exists."
-    (testing "if the chainring-service.rest-api/send-error-response definition exists."
-        (is (callable? 'chainring-service.rest-api/send-error-response))))
-
-
-(deftest test-send-plain-response-existence
-    "Check that the chainring-service.rest-api/send-plain-response definition exists."
-    (testing "if the chainring-service.rest-api/send-plain-response definition exists."
-        (is (callable? 'chainring-service.rest-api/send-plain-response))))
-
-
-(deftest test-unknown-endpoint-existence
-    "Check that the chainring-service.rest-api/unknown-endpoint definition exists."
-    (testing "if the chainring-service.rest-api/unknown-endpoint definition exists."
-        (is (callable? 'chainring-service.rest-api/unknown-endpoint))))
+(deftest test-unknown-endpoint-handler-existence
+    "Check that the chainring-service.rest-api/unknown-endpoint-handler definition exists."
+    (testing "if the chainring-service.rest-api/unknown-endpoint-handler definition exists."
+        (is (callable? 'chainring-service.rest-api/unknown-endpoint-handler))))
 
 
 (deftest test-toplevel-handler-existence
