@@ -15,20 +15,28 @@
 (require '[clojure.data.csv :as csv])
 (require '[clojure.java.io  :as io])
 
-(require '[clojure.tools.logging      :as log])
+(require '[clojure.tools.logging :as log])
 
+(def data-directory
+    "data")
 
-(def areals-data-file
-    "data/areals.csv")
+(def dates-from
+    ["2000-01-01"
+     "2018-01-01"
+     "2018-07-01"
+     "2018-09-01"])
 
-(def buildings-data-file
-    "data/buildings.csv")
+(def areals-data-file-name
+    "areals.csv")
 
-(def floors-data-file
-    "data/floors.csv")
+(def buildings-data-file-name
+    "buildings.csv")
 
-(def rooms-data-file
-    "data/rooms.csv")
+(def floors-data-file-name
+    "floors.csv")
+
+(def rooms-data-file-name
+    "rooms.csv")
 
 (def areals
     (atom nil))
@@ -56,33 +64,66 @@
         (let [data (csv/read-csv reader)]
              (doall (csv-data->maps data)))))
 
+(defn load-csv-for-all-dates
+    [dates-from data-directory filename]
+    (zipmap dates-from
+        (for [date dates-from]
+            (let [full-filename (str data-directory "/" date "/" filename)]
+                (load-csv full-filename)))))
+
 (defn load-all-data-files
     []
-    (reset! areals    (load-csv areals-data-file))
-    (reset! buildings (load-csv buildings-data-file))
-    (reset! floors    (load-csv floors-data-file))
-    (reset! rooms     (load-csv rooms-data-file)))
+    (reset! areals    (load-csv-for-all-dates dates-from data-directory areals-data-file-name))
+    (reset! buildings (load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
+    (reset! floors    (load-csv-for-all-dates dates-from data-directory floors-data-file-name))
+    (reset! rooms     (load-csv-for-all-dates dates-from data-directory rooms-data-file-name)))
 
 (load-all-data-files)
+
+(defn aoids-count-per-date
+    [dates-from aoids]
+    (zipmap dates-from
+            (for [date dates-from] (count (get aoids date)))))
 
 (defn reload-mock-data
     []
     (log/info "Reload mock data begin")
+    (log/info "Dates: " dates-from)
     (load-all-data-files)
-    (let [status {:areals    (count @areals)
-                  :buildings (count @buildings)
-                  :floors    (count @floors)
-                  :rooms     (count @rooms)}]
+    (let [status {:dates-from dates-from
+                  :areals     (aoids-count-per-date dates-from @areals)
+                  :buildings  (aoids-count-per-date dates-from @buildings)
+                  :floors     (aoids-count-per-date dates-from @floors)
+                  :rooms      (aoids-count-per-date dates-from @rooms)}]
         (log/info "Reload mock data end")
         status))
 
-(defn read-areals
+(defn get-real-date-from
+    "Retrieve the date from dates-from list that is closely older than given date."
+    [date-from]
+    (if (not date-from)
+        (last dates-from)
+        (->> dates-from
+             (filter #(not (neg? (compare date-from %))))
+             last)))
+
+
+(defn read-all-dates-from
     []
-    @areals)
+    dates-from)
+
+
+(defn read-areals
+    [date-from]
+    (let [real-date-from (get-real-date-from date-from)]
+        {:date-from real-date-from
+         :areals    (get @areals real-date-from)}))
+
 
 (defn read-areal-info
     [areal]
     (first (filter #(= areal (:AOID %)) @areals)))
+
 
 (defn read-buildings
     [areal]
