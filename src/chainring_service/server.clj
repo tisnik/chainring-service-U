@@ -19,14 +19,15 @@
 
 (require '[clj-fileutils.fileutils :as fileutils])
 
-(require '[chainring-service.db-interface     :as db-interface])
-(require '[chainring-service.html-renderer    :as html-renderer])
-(require '[chainring-service.rest-api         :as rest-api])
-(require '[chainring-service.raster-renderer  :as raster-renderer])
-(require '[chainring-service.vector-drawing   :as vector-drawing])
-(require '[chainring-service.config           :as config])
-(require '[chainring-service.http-utils       :as http-utils])
-(require '[chainring-service.sap-interface    :as sap-interface])
+(require '[chainring-service.db-interface       :as db-interface])
+(require '[chainring-service.html-renderer      :as html-renderer])
+(require '[chainring-service.html-renderer-help :as html-renderer-help])
+(require '[chainring-service.rest-api           :as rest-api])
+(require '[chainring-service.raster-renderer    :as raster-renderer])
+(require '[chainring-service.vector-drawing     :as vector-drawing])
+(require '[chainring-service.config             :as config])
+(require '[chainring-service.http-utils         :as http-utils])
+(require '[chainring-service.sap-interface      :as sap-interface])
 
 (use     '[clj-utils.utils])
 
@@ -55,7 +56,10 @@
 (defn process-front-page
     "Function that prepares data for the front page."
     [request]
-    (finish-processing request (html-renderer/render-front-page)))
+    (let [timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
+          today         (new java.util.Date)
+          valid-from    (.format timeformatter today)]
+        (finish-processing request (html-renderer/render-front-page valid-from))))
 
 (defn process-settings-page
     [request]
@@ -116,14 +120,26 @@
     [request]
     (http-utils/return-file "www" "test.html" "text/html"))
 
+(defn process-help-valid-from
+    [request]
+    (finish-processing request (html-renderer-help/render-help-valid-from)))
+
+(defn process-help-valid-from-settings
+    [request]
+    (finish-processing request (html-renderer-help/render-help-valid-from-settings)))
+
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
     [request]
-    (let [projects      (sap-interface/call-sap-interface request "read-areals")]
-        (log/info "Areals" projects)
-        (if projects
-            (if (seq projects)
-                (finish-processing request (html-renderer/render-project-list projects))
+    (let [params        (:params request)
+          valid-from    (get params "valid-from")
+          areals-struct (sap-interface/call-sap-interface request "read-areals" valid-from)
+          areals-from   (:date-from areals-struct)
+          areals        (:areals areals-struct)]
+        (log/info "Areals" areals)
+        (if areals
+            (if (seq areals)
+                (finish-processing request (html-renderer/render-areals-list valid-from areals-from areals))
                 (finish-processing request (html-renderer/render-error-page "Databáze projektů (areálů) je prázdná")))
             (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k SAPu")))))
 
@@ -445,11 +461,13 @@
     "This function is used to handle all GUI calls. Three parameters are expected:
      data structure containing HTTP request, string with URI, and the HTTP method."
     [request uri method]
-    (cond (.endsWith uri ".gif") (http-utils/return-file "www" (uri->file-name uri) "image/gif")
-          (.endsWith uri ".png") (http-utils/return-file "www" (uri->file-name uri) "image/png")
-          (.endsWith uri ".ico") (http-utils/return-file "www" (uri->file-name uri) "image/x-icon")
-          (.endsWith uri ".css") (http-utils/return-file "www" (uri->file-name uri) "text/css")
-          (.endsWith uri ".js")  (http-utils/return-file "www" (uri->file-name uri) "application/javascript")
+    (cond (.endsWith uri ".gif")  (http-utils/return-file "www" (uri->file-name uri) "image/gif")
+          (.endsWith uri ".png")  (http-utils/return-file "www" (uri->file-name uri) "image/png")
+          (.endsWith uri ".ico")  (http-utils/return-file "www" (uri->file-name uri) "image/x-icon")
+          (.endsWith uri ".css")  (http-utils/return-file "www" (uri->file-name uri) "text/css")
+          (.endsWith uri ".js")   (http-utils/return-file "www" (uri->file-name uri) "application/javascript")
+          (.endsWith uri ".htm")  (http-utils/return-file "www" (uri->file-name uri) "text/html")
+          (.endsWith uri ".html") (http-utils/return-file "www" (uri->file-name uri) "text/html")
           :else
         (condp = uri
             "/"                           (process-front-page request)
@@ -478,6 +496,9 @@
             "/json-list"                  (process-json-list request)
             "/binary-list"                (process-binary-list request)
             "/test"                       (process-test request)
+
+            "/help_valid_from"            (process-help-valid-from request)
+            "/help_valid_from_settings"   (process-help-valid-from-settings request)
             )))
 
 (defn handler

@@ -31,7 +31,11 @@
         [:meta {:http-equiv "Content-type" :content "text/html; charset=utf-8"}]
         (page/include-css (str url-prefix "bootstrap/bootstrap.min.css"))
         (page/include-css (str url-prefix "chainring.css"))
-        (page/include-js  (str url-prefix "bootstrap/bootstrap.min.js"))
+        (page/include-css (str url-prefix "calendar.css"))
+        (if (and options (:include-calendar? options))
+            (page/include-js  (str url-prefix "bootstrap/bootstrap.min.js")))
+        (if (and options (:include-calendar? options))
+            (page/include-js  (str url-prefix "calendar_db.js")))
         (if (and options (:drawing-id options))
             [:script (str "var drawing_id = " (:drawing-id options) ";")]
             [:script "var drawing_id = null;"])
@@ -96,13 +100,25 @@
 
 (defn render-front-page
     "Render front page of this application."
-    []
+    [valid-from]
     (page/xhtml
-        (render-html-header "/")
+        (render-html-header "/" {:include-calendar? true})
         [:body
             [:div {:class "container"}
                 (render-navigation-bar-section "/")
-                [:a {:href "areals" :class "btn btn-success" :role "button" :style "width:10em"} "Seznam areálů"]
+                [:h3 "Vstup do systému"]
+                (form/form-to {:name "inputForm"} [:get "/areals"]
+                    [:span "Platnost od:"] "&nbsp;"
+                    [:script "new tcal ({'formname': 'inputForm', 'controlname': 'valid-from'});"]
+                    [:br]
+                    [:br]
+                    [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:10em"}]
+                    "&nbsp;"
+                    [:a {:href "/help_valid_from_settings"} [:img {:src "icons/help.gif"}]]
+                    [:br]
+                    [:br]
+                    [:button {:type "submit" :class "btn btn-success" :style "width:10em"} "Seznam areálů"]
+                )
                 [:div {:style "height: 10ex"}]
                 [:h3 "Další volby"]
                 [:a {:href "settings" :class "btn btn-default" :role "button" :style "width:10em"} "Nastavení"]
@@ -324,8 +340,8 @@
 ))
 
 
-(defn render-project-list
-    [projects]
+(defn render-areals-list
+    [valid-from areals-from areals]
     (page/xhtml
         (render-html-header "/")
         [:body
@@ -335,15 +351,19 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
                          [:th "Jméno"]
-                         ;[:th "Vytvořeno"]
+                         [:th "Platnost od"]
                          [:th ""]]
-                    (for [project projects]
-                            [:tr [:td (:AOID project)]
-                                 [:td [:a {:href (str "areal?areal-id=" (:AOID project))}(:Label project)]]
-                                 ;[:td (:created project)]
+                    (for [areal areals]
+                            [:tr [:td (:AOID areal)]
+                                 [:td [:a {:href (str "areal?areal-id=" (:AOID areal))}(:Label areal)]]
+                                 [:td areals-from]
                                  [:td [:a {:title "Podrobnější informace o areálu"
-                                           :href (str "areal-info?areal-id=" (:AOID project))}
+                                           :href (str "areal-info?areal-id=" (:AOID areal))}
                                            [:img {:src "icons/info.gif"}]]]])
+                    [:tr [:td {:colspan 4} "&nbsp;"]]
+                    [:tr [:td {:colspan 2} "Zadaná platnost od:"]
+                         [:td valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (render-html-footer)

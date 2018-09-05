@@ -15,7 +15,7 @@
 (require '[clojure.data.csv :as csv])
 (require '[clojure.java.io  :as io])
 
-(require '[clojure.tools.logging :as log])
+(require '[clojure.tools.logging      :as log])
 
 (def data-directory
     "data")
