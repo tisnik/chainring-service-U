@@ -20,92 +20,19 @@
 (require '[hiccup.page  :as page])
 (require '[hiccup.form  :as form])
 
-
-(defn render-html-header
-    "Renders part of HTML page - the header."
-    [url-prefix & [options]]
-    [:head
-        [:title "Chainring"]
-        [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
-        [:meta {:name "Generator" :content "Clojure"}]
-        [:meta {:http-equiv "Content-type" :content "text/html; charset=utf-8"}]
-        (page/include-css (str url-prefix "bootstrap/bootstrap.min.css"))
-        (page/include-css (str url-prefix "chainring.css"))
-        (page/include-css (str url-prefix "calendar.css"))
-        (if (and options (:include-calendar? options))
-            (page/include-js  (str url-prefix "bootstrap/bootstrap.min.js")))
-        (if (and options (:include-calendar? options))
-            (page/include-js  (str url-prefix "calendar_db.js")))
-        (if (and options (:drawing-id options))
-            [:script (str "var drawing_id = " (:drawing-id options) ";")]
-            [:script "var drawing_id = null;"])
-        (if (and options (:floor-id options))
-            [:script (str "var floor_id = '" (:floor-id options) "';")]
-            [:script "var floor_id = null;"])
-        (if (and options (:version options))
-            [:script (str "var version = '" (:version options) "';")]
-            [:script "var version = null;"])
-        (if (and options (:raster-drawing-id options))
-            [:script (str "var raster_drawing_id = " (:raster-drawing-id options) ";")]
-            [:script "var raster_drawing_id = null;"])
-        (if (and options (:drawing-name options))
-            [:script (str "var drawing_name = '" (:drawing-name options) "';")]
-            [:script "var drawing_name = null;"])
-        (if (and options (:sap-enabled options))
-            [:script "var sap_enabled = true;"]
-            [:script "var sap_enabled = false;"])
-        (if (and options (:sap-url options))
-            [:script (str "var sap_url = '" (:sap-url options) "';")]
-            [:script "var sap_url = null;"])
-        (if (and options (:include-drawing-js? options))
-            (page/include-js (str url-prefix "drawing.js")))
-    ] ; head
-)
+(require '[chainring-service.html-renderer-widgets :as widgets])
 
 
-(defn render-html-footer
-    "Renders part of HTML page - the footer."
-    []
-    [:div "<br /><br />Chainring verze 0.1"])
-
-
-(defn render-navigation-bar-section
-    "Renders whole navigation bar."
-    [url-prefix]
-    [:nav {:class "navbar navbar-inverse navbar-fixed-top" :role "navigation"} ; use navbar-default instead of navbar-inverse
-        [:div {:class "container-fluid"}
-            [:div {:class "row"}
-                [:div {:class "col-md-7"}
-                    [:div {:class "navbar-header"}
-                        [:a {:href url-prefix :class "navbar-brand"} "Chainring"]
-                    ] ; ./navbar-header
-                    [:div {:class "navbar-header"}
-                        [:ul {:class "nav navbar-nav"}
-                            ;[:li (tab-class :whitelist mode) [:a {:href (str url-prefix "whitelist")} "Whitelist"]]
-                        ]
-                    ]
-                ] ; col-md-7 ends
-                ;[:div {:class "col-md-3"}
-                ;    (render-name-field user-name (remember-me-href url-prefix mode))
-                ;]
-                ;[:div {:class "col-md-2"}
-                ;    [:div {:class "navbar-header"}
-                ;        [:a {:href (users-href url-prefix mode) :class "navbar-brand"} "Users"]
-                 ;   ] ; ./navbar-header
-                ;] ; col ends
-            ] ; row ends
-        ] ; </div .container-fluid>
-]); </nav>
 
 
 (defn render-front-page
     "Render front page of this application."
     [valid-from]
     (page/xhtml
-        (render-html-header "/" {:include-calendar? true})
+        (widgets/header "/" {:include-calendar? true})
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h3 "Vstup do systému"]
                 (form/form-to {:name "inputForm"} [:get "/areals"]
                     [:span "Platnost od:"] "&nbsp;"
@@ -127,7 +54,7 @@
                 [:a {:href "db-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav databáze"]
                 "&nbsp;"
                 [:a {:href "drawings-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav výkresů"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -152,10 +79,10 @@
     "Render page with settings/configuration."
     [user-id]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Nastavení"]
                 (form/form-to [:post "store-settings"]
                     [:input {:type "hidden" :name "selected-room-color-code" :id "selected-room-color-code" :value "xxx"}]
@@ -195,7 +122,7 @@
                 (form/form-to [:get "/"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -209,10 +136,10 @@
     "Render page with database statistic."
     [db-stats]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Stav databáze"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Tabulka"]                [:th "Počet záznamů"]]
@@ -229,7 +156,7 @@
                 (form/form-to [:get "/"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -239,10 +166,10 @@
     "Render page with drawings statistic."
     [drawings-count json-count binary-count]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Stav výkresů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Formát"]        [:th "Počet výkresů"] [:th ""]]
@@ -254,7 +181,7 @@
                 (form/form-to [:get "/"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -264,10 +191,10 @@
     "Render page with list of drawings."
     [drawings]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Seznam výkresů ve formátu Drw"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Výkres"] [:th "Velikost"]]; [:th {:colspan "2"} "Náhled"]]
@@ -282,7 +209,7 @@
                 (form/form-to [:get "/drawings-stats"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -291,10 +218,10 @@
 (defn render-json-list
     [drawings]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Seznam výkresů ve formátu JSON"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Výkres"] [:th "Velikost"] [:th "Náhled"]]
@@ -308,7 +235,7 @@
                 (form/form-to [:get "/drawings-stats"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -317,10 +244,10 @@
 (defn render-binary-list
     [drawings]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Seznam výkresů v binárním formátu"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Výkres"] [:th "Velikost"] [:th "Náhled"]]
@@ -334,7 +261,7 @@
                 (form/form-to [:get "/drawings-stats"]
                     [:button {:type "submit" :class "btn btn-primary"} "Zpět"]
                 )
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -343,10 +270,10 @@
 (defn render-areals-list
     [valid-from areals-from areals]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Seznam areálů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
@@ -355,40 +282,49 @@
                          [:th ""]]
                     (for [areal areals]
                             [:tr [:td (:AOID areal)]
-                                 [:td [:a {:href (str "areal?areal-id=" (:AOID areal))}(:Label areal)]]
+                                 [:td [:a {:href (str "areal?areal-id=" (:AOID areal) "&valid-from=" valid-from)}(:Label areal)]]
                                  [:td areals-from]
                                  [:td [:a {:title "Podrobnější informace o areálu"
-                                           :href (str "areal-info?areal-id=" (:AOID areal))}
+                                           :href (str "areal-info?areal-id=" (:AOID areal) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                     [:tr [:td {:colspan 4} "&nbsp;"]]
                     [:tr [:td {:colspan 2} "Zadaná platnost od:"]
                          [:td valid-from]
-                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
+                         [:td (widgets/help-button "/help_valid_from")]]
                 ]
-                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/back-button)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
 
 
-(defn render-project-info
-    [project-id project-info building-count]
+(defn render-areal-info
+    [project-id project-info building-count valid-from]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Informace o areálu '" (:name project-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "AOID"] [:td project-id]]
-                    [:tr [:th "Jméno"] [:td (:Label project-info)]]
+                    [:tr [:th "AOID"]
+                         [:td project-id]
+                         [:td [:a {:href "/help_aoid_areal"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Jméno"]
+                         [:td (:Label project-info)]
+                         [:td [:a {:href "/help_name_areal"} [:img {:src "icons/help.gif"}]]]]
                     ;[:tr [:th "Vytvořeno"] [:td (:created project-info)]]
                     ;[:tr [:th "Modifikováno"] [:td (:modified project-info)]]
-                    [:tr [:th "Počet budov"] [:td (or building-count "nelze zjistit")]]
+                    [:tr [:th "Počet budov"] [:td (or building-count "nelze zjistit")]
+                         [:td "&nbsp;"]]
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Zadaná platnost od:"]
+                         [:td valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
-                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/back-button)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -397,10 +333,10 @@
 (defn render-building-info
     [building-id building-info floor-count]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Informace o budově '" (or (:Label building-info) (:AOID building-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td building-id]]
@@ -410,7 +346,7 @@
                     [:tr [:th "Počet podlaží"] [:td (or floor-count "nelze zjistit")]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -419,10 +355,10 @@
 (defn render-floor-info
     [floor-id floor-info drawing-count]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Informace o podlaží '" (or (:Label floor-info) (:AOID floor-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
@@ -432,7 +368,7 @@
                     [:tr [:th "Počet verzí výkresů"] [:td (or drawing-count "nelze zjistit")] [:td "&nbsp;"]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -441,10 +377,10 @@
 (defn render-drawing-info
     [drawing-id drawing-info]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Informace o výkresu '" drawing-id "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID výkresu"]      [:td drawing-id] [:td "&nbsp;"]]
@@ -458,7 +394,7 @@
                     [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;textů"]   [:td (-> drawing-info :entities-count :texts)]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -467,10 +403,10 @@
 (defn render-building-list
     [project-id project-info buildings]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Seznam budov v areálu '" (:AOID project-info) "'")]
                 [:h4 (:Label project-info)]
                 [:br]
@@ -491,7 +427,7 @@
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -500,10 +436,10 @@
 (defn render-floor-list
     [project-id building-id project-info building-info floors]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Seznam podlaží v areálu '" (:Label project-info) "' a budově '" (or (:Label building-info) (:AOID building-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
@@ -542,7 +478,7 @@
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -556,10 +492,10 @@
 (defn render-room-list-page
     [floor-id floor-info version rooms]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Informace místnostech na podlaží '" (:name floor-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
@@ -596,7 +532,7 @@
                             ])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -606,10 +542,10 @@
     "Render page with list of drawings."
     [project-id building-id floor-id project-info building-info floor-info drawings]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 (str "Výkresy pro areál '" (:name project-info) "', budovu '" (:name building-info) "' a podlaží '" "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
@@ -650,7 +586,7 @@
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -814,14 +750,14 @@
     "Render page with drawing on the right side and with configurable toolbar on the left side."
     [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms sap?]
     (page/xhtml
-        (render-html-header "/" {:include-drawing-js? true
+        (widgets/header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
                                  :version "C" ; TODO: how to handle this?
                                  :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
                                  :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
-            (render-navigation-bar-section "/")
+            (widgets/navigation-bar "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
@@ -848,7 +784,7 @@
                 ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
             ]] ; </tr> </table>
             [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-            (render-html-footer)
+            (widgets/footer)
         ] ; </body>
 ))
 
@@ -858,15 +794,15 @@
     The drawing remains static and it won't be possible to click on rooms."
     [drawing-name]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body {:class "body-drawing"}
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:img {:id "drawing" :src (str "/raster-drawing?drawing-name=" drawing-name) }]
                 [:br]
                 [:br]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -876,15 +812,15 @@
     "Render an error page with a 'back' button."
     [message]
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Chyba či neočekávaný stav"]
                 [:p {:class "alert alert-danger"} message]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 [:br][:br][:br][:br]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))
@@ -894,15 +830,15 @@
     "Render page with setting dialog and a 'back' button."
     []
     (page/xhtml
-        (render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Nastavení"]
                 [:p {:class "alert alert-success"} "Změny byly úspěšně uloženy"]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 [:br][:br][:br][:br]
-                (render-html-footer)
+                (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
 ))

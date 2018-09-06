@@ -16,24 +16,6 @@
 ;
 
 
-(deftest test-render-html-header-existence
-    "Check that the chainring-service.html-renderer/render-html-header definition exists."
-    (testing "if the chainring-service.html-renderer/render-html-header definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-html-header))))
-
-
-(deftest test-render-html-footer-existence
-    "Check that the chainring-service.html-renderer/render-html-footer definition exists."
-    (testing "if the chainring-service.html-renderer/render-html-footer definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-html-footer))))
-
-
-(deftest test-render-navigation-bar-section-existence
-    "Check that the chainring-service.html-renderer/render-navigation-bar-section definition exists."
-    (testing "if the chainring-service.html-renderer/render-navigation-bar-section definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-navigation-bar-section))))
-
-
 (deftest test-render-front-page-existence
     "Check that the chainring-service.html-renderer/render-front-page definition exists."
     (testing "if the chainring-service.html-renderer/render-front-page definition exists."
@@ -88,16 +70,16 @@
         (is (callable? 'chainring-service.html-renderer/render-binary-list))))
 
 
-(deftest test-render-project-list-existence
-    "Check that the chainring-service.html-renderer/render-project-list definition exists."
-    (testing "if the chainring-service.html-renderer/render-project-list definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-project-list))))
+(deftest test-render-areals-list-existence
+    "Check that the chainring-service.html-renderer/render-areals-list definition exists."
+    (testing "if the chainring-service.html-renderer/render-areals-list definition exists."
+        (is (callable? 'chainring-service.html-renderer/render-areals-list))))
 
 
-(deftest test-render-project-info-existence
-    "Check that the chainring-service.html-renderer/render-project-info definition exists."
-    (testing "if the chainring-service.html-renderer/render-project-info definition exists."
-        (is (callable? 'chainring-service.html-renderer/render-project-info))))
+(deftest test-render-areal-info-existence
+    "Check that the chainring-service.html-renderer/render-areal-info definition exists."
+    (testing "if the chainring-service.html-renderer/render-areal-info definition exists."
+        (is (callable? 'chainring-service.html-renderer/render-areal-info))))
 
 
 (deftest test-render-building-info-existence
