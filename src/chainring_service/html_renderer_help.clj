@@ -21,47 +21,76 @@
 (require '[hiccup.form  :as form])
 
 (require '[chainring-service.html-renderer :as html-renderer])
-
-
-(defn render-back-button
-    []
-    [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"])
+(require '[chainring-service.html-renderer-widgets :as widgets])
 
 
 (defn render-help-valid-from
     []
     (page/xhtml
-        (html-renderer/render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (html-renderer/render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Nápověda"]
                 [:h3 "Datum platnosti"]
                 [:p "Stavební objekty v SAPu mají nastaven datum platnosti, podle kterého je možné určit časový úsek, kdy takový objekt reálně existuje."]
                 [:p "Například při zbourání příčky v SAPu zanikne jedna z místností, což se projeví i na výkresech."]
                 [:p "Implicitně je datum platnosti nastaveno na aktuální den."]
                 [:br]
-                (render-back-button)
+                (widgets/back-button)
                 [:br][:br][:br][:br]
-                (html-renderer/render-html-footer)
+                (widgets/footer)
             ]]))
 
 
 (defn render-help-valid-from-settings
     []
     (page/xhtml
-        (html-renderer/render-html-header "/")
+        (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (html-renderer/render-navigation-bar-section "/")
+                (widgets/navigation-bar "/")
                 [:h1 "Nápověda"]
                 [:h3 "Nastavení data platnosti"]
                 [:p "Stavební objekty v SAPu mají nastaven datum platnosti, podle kterého je možné určit časový úsek, kdy takový objekt reálně existuje."]
                 [:p "Například při zbourání příčky v SAPu zanikne jedna z místností, což se projeví i na výkresech."]
                 [:p "Implicitně je datum platnosti nastaveno na aktuální den."]
                 [:br]
-                (render-back-button)
+                (widgets/back-button)
                 [:br][:br][:br][:br]
-                (html-renderer/render-html-footer)
+                (widgets/footer)
+            ]]))
+
+
+(defn render-help-aoid-areal
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "AOID Areálu"]
+                [:p ""]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn render-help-name-areal
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Jméno areálu"]
+                [:p ""]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
             ]]))
 
