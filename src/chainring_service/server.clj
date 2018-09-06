@@ -128,6 +128,14 @@
     [request]
     (finish-processing request (html-renderer-help/render-help-valid-from-settings)))
 
+(defn process-help-aoid-areal
+    [request]
+    (finish-processing request (html-renderer-help/render-help-aoid-areal)))
+
+(defn process-help-name-areal
+    [request]
+    (finish-processing request (html-renderer-help/render-help-name-areal)))
+
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
     [request]
@@ -137,6 +145,7 @@
           areals-from   (:date-from areals-struct)
           areals        (:areals areals-struct)]
         (log/info "Areals" areals)
+        (log/info "Valid from" valid-from)
         (if areals
             (if (seq areals)
                 (finish-processing request (html-renderer/render-areals-list valid-from areals-from areals))
@@ -147,14 +156,16 @@
     [request]
     (let [params         (:params request)
           areal-id       (get params "areal-id")
-          areal-info     (sap-interface/call-sap-interface request "read-areal-info" areal-id)
-          building-count (count (sap-interface/call-sap-interface request "read-buildings" areal-id))]
+          valid-from     (get params "valid-from")
+          areal-info     (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-count (count (sap-interface/call-sap-interface request "read-buildings" areal-id valid-from))]
           (log/info "Areal ID:" areal-id)
           (log/info "Building count:" building-count)
           (log/info "Areal info" areal-info)
+          (log/info "Valid from" valid-from)
           (if areal-id
               (if areal-info
-                  (finish-processing request (html-renderer/render-project-info areal-id areal-info building-count))
+                  (finish-processing request (html-renderer/render-areal-info areal-id areal-info building-count valid-from))
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném areálu")))
               (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
@@ -499,6 +510,8 @@
 
             "/help_valid_from"            (process-help-valid-from request)
             "/help_valid_from_settings"   (process-help-valid-from-settings request)
+            "/help_aoid_areal"            (process-help-aoid-areal request)
+            "/help_name_areal"            (process-help-name-areal request)
             )))
 
 (defn handler

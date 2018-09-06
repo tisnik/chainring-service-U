@@ -100,11 +100,11 @@
 
 (defn get-real-date-from
     "Retrieve the date from dates-from list that is closely older than given date."
-    [date-from]
-    (if (not date-from)
+    [valid-from]
+    (if (not valid-from)
         (last dates-from)
         (->> dates-from
-             (filter #(not (neg? (compare date-from %))))
+             (filter #(not (neg? (compare valid-from %))))
              last)))
 
 
@@ -114,23 +114,27 @@
 
 
 (defn read-areals
-    [date-from]
-    (let [real-date-from (get-real-date-from date-from)]
+    [valid-from]
+    (let [real-date-from (get-real-date-from valid-from)]
         {:date-from real-date-from
          :areals    (get @areals real-date-from)}))
 
 
 (defn read-areal-info
-    [areal]
-    (first (filter #(= areal (:AOID %)) @areals)))
+    [areal valid-from]
+    (let [real-date-from (get-real-date-from valid-from)]
+        (first (filter #(= areal (:AOID %)) (get @areals real-date-from)))))
 
 
 (defn read-buildings
-    [areal]
-    (if areal
-        (let [prefix (str areal ".")]
-            (filter #(.startsWith (:AOID %) prefix) @buildings))
-        @buildings))
+    [areal valid-from]
+    (let [real-date-from (get-real-date-from valid-from)
+          buildings-for-date (get @buildings real-date-from)]
+        (if areal
+            (let [prefix (str areal ".")]
+                (filter #(.startsWith (:AOID %) prefix) buildings-for-date))
+            buildings-for-date)))
+
 
 (defn read-building-info
     [building]
