@@ -57,10 +57,10 @@
         (is (callable? 'chainring-service.rest-api/config-handler))))
 
 
-(deftest test-project-list-handler-existence
-    "Check that the chainring-service.rest-api/project-list-handler definition exists."
-    (testing "if the chainring-service.rest-api/project-list-handler definition exists."
-        (is (callable? 'chainring-service.rest-api/project-list-handler))))
+(deftest test-list-of-areals-handler-existence
+    "Check that the chainring-service.rest-api/list-of-areals-handler definition exists."
+    (testing "if the chainring-service.rest-api/list-of-areals-handler definition exists."
+        (is (callable? 'chainring-service.rest-api/list-of-areals-handler))))
 
 
 (deftest test-read-project-info-existence
@@ -97,12 +97,6 @@
     "Check that the chainring-service.rest-api/drawing-handler definition exists."
     (testing "if the chainring-service.rest-api/drawing-handler definition exists."
         (is (callable? 'chainring-service.rest-api/drawing-handler))))
-
-
-(deftest test-all-projects-existence
-    "Check that the chainring-service.rest-api/all-projects definition exists."
-    (testing "if the chainring-service.rest-api/all-projects definition exists."
-        (is (callable? 'chainring-service.rest-api/all-projects))))
 
 
 (deftest test-all-buildings-existence
