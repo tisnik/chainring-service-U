@@ -401,7 +401,7 @@
 
 
 (defn render-building-list
-    [project-id project-info buildings]
+    [project-id project-info buildings valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -418,13 +418,17 @@
                          [:th ""]]
                     (for [building buildings]
                             [:tr [:td (:AOID building)]
-                                 [:td [:a {:href (str "building?areal-id=" project-id "&building-id=" (:AOID building))}
+                                 [:td [:a {:href (str "building?areal-id=" project-id "&building-id=" (:AOID building) "&valid-from=" valid-from)}
                                           (if (empty? (:Label building)) (:AOID building) (:Label building))]]
                                  ;[:td (:AOID building)]
                                  ;[:td (:created building)]
                                  [:td [:a {:title "Podrobnější informace o budově"
-                                           :href (str "building-info?building-id=" (:AOID building))}
+                                           :href (str "building-info?building-id=" (:AOID building) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Zadaná platnost od:"]
+                         [:td valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (widgets/footer)

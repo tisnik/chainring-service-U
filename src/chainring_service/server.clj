@@ -173,9 +173,10 @@
     [request]
     (let [params         (:params request)
           areal-id       (get params "areal-id")
+          valid-from     (get params "valid-from")
           building-id    (get params "building-id")
-          building-info  (sap-interface/call-sap-interface request "read-building-info" building-id)
-          floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id))]
+          building-info  (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id valid-from))]
           (log/info "Areal ID:" building-id)
           (log/info "Building ID:" building-id)
           (log/info "Floor count:" floor-count)
@@ -256,14 +257,15 @@
     [request]
     (let [params       (:params request)
           areal-id     (get params "areal-id")
-          areal-info   (sap-interface/call-sap-interface request "read-areal-info" areal-id)]
+          valid-from   (get params "valid-from")
+          areal-info   (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info:" areal-info)
           (if areal-id
-              (let [buildings (sap-interface/call-sap-interface request "read-buildings" areal-id)]
+              (let [buildings (sap-interface/call-sap-interface request "read-buildings" areal-id valid-from)]
                   (log/info "Buildings:" buildings)
                   (if (seq buildings)
-                      (finish-processing request (html-renderer/render-building-list areal-id areal-info buildings))
+                      (finish-processing request (html-renderer/render-building-list areal-id areal-info buildings valid-from))
                       (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))
               (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
