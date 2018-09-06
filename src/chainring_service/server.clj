@@ -183,7 +183,7 @@
           (log/info "Building info" building-info)
           (if building-id
               (if building-info
-                  (finish-processing request (html-renderer/render-building-info building-id building-info floor-count))
+                  (finish-processing request (html-renderer/render-building-info building-id building-info floor-count valid-from))
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
@@ -195,14 +195,15 @@
     [request]
     (let [params                (:params request)
           floor-id              (get params "floor-id")
-          floor-info            (sap-interface/call-sap-interface request "read-floor-info" floor-id)
+          valid-from            (get params "valid-from")
+          floor-info            (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
           drawing-count         (drawings-for-floor floor-id)]
           (log/info "Floor ID:" floor-id)
           (log/info "Drawing count:" drawing-count)
           (log/info "Floor info" floor-info)
           (if floor-id
               (if floor-info
-                  (finish-processing request (html-renderer/render-floor-info floor-id floor-info drawing-count))
+                  (finish-processing request (html-renderer/render-floor-info floor-id floor-info drawing-count valid-from))
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném podlaží")))
               (finish-processing request (html-renderer/render-error-page "Žádné podlaží nebylo vybráno")))))
 

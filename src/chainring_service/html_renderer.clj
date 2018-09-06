@@ -306,7 +306,7 @@
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Informace o areálu '" (:name project-info) "'")]
+                [:h1 (str "Informace o areálu '" (or (:Label project-info) (:AOID project-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "AOID"]
                          [:td project-id]
@@ -331,7 +331,7 @@
 
 
 (defn render-building-info
-    [building-id building-info floor-count]
+    [building-id building-info floor-count valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -339,11 +339,15 @@
                 (widgets/navigation-bar "/")
                 [:h1 (str "Informace o budově '" (or (:Label building-info) (:AOID building-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"] [:td building-id]]
+                    [:tr [:th "AOID"] [:td building-id]]
                     [:tr [:th "Jméno"] [:td (:Label building-info)]]
                     ;[:tr [:th "Vytvořeno"] [:td (:created building-info)]]
                     ;[:tr [:th "Modifikováno"] [:td (:modified building-info)]]
                     [:tr [:th "Počet podlaží"] [:td (or floor-count "nelze zjistit")]]
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Zadaná platnost od:"]
+                         [:td valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (widgets/footer)
