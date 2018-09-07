@@ -142,3 +142,51 @@
                 (widgets/footer)
             ]]))
 
+(defn aoid-floor
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "AOID Podlaží"]
+                [:p "Jedná se o jednotný identifikátor podlaží používaný v SAPu. Tento identifikátor má tvar celého kladného čísla následovaného tečkou a identifikátorem budovy a identifikátorem podlaží: 1.A1.1MP atd."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn name-floor
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Jméno podlaží"]
+                [:p "Jedná se o jméno podlaží používané v SAPu. Tvar jména může být prakticky libovolný a není povinný."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn drawing-count-floor
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Počet výkresů"]
+                [:p "Zjištěný počet výkresů pro podlaží v dané oblasti platnosti"]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
