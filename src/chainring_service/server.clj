@@ -136,6 +136,18 @@
     [request]
     (finish-processing request (html-renderer-help/render-help-name-areal)))
 
+(defn process-help-aoid-building
+    [request]
+    (finish-processing request (html-renderer-help/render-help-aoid-building)))
+
+(defn process-help-name-building
+    [request]
+    (finish-processing request (html-renderer-help/render-help-name-building)))
+
+(defn process-help-floor-count-building
+    [request]
+    (finish-processing request (html-renderer-help/render-help-floor-count-building)))
+
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
     [request]
@@ -515,6 +527,9 @@
             "/help_valid_from_settings"   (process-help-valid-from-settings request)
             "/help_aoid_areal"            (process-help-aoid-areal request)
             "/help_name_areal"            (process-help-name-areal request)
+            "/help_aoid_building"         (process-help-aoid-building request)
+            "/help_name_building"         (process-help-name-building request)
+            "/help_floor_count_building"  (process-help-floor-count-building request)
             )))
 
 (defn handler

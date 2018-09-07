@@ -150,11 +150,18 @@
           floors-for-date (get @floors real-date-from)]
         (if areal
             (if building
+                ; filter by areal-id and building-id
                 (let [prefix (str building ".")]
                     (filter #(.startsWith (:AOID %) prefix) floors-for-date))
+                ; filter by areal-id
                 (let [prefix (str areal ".")]
                     (filter #(.startsWith (:AOID %) prefix) floors-for-date)))
-            floors-for-date)))
+            (if building
+                ; filter by building-id
+                (let [prefix (str building ".")]
+                    (filter #(.startsWith (:AOID %) prefix) floors-for-date))
+                ; no filtering at all
+                floors-for-date))))
 
 
 (defn read-floor-info
