@@ -71,7 +71,7 @@
                 (widgets/navigation-bar "/")
                 [:h1 "Nápověda"]
                 [:h3 "AOID Areálu"]
-                [:p ""]
+                [:p "Jedná se o jednotný identifikátor areálu používaný v SAPu. Tento identifikátor má tvar celého kladného čísla (1, 2, atd.)."]
                 [:br]
                 (widgets/back-button)
                 [:br][:br][:br][:br]
@@ -87,7 +87,55 @@
                 (widgets/navigation-bar "/")
                 [:h1 "Nápověda"]
                 [:h3 "Jméno areálu"]
-                [:p ""]
+                [:p "Jedná se o jméno areálu používané v SAPu. Tvar jména může být prakticky libovolný a není povinný."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn render-help-aoid-building
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "AOID Budovy"]
+                [:p "Jedná se o jednotný identifikátor budovy používaný v SAPu. Tento identifikátor má tvar celého kladného čísla následovaného tečkou a identifikátorem budovy: A.A1 atd."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn render-help-name-building
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Jméno budovy"]
+                [:p "Jedná se o jméno budovy používané v SAPu. Tvar jména může být prakticky libovolný a není povinný."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn render-help-floor-count-building
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Počet podlaží"]
+                [:p "Zjištěný počet podlaží v budově"]
                 [:br]
                 (widgets/back-button)
                 [:br][:br][:br][:br]
