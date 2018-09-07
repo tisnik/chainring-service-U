@@ -120,45 +120,10 @@
     [request]
     (http-utils/return-file "www" "test.html" "text/html"))
 
-(defn process-help-valid-from
-    [request]
-    (finish-processing request (html-renderer-help/valid-from)))
+(defn process-help-page
+    [request page-handler]
+    (finish-processing request (page-handler)))
 
-(defn process-help-valid-from-settings
-    [request]
-    (finish-processing request (html-renderer-help/valid-from-settings)))
-
-(defn process-help-aoid-areal
-    [request]
-    (finish-processing request (html-renderer-help/aoid-areal)))
-
-(defn process-help-name-areal
-    [request]
-    (finish-processing request (html-renderer-help/name-areal)))
-
-(defn process-help-aoid-building
-    [request]
-    (finish-processing request (html-renderer-help/aoid-building)))
-
-(defn process-help-name-building
-    [request]
-    (finish-processing request (html-renderer-help/name-building)))
-
-(defn process-help-floor-count-building
-    [request]
-    (finish-processing request (html-renderer-help/floor-count-building)))
-
-(defn process-help-aoid-floor
-    [request]
-    (finish-processing request (html-renderer-help/aoid-floor)))
-
-(defn process-help-name-floor
-    [request]
-    (finish-processing request (html-renderer-help/name-floor)))
-
-(defn process-help-floor-count-floor
-    [request]
-    (finish-processing request (html-renderer-help/drawing-count-floor)))
 
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
@@ -545,16 +510,16 @@
             "/binary-list"                (process-binary-list request)
             "/test"                       (process-test request)
 
-            "/help_valid_from"            (process-help-valid-from request)
-            "/help_valid_from_settings"   (process-help-valid-from-settings request)
-            "/help_aoid_areal"            (process-help-aoid-areal request)
-            "/help_name_areal"            (process-help-name-areal request)
-            "/help_aoid_building"         (process-help-aoid-building request)
-            "/help_name_building"         (process-help-name-building request)
-            "/help_floor_count_building"  (process-help-floor-count-building request)
-            "/help_aoid_floor"            (process-help-aoid-floor request)
-            "/help_name_floor"            (process-help-name-floor request)
-            "/help_drawing_count_floor"   (process-help-floor-count-floor request)
+            "/help_valid_from"            (process-help-page request html-renderer-help/valid-from)
+            "/help_valid_from_settings"   (process-help-page request html-renderer-help/valid-from-settings)
+            "/help_aoid_areal"            (process-help-page request html-renderer-help/aoid-areal)
+            "/help_name_areal"            (process-help-page request html-renderer-help/name-areal)
+            "/help_aoid_building"         (process-help-page request html-renderer-help/aoid-building)
+            "/help_name_building"         (process-help-page request html-renderer-help/name-building)
+            "/help_floor_count_building"  (process-help-page request html-renderer-help/floor-count-building)
+            "/help_aoid_floor"            (process-help-page request html-renderer-help/aoid-floor)
+            "/help_name_floor"            (process-help-page request html-renderer-help/name-floor)
+            "/help_drawing_count_floor"   (process-help-page request html-renderer-help/drawing-count-floor)
             )))
 
 (defn handler
