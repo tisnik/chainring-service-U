@@ -330,6 +330,17 @@
 ))
 
 
+(defn get-building-name
+    ( [building-info]
+      (if (empty? (:Label building-info))
+          (:AOID building-info)
+          (:Label building-info)))
+    ( [building-info default-label]
+      (if (empty? (:Label building-info))
+          default-label
+          (:Label building-info))))
+
+
 (defn render-building-info
     [building-id building-info floor-count valid-from]
     (page/xhtml
@@ -337,13 +348,19 @@
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Informace o budově '" (or (:Label building-info) (:AOID building-info)) "'")]
+                [:h1 (str "Informace o budově '" (get-building-name building-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "AOID"] [:td building-id]]
-                    [:tr [:th "Jméno"] [:td (:Label building-info)]]
+                    [:tr [:th "AOID"]
+                         [:td building-id]
+                         [:td [:a {:href "/help_aoid_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Jméno"]
+                         [:td (get-building-name building-info "nezadáno")]
+                         [:td [:a {:href "/help_name_building"} [:img {:src "icons/help.gif"}]]]]
                     ;[:tr [:th "Vytvořeno"] [:td (:created building-info)]]
                     ;[:tr [:th "Modifikováno"] [:td (:modified building-info)]]
-                    [:tr [:th "Počet podlaží"] [:td (or floor-count "nelze zjistit")]]
+                    [:tr [:th "Počet podlaží"]
+                         [:td (or floor-count "nelze zjistit")]
+                         [:td [:a {:href "/help_floor_count_building"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td {:colspan 3} "&nbsp;"]]
                     [:tr [:td "Zadaná platnost od:"]
                          [:td valid-from]
