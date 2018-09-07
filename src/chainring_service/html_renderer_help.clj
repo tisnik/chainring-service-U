@@ -24,7 +24,7 @@
 (require '[chainring-service.html-renderer-widgets :as widgets])
 
 
-(defn render-help-valid-from
+(defn valid-from
     []
     (page/xhtml
         (widgets/header "/")
@@ -43,7 +43,7 @@
             ]]))
 
 
-(defn render-help-valid-from-settings
+(defn valid-from-settings
     []
     (page/xhtml
         (widgets/header "/")
@@ -62,7 +62,7 @@
             ]]))
 
 
-(defn render-help-aoid-areal
+(defn aoid-areal
     []
     (page/xhtml
         (widgets/header "/")
@@ -78,7 +78,7 @@
                 (widgets/footer)
             ]]))
 
-(defn render-help-name-areal
+(defn name-areal
     []
     (page/xhtml
         (widgets/header "/")
@@ -94,7 +94,7 @@
                 (widgets/footer)
             ]]))
 
-(defn render-help-aoid-building
+(defn aoid-building
     []
     (page/xhtml
         (widgets/header "/")
@@ -110,7 +110,7 @@
                 (widgets/footer)
             ]]))
 
-(defn render-help-name-building
+(defn name-building
     []
     (page/xhtml
         (widgets/header "/")
@@ -126,7 +126,7 @@
                 (widgets/footer)
             ]]))
 
-(defn render-help-floor-count-building
+(defn floor-count-building
     []
     (page/xhtml
         (widgets/header "/")

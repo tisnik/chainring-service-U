@@ -122,31 +122,31 @@
 
 (defn process-help-valid-from
     [request]
-    (finish-processing request (html-renderer-help/render-help-valid-from)))
+    (finish-processing request (html-renderer-help/valid-from)))
 
 (defn process-help-valid-from-settings
     [request]
-    (finish-processing request (html-renderer-help/render-help-valid-from-settings)))
+    (finish-processing request (html-renderer-help/valid-from-settings)))
 
 (defn process-help-aoid-areal
     [request]
-    (finish-processing request (html-renderer-help/render-help-aoid-areal)))
+    (finish-processing request (html-renderer-help/aoid-areal)))
 
 (defn process-help-name-areal
     [request]
-    (finish-processing request (html-renderer-help/render-help-name-areal)))
+    (finish-processing request (html-renderer-help/name-areal)))
 
 (defn process-help-aoid-building
     [request]
-    (finish-processing request (html-renderer-help/render-help-aoid-building)))
+    (finish-processing request (html-renderer-help/aoid-building)))
 
 (defn process-help-name-building
     [request]
-    (finish-processing request (html-renderer-help/render-help-name-building)))
+    (finish-processing request (html-renderer-help/name-building)))
 
 (defn process-help-floor-count-building
     [request]
-    (finish-processing request (html-renderer-help/render-help-floor-count-building)))
+    (finish-processing request (html-renderer-help/floor-count-building)))
 
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
