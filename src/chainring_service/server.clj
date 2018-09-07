@@ -148,6 +148,18 @@
     [request]
     (finish-processing request (html-renderer-help/floor-count-building)))
 
+(defn process-help-aoid-floor
+    [request]
+    (finish-processing request (html-renderer-help/aoid-floor)))
+
+(defn process-help-name-floor
+    [request]
+    (finish-processing request (html-renderer-help/name-floor)))
+
+(defn process-help-floor-count-floor
+    [request]
+    (finish-processing request (html-renderer-help/drawing-count-floor)))
+
 (defn process-areal-list-page
     "Function that prepares data for the page with list of areals."
     [request]
@@ -193,6 +205,7 @@
           (log/info "Building ID:" building-id)
           (log/info "Floor count:" floor-count)
           (log/info "Building info" building-info)
+          (log/info "Valid from" valid-from)
           (if building-id
               (if building-info
                   (finish-processing request (html-renderer/render-building-info building-id building-info floor-count valid-from))
@@ -274,6 +287,7 @@
           areal-info   (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info:" areal-info)
+          (log/info "Valid from" valid-from)
           (if areal-id
               (let [buildings (sap-interface/call-sap-interface request "read-buildings" areal-id valid-from)]
                   (log/info "Buildings:" buildings)
@@ -288,17 +302,19 @@
     (let [params        (:params request)
           areal-id      (get params "areal-id")
           building-id   (get params "building-id")
-          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id)
-          building-info (sap-interface/call-sap-interface request "read-building-info" building-id)]
+          valid-from    (get params "valid-from")
+          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info" areal-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
+          (log/info "Valid from" valid-from)
           (if building-id
-              (let [floors (sap-interface/call-sap-interface request "read-floors" areal-id building-id)]
+              (let [floors (sap-interface/call-sap-interface request "read-floors" areal-id building-id valid-from)]
                   (log/info "Floors" floors)
                   (if (seq floors)
-                      (finish-processing request (html-renderer/render-floor-list areal-id building-id areal-info building-info floors))
+                      (finish-processing request (html-renderer/render-floor-list areal-id building-id areal-info building-info floors valid-from))
                       (finish-processing request (html-renderer/render-error-page "Nebylo nalezeno žádné podlaží"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
@@ -496,19 +512,25 @@
           (.endsWith uri ".html") (http-utils/return-file "www" (uri->file-name uri) "text/html")
           :else
         (condp = uri
+            ; common pages
             "/"                           (process-front-page request)
             "/settings"                   (process-settings-page request)
             "/store-settings"             (process-store-settings-page request)
             "/db-stats"                   (process-db-statistic-page request)
             "/drawings-stats"             (process-drawings-statistic-page request)
+
+            ; AOID list pages
             "/areals"                     (process-areal-list-page request)
             "/areal"                      (process-areal-page request)
+            "/building"                   (process-building-page request)
+            "/floor"                      (process-floor-page request)
+
+            ; AOID info pages
             "/areal-info"                 (process-areal-info-page request)
             "/building-info"              (process-building-info-page request)
-            "/floor"                      (process-floor-page request)
             "/floor-info"                 (process-floor-info-page request)
+
             "/room-list"                  (process-room-list request)
-            "/building"                   (process-building-page request)
             "/drawing"                    (process-drawing-page request)
             "/drawing-from-sap"           (process-drawing-from-sap-page request)
             "/drawing-info"               (process-drawing-info request)
@@ -530,6 +552,9 @@
             "/help_aoid_building"         (process-help-aoid-building request)
             "/help_name_building"         (process-help-name-building request)
             "/help_floor_count_building"  (process-help-floor-count-building request)
+            "/help_aoid_floor"            (process-help-aoid-floor request)
+            "/help_name_floor"            (process-help-name-floor request)
+            "/help_drawing_count_floor"   (process-help-floor-count-floor request)
             )))
 
 (defn handler

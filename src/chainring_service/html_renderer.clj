@@ -374,7 +374,7 @@
 
 
 (defn render-floor-info
-    [floor-id floor-info drawing-count]
+    [floor-id floor-info drawing-count valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -382,11 +382,21 @@
                 (widgets/navigation-bar "/")
                 [:h1 (str "Informace o podlaží '" (or (:Label floor-info) (:AOID floor-info)) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
-                    [:tr [:th "Jméno"] [:td (:Label floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "ID"]
+                         [:td floor-id]
+                         [:td [:a {:href "/help_aoid_floor"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Jméno"]
+                         [:td (:Label floor-info)]
+                         [:td [:a {:href "/help_name_floor"} [:img {:src "icons/help.gif"}]]]]
                     ;[:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
                     ;[:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "Počet verzí výkresů"] [:td (or drawing-count "nelze zjistit")] [:td "&nbsp;"]]
+                    [:tr [:th "Počet verzí výkresů"]
+                         [:td (or drawing-count "nelze zjistit")]
+                         [:td [:a {:href "/help_drawing_count_floor"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Zadaná platnost od:"]
+                         [:td valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (widgets/footer)
@@ -459,7 +469,7 @@
 
 
 (defn render-floor-list
-    [project-id building-id project-info building-info floors]
+    [project-id building-id project-info building-info floors valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -471,13 +481,13 @@
                         [:th "Areál"]  [:td (:Label project-info)]
                         [:th "AOID"]   [:td (:AOID project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
-                                  :href (str "areal-info?areal-id=" project-id)}
+                                  :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (:Label building-info)]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?building-id=" building-id)}
+                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                 ]
                 [:br]
@@ -490,7 +500,7 @@
                          [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:AOID floor)]
-                                 [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor))} (:Label floor)]]
+                                 [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (:Label floor)]]
                                  ;[:td (:aoid floor)]
                                  ;[:td (:created floor)]
                                  ;[:td
@@ -499,7 +509,7 @@
                                  ;    [:div {:class "has-drawings"} (:drawings floor)])
                                  ;]
                                  [:td [:a {:title "Podrobnější informace o podlaží"
-                                           :href (str "floor-info?floor-id=" (:AOID floor))}
+                                           :href (str "floor-info?floor-id=" (:AOID floor) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
