@@ -177,9 +177,13 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
-(defn drawings-for-floor
+(defn all-drawings-for-floor
     [floor-id]
-    0)
+    (let [files     (fileutils/file-list "drawings/" ".json")
+          filenames (for [file files] (.getName file))
+          floor-id  (clojure.string/replace floor-id \. \_)
+          drawings  (filter #(startsWith % floor-id) filenames)]
+          (sort drawings)))
 
 (defn process-floor-info-page
     [request]
@@ -187,13 +191,14 @@
           floor-id              (get params "floor-id")
           valid-from            (get params "valid-from")
           floor-info            (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
-          drawing-count         (drawings-for-floor floor-id)]
+          drawings              (all-drawings-for-floor floor-id)]
           (log/info "Floor ID:" floor-id)
-          (log/info "Drawing count:" drawing-count)
+          (log/info "Drawings: " drawings)
+          (log/info "Drawing count:" (count drawings))
           (log/info "Floor info" floor-info)
           (if floor-id
               (if floor-info
-                  (finish-processing request (html-renderer/render-floor-info floor-id floor-info drawing-count valid-from))
+                  (finish-processing request (html-renderer/render-floor-info floor-id floor-info (count drawings) valid-from))
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném podlaží")))
               (finish-processing request (html-renderer/render-error-page "Žádné podlaží nebylo vybráno")))))
 
@@ -205,11 +210,12 @@
 (defn prepare-drawing-info
     [drawing-id drawing-data]
     (let [entities (:entities drawing-data)]
-        {:entities-count {:all (:entities_count drawing-data)
-                          :lines   (entity-count entities "L")
-                          :circles (entity-count entities "C")
-                          :arcs    (entity-count entities "A")
-                          :texts   (entity-count entities "T")}
+        {:entities-count {:all       (:entities_count drawing-data)
+                          :lines     (entity-count entities "L")
+                          :circles   (entity-count entities "C")
+                          :arcs      (entity-count entities "A")
+                          :texts     (entity-count entities "T")
+                          :polylines (entity-count entities "P")}
          :rooms-count    (:rooms_count drawing-data)
          :created        (:created drawing-data)
          :format-version (:version drawing-data)}))
@@ -287,23 +293,25 @@
     "Function that prepares data for the page with list of floors."
     [request]
     (let [params        (:params request)
-          project-id    (get params "project-id")
+          areal-id      (get params "areal-id")
           building-id   (get params "building-id")
           floor-id      (get params "floor-id")
-          project-info  (db-interface/read-project-info project-id)
-          building-info (db-interface/read-building-info building-id)
-          floor-info    (db-interface/read-floor-info floor-id)]
-          (log/info "Project ID:" project-id)
-          (log/info "Project info" project-info)
+          valid-from    (get params "valid-from")
+          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)]
+          (log/info "Areal ID:" areal-id)
+          (log/info "Areal info" areal-info)
           (log/info "Building ID:" building-id)
           (log/info "Building info" building-info)
           (log/info "Floor ID:" floor-id)
           (log/info "Floor info" floor-info)
+          (log/info "Valid from" valid-from)
           (if building-id
-              (let [drawings (db-interface/read-drawing-list floor-id)]
+              (let [drawings (all-drawings-for-floor floor-id)]
                   (log/info "Drawings" drawings)
                   (if (seq drawings)
-                      (finish-processing request (html-renderer/render-drawing-list project-id building-id floor-id project-info building-info floor-info drawings))
+                      (finish-processing request (html-renderer/render-drawing-list areal-id building-id floor-id areal-info building-info floor-info valid-from drawings))
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
 
@@ -339,21 +347,21 @@
     (let [params        (:params request)
           session       (:session request)
           configuration (:configuration request)
-          project-id    (get params "project-id")
+          areal-id      (get params "areal-id")
           building-id   (get params "building-id")
           floor-id      (get params "floor-id")
           drawing-id    (get params "drawing-id")
-          project-info  (db-interface/read-project-info project-id)
-          building-info (db-interface/read-building-info building-id)
-          floor-info    (db-interface/read-floor-info floor-id)
-          drawing-info  (db-interface/read-drawing-info drawing-id)
-          rooms         (db-interface/read-sap-room-list floor-id "C")
-          session       (assoc session :drawing-id drawing-id)
-          ]
-          (log-process-drawing-info project-id project-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
+          valid-from    (get params "valid-from")
+          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
+          drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
+          rooms         '() ;(db-interface/read-sap-room-list floor-id "C")
+          session       (assoc session :drawing-id drawing-id)]
+          (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms nil) session)
+                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms nil) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
