@@ -56,14 +56,6 @@
             nil)))
 
 
-(defn read-project-list
-    "Read list of all projects.
-     Empty sequence might be returned if the database is empty or broken."
-    []
-    (simple-query-sequence ["select id, name, created from project order by name"]
-                  "read-project-list"))
-
-
 (defn read-project-id
     [project-aoid]
     (simple-query-selector ["select id from project where aoid=?" project-aoid] :id "read-project-id"))
