@@ -268,7 +268,7 @@
 (defn drawing-full-name
     [drawing-id drawing-name]
     (if drawing-id
-        (format (str "drawings/%05d.json") (Integer/parseInt drawing-id))
+        (format (str "drawings/%s.json") drawing-id)
         (if drawing-name
             (str "drawings/" drawing-name))))
 
