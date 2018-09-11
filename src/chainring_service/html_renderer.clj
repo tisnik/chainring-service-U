@@ -418,11 +418,13 @@
                     [:tr [:th "Vytvořeno"]       [:td (:created drawing-info)]]
                     [:tr [:th "Verze formátu"]   [:td (:format-version drawing-info)]]
                     [:tr [:th "Počet místností"] [:td (:rooms-count drawing-info)]]
-                    [:tr [:th "Celkový počet entit"] [:td (-> drawing-info :entities-count :all)]]
-                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;úseček"]  [:td (-> drawing-info :entities-count :lines)]]
-                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;kružnic"] [:td (-> drawing-info :entities-count :circles)]]
-                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;oblouků"] [:td (-> drawing-info :entities-count :arcs)]]
-                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;textů"]   [:td (-> drawing-info :entities-count :texts)]]
+                    [:tr [:td {:colspan 2} "&nbsp;"]]
+                    [:tr [:th "Celkový počet entit"] [:td {:style "text-align:right"} (-> drawing-info :entities-count :all)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;úseček"]  [:td {:style "text-align:right"} (-> drawing-info :entities-count :lines)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;kružnic"] [:td {:style "text-align:right"} (-> drawing-info :entities-count :circles)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;oblouků"] [:td {:style "text-align:right"} (-> drawing-info :entities-count :arcs)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;textů"]   [:td {:style "text-align:right"} (-> drawing-info :entities-count :texts)]]
+                    [:tr [:td "&nbsp;&nbsp;&nbsp;&nbsp;polyčar"] [:td {:style "text-align:right"} (-> drawing-info :entities-count :polylines)]]
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
                 (widgets/footer)
@@ -475,7 +477,7 @@
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Seznam podlaží v areálu '" (:Label project-info) "' a budově '" (or (:Label building-info) (:AOID building-info)) "'")]
+                [:h1 (str "Seznam podlaží v areálu '" (:Label project-info) "' a budově '" (get-building-name building-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
                         [:th "Areál"]  [:td (:Label project-info)]
@@ -484,11 +486,15 @@
                                   :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
-                        [:th "Budova"] [:td (:Label building-info)]
+                        [:th "Budova"] [:td (get-building-name building-info "nezadáno")]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
+                    [:tr [:td {:colspan 5} "&nbsp;"]]
+                    [:tr [:td {:colspan 2} "Zadaná platnost od:"]
+                         [:td {:colspan 2} valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
@@ -500,7 +506,7 @@
                          [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:AOID floor)]
-                                 [:td [:a {:href (str "floor?project-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (:Label floor)]]
+                                 [:td [:a {:href (str "floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (:Label floor)]]
                                  ;[:td (:aoid floor)]
                                  ;[:td (:created floor)]
                                  ;[:td
@@ -534,8 +540,8 @@
                 [:h1 (str "Informace místnostech na podlaží '" (:name floor-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"] [:td floor-id] [:td "&nbsp;"]]
-                    [:tr [:th "Jméno"] [:td (:name floor-info)] [:td "&nbsp;"]]
-                    [:tr [:th "AOID"] [:td (:aoid floor-info)] [:td "&nbsp;"]]]
+                    [:tr [:th "Jméno"] [:td (:Label floor-info)] [:td "&nbsp;"]]
+                    [:tr [:th "AOID"] [:td (:AOID floor-info)] [:td "&nbsp;"]]]
                 [:h4 "Místnosti"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
@@ -573,51 +579,59 @@
 ))
 
 
+(defn filename->drawing-version
+    [filename floor-id]
+    (let [wo-prefix (subs filename (inc (count floor-id)))
+          wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
+          wo-ext))
+
+
+(defn filename->drawing-id
+    [filename]
+    (subs filename 0 (- (count filename) (count ".json"))))
+
+
 (defn render-drawing-list
     "Render page with list of drawings."
-    [project-id building-id floor-id project-info building-info floor-info drawings]
+    [project-id building-id floor-id project-info building-info floor-info valid-from drawings]
     (page/xhtml
         (widgets/header "/")
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Výkresy pro areál '" (:name project-info) "', budovu '" (:name building-info) "' a podlaží '" "'")]
+                [:h1 (str "Areál '" (:Label project-info) "', budova '" (get-building-name building-info) "' a podlaží '" (:Label floor-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
-                        [:th "Areál"]  [:td (:name project-info)]
-                        [:th "AOID"]   [:td (:id project-info)]
+                        [:th "Areál"]  [:td (:Label project-info)]
+                        [:th "AOID"]   [:td (:AOID project-info)]
                         [:td [:a {:title "Podrobnější informace o areálu"
-                                  :href (str "project-info?project-id=" project-id)}
+                                  :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
-                        [:th "Budova"] [:td (:name building-info)]
-                        [:th "AOID"]   [:td (:id building-info)]
+                        [:th "Budova"] [:td (get-building-name building-info)]
+                        [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?building-id=" building-id)}
+                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
-                        [:th "Podlaží"] [:td (:name floor-info)]
-                        [:th "AOID"]   [:td (:id floor-info)]
+                        [:th "Podlaží"] [:td (:Label floor-info)]
+                        [:th "AOID"]   [:td (:AOID floor-info)]
                         [:td [:a {:title "Podrobnější informace o podlaží"
-                                  :href (str "floor-info?floor-id=" floor-id)}
+                                  :href (str "floor-info?floor-id=" floor-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
+                    [:tr [:td {:colspan 5} "&nbsp;"]]
+                    [:tr [:td {:colspan 2} "Zadaná platnost od:"]
+                         [:td {:colspan 2} valid-from]
+                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
                 ]
                 [:br]
+                [:h3 "Seznam výkresů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"]
-                         [:th "Výkres"]
-                         [:th "Vytvořeno"]
-                         [:th "Modifikováno"]
-                         [:th "Verze"]
-                         [:th ""]]
+                    [:tr [:th "Platnost od"] [:th "&nbsp;"]]
                     (for [drawing drawings]
-                            [:tr [:td (:id drawing)]
-                                 [:td [:a {:href (str "drawing?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&drawing-id=" (:id drawing))} (:name drawing)]]
-                                 [:td (:created drawing)]
-                                 [:td (:modified drawing)]
-                                 [:td (:version drawing)]
+                            [:tr [:td [:a {:href (str "drawing?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from "&drawing-id=" (filename->drawing-id drawing))} (filename->drawing-version drawing floor-id)]]
                                  [:td [:a {:title "Podrobnější informace o výkresu"
-                                           :href (str "drawing-info?drawing-id=" (:id drawing))}
+                                           :href (str "drawing-info?drawing-id=" (filename->drawing-id drawing))}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
@@ -637,38 +651,37 @@
 
 (defn render-floor-info-table
     "Render info for 'Vybrane podlazi'/'Selected floor'."
-    [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info]
+    [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from]
     [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
         [:tr {:class "vcell"}
-            [:th "Areál"]  [:td (:name project-info)]
-            [:th "AOID"]   [:td (:id project-info)]
+            [:th "Areál"]  [:td (:Label project-info)]
+            [:th "AOID"]   [:td (:AOID project-info)]
             [:td [:a {:title "Podrobnější informace o areálu"
-                      :href (str "project-info?project-id=" project-id)}
+                      :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiný areál"
-                      :href "/project-list"}
+                      :href (str "/areals?valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
-            [:th "Budova"] [:td (:name building-info)]
-            [:th "AOID"]   [:td (:id building-info)]
+            [:th "Budova"] [:td (:Label building-info)]
+            [:th "AOID"]   [:td (:AOID building-info)]
             [:td [:a {:title "Podrobnější informace o budově"
-                      :href (str "building-info?building-id=" building-id)}
+                      :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jinou budovu"
-                      :href (str "/project?project-id=" project-id)}
+                      :href (str "/areal?areal-id=" project-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
-            [:th "Podlaží"] [:td (:name floor-info)]
-            [:th "AOID"]   [:td (:id floor-info)]
+            [:th "Podlaží"] [:td (:Label floor-info)]
+            [:th "AOID"]   [:td (:AOID floor-info)]
             [:td [:a {:title "Podrobnější informace o podlaží"
-                      :href (str "floor-info?floor-id=" floor-id)}
+                      :href (str "floor-info?floor-id=" floor-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiné podlaží"
-                      :href (str "/building?project-id=" project-id "&building-id=" building-id)}
+                      :href (str "/building?project-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
-            [:th "Výkres"] [:td (:name floor-info)]
-            [:th "AOID"]   [:td (:id floor-info)]
+            [:th "Výkres"] [:td {:colspan 3} drawing-id]
             [:td [:a {:title "Podrobnější informace o výkresu"
                       :href (str "drawing-info?drawing-id=" drawing-id)}
                       [:img {:src "icons/info.gif"}]]]
@@ -783,24 +796,23 @@
 
 (defn render-drawing
     "Render page with drawing on the right side and with configurable toolbar on the left side."
-    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms sap?]
+    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from rooms sap?]
     (page/xhtml
         (widgets/header "/" {:include-drawing-js? true
-                                 :floor-id floor-id
-                                 :raster-drawing-id drawing-id
-                                 :version "C" ; TODO: how to handle this?
-                                 :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
-                                 :sap-url     (-> configuration :sap-interface :url)})
+                             :floor-id floor-id
+                             :raster-drawing-id drawing-id
+                             :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
+                             :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
             (widgets/navigation-bar "/")
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
-                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:50em;" )}
+                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:35em;" )}
                         (if (not sap?)
                             [:span
                                 (render-floor-info-header)
-                                (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info)
+                                (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from)
                                 (render-room-list-header)
                                 (render-room-list rooms)])
                         (render-filters-header)
