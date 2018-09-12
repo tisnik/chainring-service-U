@@ -703,22 +703,24 @@
     "Render list of rooms."
     [rooms]
     [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
-        [:tr {:class "vcell"} [:th "Jméno"]
+        [:tr {:class "vcell"}
+             [:th "Jméno"]
              [:th "AOID"]
-             [:th "Platnost<br>od/do"]
-             [:th "Typ"]
-             [:th "Kapacita/<br>plocha"]
-             [:th "Obsazení"]]
+             ;[:th "Platnost<br>od/do"]
+             ;[:th "Typ"]
+             ;[:th "Kapacita/<br>plocha"]
+             ;[:th "Obsazení"]
+        ]
         (for [room rooms]
-                [:tr {:class "vcell"} [:td (:name room)]
-                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:id room) "')")} (:id room)]]
-                     [:td (:valid_from room) "<br>"
-                          (:valid_to room)]
-                     [:td (:room_type_str room)]
-                     [:td (:capacity room) "<br>"
-                          (:area room) "m<sup>2</sup>"]
-                     [:td (:occupied_by room) "<br>"
-                          (if (= (:occupation room) "I") "interní" "externí")]
+                [:tr {:class "vcell"} [:td (:Label room)]
+                     [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:AOID room) "')")} (:AOID room)]]
+                     ;[:td (:valid_from room) "<br>"
+                     ;     (:valid_to room)]
+                     ;[:td (:room_type_str room)]
+                     ;[:td (:capacity room) "<br>"
+                     ;     (:area room) "m<sup>2</sup>"]
+                     ;[:td (:occupied_by room) "<br>"
+                     ;     (if (= (:occupation room) "I") "interní" "externí")]
                 ])
         ; not needed, let's use debugger instead for this old part of code
         ; [:tr [:td "Drawing:"] [:td [:div {:id "drawing-id"} drawing-id]]]

@@ -37,7 +37,7 @@
         (if (and options (:include-calendar? options))
             (page/include-js  (str url-prefix "calendar_db.js")))
         (if (and options (:drawing-id options))
-            [:script (str "var drawing_id = " (:drawing-id options) ";")]
+            [:script (str "var drawing_id = '" (:drawing-id options) "';")]
             [:script "var drawing_id = null;"])
         (if (and options (:floor-id options))
             [:script (str "var floor_id = '" (:floor-id options) "';")]
@@ -46,7 +46,7 @@
             [:script (str "var version = '" (:version options) "';")]
             [:script "var version = null;"])
         (if (and options (:raster-drawing-id options))
-            [:script (str "var raster_drawing_id = " (:raster-drawing-id options) ";")]
+            [:script (str "var raster_drawing_id = '" (:raster-drawing-id options) "';")]
             [:script "var raster_drawing_id = null;"])
         (if (and options (:drawing-name options))
             [:script (str "var drawing_name = '" (:drawing-name options) "';")]
