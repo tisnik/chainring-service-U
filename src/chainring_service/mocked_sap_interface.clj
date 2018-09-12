@@ -172,15 +172,13 @@
             (first (filter #(= floor (:AOID %)) floors-for-date))
             floors-for-date)))
 
+
 (defn read-rooms
-    [areal building floor]
-    (if areal
-        (if building
-            (if floor
-                (let [prefix (str areal "." building "." floor ".")]
-                    (filter #(.startsWith (:AOID %) prefix) @rooms))
-                (let [prefix (str areal "." building ".")]
-                    (filter #(.startsWith (:AOID %) prefix) @rooms)))
-            (let [prefix (str areal ".")]
-                (filter #(.startsWith (:AOID %) prefix) @rooms)))
-        @rooms))
+    [floor valid-from]
+    (let [real-date-from (get-real-date-from valid-from)
+          rooms-for-date (get @rooms real-date-from)]
+       (if floor
+           (let [prefix (str floor ".")]
+                (println prefix)
+                (filter #(.startsWith (:AOID %) prefix) rooms-for-date))
+           rooms-for-date)))
