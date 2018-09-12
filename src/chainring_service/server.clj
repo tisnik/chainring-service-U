@@ -356,7 +356,7 @@
           building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
           floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
           drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
-          rooms         '() ;(db-interface/read-sap-room-list floor-id "C")
+          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           session       (assoc session :drawing-id drawing-id)]
           (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
@@ -372,31 +372,22 @@
     (let [params        (:params request)
           session       (:session request)
           configuration (:configuration request)
-          project-aoid  (get params "project-aoid")
-          building-aoid (get params "building-aoid")
-          floor-aoid    (get params "floor-aoid")
-          drawing-aoid  (get params "drawing-aoid")
+          areal-id      (get params "areal-id")
+          building-id   (get params "building-id")
+          floor-id      (get params "floor-id")
+          drawing-id    (get params "drawing-id")
+          valid-from    (get params "valid-from")
 
-          project-id    (db-interface/read-project-id project-aoid)
-          building-id   (db-interface/read-building-id building-aoid)
-          floor-id      (db-interface/read-floor-id floor-aoid)
-          drawing-id    (db-interface/read-drawing-id drawing-aoid)
-
-          project-info  (db-interface/read-project-info project-id)
-          building-info (db-interface/read-building-info building-id)
-          floor-info    (db-interface/read-floor-info floor-id)
-          drawing-info  (db-interface/read-drawing-info drawing-id)
-          rooms         (db-interface/read-sap-room-list floor-id "C")
-          session       (assoc session :drawing-id drawing-id)
-          ]
-          (log/info "Project AOID:" project-aoid)
-          (log/info "Building AOID:" project-aoid)
-          (log/info "Floor AOID:" floor-aoid)
-          (log/info "Drawing AOID:" drawing-aoid)
-          (log-process-drawing-info project-id project-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
+          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
+          drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
+          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+          session       (assoc session :drawing-id drawing-id)]
+          (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info rooms true) session)
+                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms true) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
@@ -439,6 +430,7 @@
             [:get  "aoids"]                  (rest-api/list-all-aoids request uri)
             [:get  "areals"]                 (rest-api/list-of-areals-handler request uri)
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
+            [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
 
             ; endpoints to return information about selected AOID
 
@@ -450,8 +442,6 @@
             [:get  "building"]               (rest-api/building-handler request uri)
             [:get  "floor"]                  (rest-api/floor-handler request uri)
             [:get  "drawing"]                (rest-api/drawing-handler request uri)
-            [:get  "buildings"]              (rest-api/all-buildings request uri)
-            [:get  "floors"]                 (rest-api/all-floors request uri)
             [:get  "drawings"]               (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data-to-db"] (rest-api/store-drawing-raw-data request)
             [:get  "drawing-data"]           (rest-api/deserialize-drawing request)
@@ -504,9 +494,12 @@
             "/floor-info"                 (process-floor-info-page request)
 
             "/room-list"                  (process-room-list request)
+
+            ; pages with drawings
             "/drawing"                    (process-drawing-page request)
             "/drawing-from-sap"           (process-drawing-from-sap-page request)
             "/drawing-info"               (process-drawing-info request)
+
             "/raster-preview"             (process-raster-preview-page request)
             "/vector-drawing-as-drw"      (vector-drawing/vector-drawing-as-drw request)
             "/vector-drawing-as-json"     (vector-drawing/vector-drawing-as-json request)

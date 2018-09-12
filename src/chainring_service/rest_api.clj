@@ -100,9 +100,9 @@
     [request uri]
     (try
         (let [start-time (System/currentTimeMillis)
-              areals     (sap-interface/call-sap-interface request "read-areals")
-              buildings  (sap-interface/call-sap-interface request "read-buildings" nil)
-              floors     (sap-interface/call-sap-interface request "read-floors" nil nil)
+              areals     (sap-interface/call-sap-interface request "read-areals" nil)
+              buildings  (sap-interface/call-sap-interface request "read-buildings" nil nil)
+              floors     (sap-interface/call-sap-interface request "read-floors" nil nil nil)
               end-time   (System/currentTimeMillis)
               timestamp  (rest-api-utils/get-timestamp)
               response {:status    :ok
@@ -123,7 +123,7 @@
     (try
         (let [start-time (System/currentTimeMillis)
               params     (:params request)
-              date-from  (get params "date-from") 
+              date-from  (get params "valid-from") 
               result     (sap-interface/call-sap-interface request "read-areals" date-from)
               end-time   (System/currentTimeMillis)
               timestamp  (rest-api-utils/get-timestamp)
@@ -145,7 +145,8 @@
         (let [start-time (System/currentTimeMillis)
               params     (:params request)
               areal-id   (get params "areal-id")
-              buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id)
+              date-from  (get params "valid-from") 
+              buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id date-from)
               end-time   (System/currentTimeMillis)
               timestamp  (rest-api-utils/get-timestamp)
               response {:status    :ok
@@ -156,6 +157,30 @@
             (rest-api-utils/send-response response request))
         (catch Exception e
             (log/error e "read-buildings")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn list-of-floors-handler
+    "REST API handler for the /api/{version}/floors endpoint."
+    [request uri]
+    (try
+        (let [start-time  (System/currentTimeMillis)
+              params      (:params request)
+              areal-id    (get params "areal-id")
+              building-id (get params "building-id")
+              date-from   (get params "valid-from") 
+              floors      (sap-interface/call-sap-interface request "read-floors" areal-id building-id date-from)
+              end-time    (System/currentTimeMillis)
+              timestamp   (rest-api-utils/get-timestamp)
+              response {:status       :ok
+                        :duration     (- end-time start-time)
+                        :timestamp    timestamp
+                        :areal-id     areal-id
+                        :building-id  building-id
+                        :floors       floors}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-floors")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
