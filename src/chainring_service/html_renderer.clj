@@ -706,6 +706,7 @@
         [:tr {:class "vcell"}
              [:th "Jméno"]
              [:th "AOID"]
+             [:th {:id "room_attribute_label"} ""]
              ;[:th "Platnost<br>od/do"]
              ;[:th "Typ"]
              ;[:th "Kapacita/<br>plocha"]
@@ -714,6 +715,7 @@
         (for [room rooms]
                 [:tr {:class "vcell"} [:td (:Label room)]
                      [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:AOID room) "')")} (:AOID room)]]
+                     [:td {:id (str "room_" (:AOID room) "_attribute_value")} ""]
                      ;[:td (:valid_from room) "<br>"
                      ;     (:valid_to room)]
                      ;[:td (:room_type_str room)]
@@ -740,38 +742,48 @@
 
 (defn render-filters
     "Render room filters part."
-    []
-    [:table {:id "filters" :class "table table-stripped table-hover" :style "width:auto;"}
-        [:tr {:class "vcell"}
-            [:td "Typ"]
-            [:td (form/check-box {:onclick "roomTypeCheckBoxClicked();"} "room-type-checkbox")]
-            [:td (passive-color-box "rgb(200,150,100)") "Kancelář" [:br]
-                 (passive-color-box "rgb(100,150,200)") "Chodba" [:br]
-                 (passive-color-box "rgb(200,140,200)") "Hala" [:br]
-                 (passive-color-box "rgb(100,200,200)") "WC" [:br]
-                 (passive-color-box "rgb(200,200,100)") "Technická místnost" [:br]
-                 ]
-        [:tr {:class "vcell"}
-            [:td "Kapacita"]
-            [:td (form/check-box {:onclick "roomCapacityCheckBoxClicked();"} "room-capacity-checkbox")]
-            [:td (passive-color-box "rgb(50,50,50)") "0" [:br]
-                 (passive-color-box "rgb(100,100,100)") "1" [:br]
-                 (passive-color-box "rgb(150,150,150)") "2" [:br]
-                 (passive-color-box "rgb(200,200,200)") "&gt;2" [:br]
-            ]
-        ]
-        [:tr {:class "vcell"}
-            [:td "Obsazení"]
-            [:td (form/check-box {:onclick "roomOccupationCheckBoxClicked();"} "room-ocupation-checkbox")]
-            [:td (passive-color-box "rgb(200,100,100)") "interní" [:br]
-                 (passive-color-box "rgb(100,100,200)") "externí" [:br]
-            ]
-        ]
-        [:tr {:class "vcell"}
-            [:td "Nájemce"]
-            [:td (form/check-box {:onclick "roomOccupiedByCheckBoxClicked();"} "room-occupied-by-checkbox")]
-            ]
-        ]])
+    [project-id building-id floor-id valid-from room-attribute-types]
+    [:table {:id "filters" :class ""}
+        [:tr
+            [:td {:style "vertical-align:top"}
+                [:table {:id "filter-list" :class "table table-stripped table-hover" :style "width:auto;"}
+                    (for [attribute room-attribute-types]
+                        [:tr {:class "vcell"} [:td [:a {:href "#" :onclick (str "onAttributeTypeClicked('" (:Atribut attribute) "', '" floor-id "', '" valid-from "')")} (:Atribut attribute)]]]
+                        )]]
+            [:td {:style "width:1em"} "&nbsp;"]
+            [:td {:style "vertical-align:top"}
+                 "Legenda"
+            ]]])
+       ;[:tr {:class "vcell"}
+       ;    [:td "Typ"]
+       ;    [:td (form/check-box {:onclick "roomTypeCheckBoxClicked();"} "room-type-checkbox")]
+       ;    [:td (passive-color-box "rgb(200,150,100)") "Kancelář" [:br]
+       ;         (passive-color-box "rgb(100,150,200)") "Chodba" [:br]
+       ;         (passive-color-box "rgb(200,140,200)") "Hala" [:br]
+       ;         (passive-color-box "rgb(100,200,200)") "WC" [:br]
+       ;         (passive-color-box "rgb(200,200,100)") "Technická místnost" [:br]
+       ;         ]
+       ;[:tr {:class "vcell"}
+       ;    [:td "Kapacita"]
+       ;    [:td (form/check-box {:onclick "roomCapacityCheckBoxClicked();"} "room-capacity-checkbox")]
+       ;    [:td (passive-color-box "rgb(50,50,50)") "0" [:br]
+       ;         (passive-color-box "rgb(100,100,100)") "1" [:br]
+       ;         (passive-color-box "rgb(150,150,150)") "2" [:br]
+       ;         (passive-color-box "rgb(200,200,200)") "&gt;2" [:br]
+       ;    ]
+       ;]
+       ;[:tr {:class "vcell"}
+       ;    [:td "Obsazení"]
+       ;    [:td (form/check-box {:onclick "roomOccupationCheckBoxClicked();"} "room-ocupation-checkbox")]
+       ;    [:td (passive-color-box "rgb(200,100,100)") "interní" [:br]
+       ;         (passive-color-box "rgb(100,100,200)") "externí" [:br]
+       ;    ]
+       ;]
+       ;[:tr {:class "vcell"}
+       ;    [:td "Nájemce"]
+       ;    [:td (form/check-box {:onclick "roomOccupiedByCheckBoxClicked();"} "room-occupied-by-checkbox")]
+       ;    ]
+       ;]])
 
 
 (defn render-view-tools
@@ -798,7 +810,7 @@
 
 (defn render-drawing
     "Render page with drawing on the right side and with configurable toolbar on the left side."
-    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from rooms sap?]
+    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from rooms room-attribute-types sap?]
     (page/xhtml
         (widgets/header "/" {:include-drawing-js? true
                              :floor-id floor-id
@@ -815,10 +827,13 @@
                             [:span
                                 (render-floor-info-header)
                                 (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from)
+                                (render-filters-header)
+                                (render-filters project-id building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
-                                (render-room-list rooms)])
-                        (render-filters-header)
-                        (render-filters)
+                                (render-room-list rooms)]
+                            [:span
+                                (render-filters-header)
+                                (render-filters project-id building-id floor-id valid-from room-attribute-types)])
                     ]
                     (render-view-tools)
                 ; 2nd row - drawing on the right side
