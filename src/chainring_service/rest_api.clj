@@ -1,4 +1,4 @@
-;
+
 ;  (C) Copyright 2017, 2018  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
@@ -494,7 +494,7 @@
           drawing-id    (get params "drawing")
           store-format  (get params "format")
           raw-data      (rest-api-utils/read-request-body request)]
-          (cond (and drawing-id format raw-data)
+          (cond (and drawing-id store-format raw-data)
                 (try
                     (try-to-store-drawing drawing-id store-format raw-data configuration)
                     (rest-api-utils/send-ok-response "Drawing has been saved" request)
