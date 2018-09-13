@@ -100,9 +100,33 @@
     [request uri]
     (try
         (let [start-time (System/currentTimeMillis)
-              areals     (sap-interface/call-sap-interface request "read-areals" nil)
-              buildings  (sap-interface/call-sap-interface request "read-buildings" nil nil)
-              floors     (sap-interface/call-sap-interface request "read-floors" nil nil nil)
+              params     (:params request)
+              date-from  (get params "valid-from") 
+              areals     (sap-interface/call-sap-interface request "read-areals" date-from)
+              buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
+              floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
+              end-time   (System/currentTimeMillis)
+              timestamp  (rest-api-utils/get-timestamp)
+              response {:status    :ok
+                        :duration  (- end-time start-time)
+                        :timestamp timestamp
+                        :aoids     (concat (:areals areals) buildings floors)}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-all-aoids")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn list-all-objects
+    "REST API handler for the /api/{version}/objects endpoint."
+    [request uri]
+    (try
+        (let [start-time (System/currentTimeMillis)
+              params     (:params request)
+              date-from  (get params "valid-from") 
+              areals     (sap-interface/call-sap-interface request "read-areals" date-from)
+              buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
+              floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
               end-time   (System/currentTimeMillis)
               timestamp  (rest-api-utils/get-timestamp)
               response {:status    :ok

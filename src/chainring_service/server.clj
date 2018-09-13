@@ -430,6 +430,7 @@
 
             ; endpoints to return list of AOIDs
             [:get  "aoids"]                  (rest-api/list-all-aoids request uri)
+            [:get  "objects"]                (rest-api/list-all-objects request uri)
             [:get  "areals"]                 (rest-api/list-of-areals-handler request uri)
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
             [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
