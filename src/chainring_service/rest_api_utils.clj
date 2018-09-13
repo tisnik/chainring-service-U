@@ -54,10 +54,10 @@
     ([response request http-code]
      (if (config/pretty-print? request)
          (-> (http-response/response (with-out-str (json/pprint response)))
-             (http-response/content-type "application/json")
+             (http-response/content-type "application/json; charset=utf-8")
              (http-response/status (get http-codes http-code)))
          (-> (http-response/response (json/write-str response))
-             (http-response/content-type "application/json")
+             (http-response/content-type "application/json; charset=utf-8")
              (http-response/status (get http-codes http-code)))))
     ([response request]
      (send-response response request :ok)))
