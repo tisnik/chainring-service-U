@@ -23,7 +23,7 @@
 (defn store-drawing-as-json
     "Store drawing into a JSON format into selected directory."
     [id directory drawing-in-json]
-    (let [filename  (format "%s/%05d.json" directory id)]
+    (let [filename  (format "%s/%s.json" directory id)]
         (log/info "Storing into" filename)
         (spit filename drawing-in-json)))
 
@@ -31,7 +31,7 @@
 (defn store-drawing-as-edn
     "Store drawing into an EDN format into selected directory."
     [id directory drawing-in-json]
-    (let [filename  (format "%s/%05d.edn" directory id)
+    (let [filename  (format "%s/%s.edn" directory id)
           data      (json/read-str drawing-in-json :key-fn keyword)]
         (log/info "Storing into" filename)
         (spit filename data)))
