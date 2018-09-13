@@ -9,6 +9,7 @@ var grid = false;
 var boundary = false;
 var clickedX = null;
 var clickedY = null;
+var attributeToHighlight = null;
 
 var roomInfoVisible = true;
 var roomListVisible = true;
@@ -271,15 +272,25 @@ function registerMouseWheelCallbackFunction(drawingElement) {
     else drawingElement.attachEvent("onmousewheel", onMouseWheel);
 }
 
+function addAttributeToHighlight() {
+    if (attributeToHighlight == null) {
+        return "";
+    }
+    else {
+        return "&attribute=" + attributeToHighlight;
+    }
+}
+
 function reloadImage(clickedX, clickedY) {
     var url = rasterDrawingUrl(drawing_id, floor_id, version);
     if (clickedX != null && clickedY != null) {
         url += "&coordsx=" + clickedX + "&coordsy=" + clickedY;
     }
     url += selectedRoomInUrl();
-    url += rasterDrawingHighlight();
+    //url += rasterDrawingHighlight();
     url += transformation();
     url += otherOptions();
+    url += addAttributeToHighlight();
     url += "&counter=" + counter;
     counter++;
     console.log(url);
@@ -334,6 +345,53 @@ function selectRoomInSap(aoid) {
     console.log("selectRoomInSap");
     console.log(aoid);
     setTimeout("clickOnSapHref()", 500);
+}
+
+function deleteRoomAttributes() {
+    var container = document.getElementById("room_list");
+    var rows = container.getElementsByTagName("tr");
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var col3 = row.children[2];
+        if (col3.id != null && col3.id.startsWith("room_")) {
+            col3.innerText = "";
+        }
+    }
+}
+
+function onRoomAttributesReceived(data) {
+    var attributes = JSON.parse(data);
+    for(var prop in attributes) {
+        room = prop;
+        attribute = attributes[room];
+        var elementId = "room_" + room + "_attribute_value";
+        var element = document.getElementById(elementId);
+        console.log(element.innerText);
+        if (element != null) {
+            element.innerText = attribute;
+        }
+    }
+}
+
+function urlForRoomWithAttributes(attribute, floor_id, valid_from) {
+    return "/api/v1/rooms-attribute?floor-id=" + floor_id + "&valid-from=" + valid_from + "&attribute=" + attribute;
+}
+
+function setRoomAttributeLabel(label) {
+    var element = document.getElementById("room_attribute_label");
+    element.innerText = label;
+}
+
+function onAttributeTypeClicked(attribute, floor_id, valid_from) {
+    var url = urlForRoomWithAttributes(attribute, floor_id, valid_from)
+    attributeToHighlight = attribute;
+    // clear the 3rd column in room table
+    deleteRoomAttributes();
+    // set the new label (1st row)
+    setRoomAttributeLabel(attribute);
+    // try to set attributes (2nd... rows)
+    callAjax(url, onRoomAttributesReceived);
+    reloadImage(null, null);
 }
 
 function onImageClick(obj, e) {
@@ -396,28 +454,33 @@ window.onload = function () {
     console.log(version);
 };
 
-function showHideSomething(elementId, iconId, hide) {
+function showHideSomething(elementId, iconId, hide, className) {
     if (hide) {
         document.getElementById(elementId).className = "hidden";
         document.getElementById(iconId).src = "icons/1uparrow.gif";
     }
     else {
-        document.getElementById(elementId).className = "table table-stripped table-hover";
+        if (className != null) {
+            document.getElementById(elementId).className = className;
+        }
+        else {
+            document.getElementById(elementId).className = "table table-stripped table-hover";
+        }
         document.getElementById(iconId).src = "icons/1downarrow.gif";
     }
 }
 
 function showHideRoomInfo() {
     roomInfoVisible = !roomInfoVisible;
-    showHideSomething("room_info", "show_hide_room_info", !roomInfoVisible);
+    showHideSomething("room_info", "show_hide_room_info", !roomInfoVisible, null);
 }
 
 function showHideRoomList() {
     roomListVisible = !roomListVisible;
-    showHideSomething("room_list", "show_hide_room_list", !roomListVisible);
+    showHideSomething("room_list", "show_hide_room_list", !roomListVisible, null);
 }
 
 function showHideFilters() {
     filtersVisible = !filtersVisible;
-    showHideSomething("filters", "show_hide_filters", !filtersVisible);
+    showHideSomething("filters", "show_hide_filters", !filtersVisible, "");
 }
