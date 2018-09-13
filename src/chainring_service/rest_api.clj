@@ -168,7 +168,7 @@
               params      (:params request)
               areal-id    (get params "areal-id")
               building-id (get params "building-id")
-              date-from   (get params "valid-from") 
+              date-from   (get params "valid-from")
               floors      (sap-interface/call-sap-interface request "read-floors" areal-id building-id date-from)
               end-time    (System/currentTimeMillis)
               timestamp   (rest-api-utils/get-timestamp)
@@ -181,6 +181,32 @@
             (rest-api-utils/send-response response request))
         (catch Exception e
             (log/error e "read-floors")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn list-of-rooms-handler
+    "REST API handler for the /api/{version}/rooms endpoint."
+    [request uri]
+    (try
+        (let [start-time  (System/currentTimeMillis)
+              params      (:params request)
+              areal-id    (get params "areal-id")
+              building-id (get params "building-id")
+              floor-id    (get params "floor-id")
+              date-from   (get params "valid-from")
+              rooms       (sap-interface/call-sap-interface request "read-rooms" floor-id date-from)
+              end-time    (System/currentTimeMillis)
+              timestamp   (rest-api-utils/get-timestamp)
+              response {:status       :ok
+                        :duration     (- end-time start-time)
+                        :timestamp    timestamp
+                        :areal-id     areal-id
+                        :building-id  building-id
+                        :floor-id     floor-id
+                        :rooms        rooms}]
+            (rest-api-utils/send-response response request))
+        (catch Exception e
+            (log/error e "read-rooms")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -349,25 +375,6 @@
           object-type   (get-sap-selector uri)
           href          (get-sap-href configuration object-type)]
           (rest-api-utils/send-response href request)))
-
-
-(defn sap-floors
-    [request uri]
-    (let [params            (:params request)
-          areal             (get params "areal")
-          building          (get params "building")
-          sap-response      (sap-interface/call-sap-interface request "read-floors" areal building)]
-        (rest-api-utils/send-response sap-response request)))
-
-
-(defn sap-rooms
-    [request uri]
-    (let [params (:params request)
-          areal             (get params "areal")
-          building          (get params "building")
-          floor             (get params "floor")
-          sap-response      (sap-interface/call-sap-interface request "read-rooms" areal building floor)]
-        (rest-api-utils/send-response sap-response request)))
 
 
 (defn sap-debug-handler

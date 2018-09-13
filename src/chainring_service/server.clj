@@ -433,6 +433,7 @@
             [:get  "areals"]                 (rest-api/list-of-areals-handler request uri)
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
             [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
+            [:get  "rooms"]                  (rest-api/list-of-rooms-handler request uri)
 
             ; endpoints to return information about selected AOID
 
@@ -455,8 +456,6 @@
             [:post "sap-reload-mock-data"]   (rest-api/sap-reload-mock-data request uri)
             [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
             [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
-            [:get  "sap-floors"]             (rest-api/sap-floors request uri)
-            [:get  "sap-rooms"]              (rest-api/sap-rooms request uri)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
             [:get  "rooms-with-attribute"]   (rest-api/rooms-with-attribute request uri)
                                              (rest-api/unknown-endpoint-handler request uri)
