@@ -382,10 +382,14 @@
     [attribute]
     [1 2 3 4])
 
-(defn sap-room-attributes
+(defn rooms-attribute
     [request uri]
-    (let [attributes ["kapacita" "obsazenost" "typ" "plocha"]]
-        (rest-api-utils/send-response attributes request)
+    (let [params     (:params request)
+          floor      (get params "floor-aoid")
+          valid-from (get params "valid_from")
+          attribute  (get params "attribute")
+          sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)]
+        (rest-api-utils/send-response sap-response request)
     ))
 
 (defn rooms-with-attribute
@@ -478,9 +482,8 @@
 (defn try-to-store-drawing
     "Try to store the drawing onto the filesystem."
     [drawing-id store-format raw-data configuration]
-    (let [id        (parse-int drawing-id)
-          directory (-> configuration :drawings :directory)]
-          (drawings-storage/store-drawing-as id directory store-format raw-data)))
+    (let [directory (-> configuration :drawings :directory)]
+          (drawings-storage/store-drawing-as drawing-id directory store-format raw-data)))
 
 
 (defn serialize-drawing

@@ -38,6 +38,12 @@
 (def rooms-data-file-name
     "rooms.csv")
 
+(def room-attribute-types-file-name
+    "attribute_types.csv")
+
+(def room-attributes-file-name
+    "room_attributes.csv")
+
 (def areals
     (atom nil))
 
@@ -48,6 +54,12 @@
     (atom nil))
 
 (def rooms
+    (atom nil))
+
+(def room-attribute-types
+    (atom nil))
+
+(def room-attributes
     (atom nil))
 
 (defn csv-data->maps
@@ -73,10 +85,13 @@
 
 (defn load-all-data-files
     []
-    (reset! areals    (load-csv-for-all-dates dates-from data-directory areals-data-file-name))
-    (reset! buildings (load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
-    (reset! floors    (load-csv-for-all-dates dates-from data-directory floors-data-file-name))
-    (reset! rooms     (load-csv-for-all-dates dates-from data-directory rooms-data-file-name)))
+    (reset! areals               (load-csv-for-all-dates dates-from data-directory areals-data-file-name))
+    (reset! buildings            (load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
+    (reset! floors               (load-csv-for-all-dates dates-from data-directory floors-data-file-name))
+    (reset! rooms                (load-csv-for-all-dates dates-from data-directory rooms-data-file-name))
+    (reset! room-attribute-types (load-csv (str data-directory "/" room-attribute-types-file-name)))
+    (reset! room-attributes      (load-csv (str data-directory "/" room-attributes-file-name)))
+)
 
 (load-all-data-files)
 
@@ -182,3 +197,17 @@
                 (println prefix)
                 (filter #(.startsWith (:AOID %) prefix) rooms-for-date))
            rooms-for-date)))
+
+
+(defn read-room-attribute-types
+    []
+    @room-attribute-types)
+
+
+(defn read-rooms-attribute
+    [floor valid-from attribute-name]
+    (let [ra @room-attributes
+          selector (keyword attribute-name)]
+        (zipmap (for [room ra] (:Room room))
+                (for [room ra] (get room selector)))))
+

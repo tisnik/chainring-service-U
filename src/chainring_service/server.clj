@@ -344,24 +344,25 @@
 (defn process-drawing-page
     "Function that prepares data for the page with selected drawing."
     [request]
-    (let [params        (:params request)
-          session       (:session request)
-          configuration (:configuration request)
-          areal-id      (get params "areal-id")
-          building-id   (get params "building-id")
-          floor-id      (get params "floor-id")
-          drawing-id    (get params "drawing-id")
-          valid-from    (get params "valid-from")
-          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
-          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
-          drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
-          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
-          session       (assoc session :drawing-id drawing-id)]
+    (let [params               (:params request)
+          session              (:session request)
+          configuration        (:configuration request)
+          areal-id             (get params "areal-id")
+          building-id          (get params "building-id")
+          floor-id             (get params "floor-id")
+          drawing-id           (get params "drawing-id")
+          valid-from           (get params "valid-from")
+          areal-info           (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
+          building-info        (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          floor-info           (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
+          drawing-info         '() ;(db-interface/read-drawing-info drawing-id)
+          rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+          room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
+          session              (assoc session :drawing-id drawing-id)]
           (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms nil) session)
+                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms room-attribute-types nil) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
@@ -383,11 +384,12 @@
           floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
           drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
           rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+          room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session       (assoc session :drawing-id drawing-id)]
           (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms true) session)
+                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms room-attribute-types true) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
@@ -438,6 +440,8 @@
             [:get  "dates-from"]             (rest-api/list-all-dates-from request uri)
             [:get  "nearest-date-from"]      (rest-api/nearest-date-from request uri)
 
+            [:get  "rooms-attribute"]        (rest-api/rooms-attribute request uri)
+
             [:get  "project"]                (rest-api/project-handler request uri)
             [:get  "building"]               (rest-api/building-handler request uri)
             [:get  "floor"]                  (rest-api/floor-handler request uri)
@@ -453,7 +457,6 @@
             [:get  "sap-floors"]             (rest-api/sap-floors request uri)
             [:get  "sap-rooms"]              (rest-api/sap-rooms request uri)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
-            [:get  "sap-room-attributes"]    (rest-api/sap-room-attributes request uri)
             [:get  "rooms-with-attribute"]   (rest-api/rooms-with-attribute request uri)
                                              (rest-api/unknown-endpoint-handler request uri)
         )))
@@ -532,7 +535,7 @@
           method          (:request-method request)
           api-prefix      (config/get-api-prefix request)
           api-full-prefix (config/get-api-full-prefix request)]
-          (println uri)
+          ;(println uri)
         (cond (= uri api-prefix)            (rest-api/toplevel-handler request api-full-prefix)
               (= uri (str api-prefix "/"))  (rest-api/toplevel-handler request api-full-prefix)
               (startsWith uri api-prefix)   (api-call-handler request uri method api-full-prefix)
