@@ -12,10 +12,8 @@
 
 (ns chainring-service.mocked-sap-interface)
 
-(require '[clojure.data.csv :as csv])
-(require '[clojure.java.io  :as io])
-
-(require '[clojure.tools.logging      :as log])
+(require '[clojure.tools.logging        :as log])
+(require '[chainring-service.csv-loader :as csv-loader])
 
 (def data-directory
     "data")
@@ -62,35 +60,14 @@
 (def room-attributes
     (atom nil))
 
-(defn csv-data->maps
-    [csv-data]
-    (map zipmap
-        (->> (first csv-data)  ;; header
-             (map keyword)     ;; heder items -> keywords
-             repeat)
-             (rest csv-data)))
-
-(defn load-csv
-    [filename]
-    (with-open [reader (io/reader filename)]
-        (let [data (csv/read-csv reader)]
-             (doall (csv-data->maps data)))))
-
-(defn load-csv-for-all-dates
-    [dates-from data-directory filename]
-    (zipmap dates-from
-        (for [date dates-from]
-            (let [full-filename (str data-directory "/" date "/" filename)]
-                (load-csv full-filename)))))
-
 (defn load-all-data-files
     []
-    (reset! areals               (load-csv-for-all-dates dates-from data-directory areals-data-file-name))
-    (reset! buildings            (load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
-    (reset! floors               (load-csv-for-all-dates dates-from data-directory floors-data-file-name))
-    (reset! rooms                (load-csv-for-all-dates dates-from data-directory rooms-data-file-name))
-    (reset! room-attribute-types (load-csv (str data-directory "/" room-attribute-types-file-name)))
-    (reset! room-attributes      (load-csv (str data-directory "/" room-attributes-file-name)))
+    (reset! areals               (csv-loader/load-csv-for-all-dates dates-from data-directory areals-data-file-name))
+    (reset! buildings            (csv-loader/load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
+    (reset! floors               (csv-loader/load-csv-for-all-dates dates-from data-directory floors-data-file-name))
+    (reset! rooms                (csv-loader/load-csv-for-all-dates dates-from data-directory rooms-data-file-name))
+    (reset! room-attribute-types (csv-loader/load-csv (str data-directory "/" room-attribute-types-file-name)))
+    (reset! room-attributes      (csv-loader/load-csv (str data-directory "/" room-attributes-file-name)))
 )
 
 (load-all-data-files)
@@ -194,9 +171,17 @@
           rooms-for-date (get @rooms real-date-from)]
        (if floor
            (let [prefix (str floor ".")]
-                (println prefix)
                 (filter #(.startsWith (:AOID %) prefix) rooms-for-date))
            rooms-for-date)))
+
+
+(defn read-room-info
+    [room valid-from]
+    (let [real-date-from (get-real-date-from valid-from)
+          rooms-for-date (get @rooms real-date-from)]
+       (if room
+            (first (filter #(= room (:AOID %)) rooms-for-date))
+            rooms-for-date)))
 
 
 (defn read-room-attribute-types
