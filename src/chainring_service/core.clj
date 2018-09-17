@@ -29,6 +29,7 @@
 
 (require '[chainring-service.config     :as config])
 (require '[chainring-service.server     :as server])
+(require '[chainring-service.real-sap-interface :as real-sap-interface])
 
 
 (def cli-options
@@ -61,6 +62,11 @@
     (jetty/run-jetty app {:port (read-string port)}))
 
 
+(defn start-sap-fetcher
+    []
+    (.start (Thread. real-sap-interface/run-fetcher)))
+
+
 (defn show-help
     "Display brief help on the standard output."
     [all-options]
@@ -83,5 +89,5 @@
           ; perform the selected operation according to CLI options
           (cond (:help options)         (show-help all-options)
                 (:print-config options) (show-configuration configuration)
-                :else                   (start-server    port))))
-
+                :else                   (do (start-sap-fetcher)
+                                            (start-server    port)))))
