@@ -11,7 +11,7 @@
 ;
 
 (ns chainring-service.rest-api
-    "Handler for all REST API calls.
+    "Handlers for all REST API calls.
 
     Author: Pavel Tisnovsky")
 
@@ -27,6 +27,7 @@
 (require '[chainring-service.sap-interface         :as sap-interface])
 (require '[chainring-service.mocked-sap-interface  :as mocked-sap-interface])
 (require '[chainring-service.rest-api-utils        :as rest-api-utils])
+(require '[chainring-service.rest-api-impl         :as rest-api-impl])
 
 (use     '[clj-utils.utils])
 
@@ -54,8 +55,11 @@
                     (str api-prefix "/config")         "actual configuration"
                     (str api-prefix "/areals")         "list of areals"
                     (str api-prefix "/buildings")      "list of buildings"
-                    (str api-prefix "/project")        "project metadata"
+                    (str api-prefix "/floors")         "list of floors"
+                    (str api-prefix "/rooms")          "list of rooms"
+                    (str api-prefix "/areal")          "areal metadata"
                     (str api-prefix "/building")       "building metadata"
+                    (str api-prefix "/floor")          "floor metadata"
                     (str api-prefix "/drawing")        "drawing metadata"
                     (str api-prefix "/drawings-cache") "drawings cache statistic"}]
         (rest-api-utils/send-response response request)))
@@ -99,21 +103,13 @@
     "REST API handler for the /api/{version}/aoids endpoint."
     [request uri]
     (try
-        (let [start-time (System/currentTimeMillis)
-              params     (:params request)
-              date-from  (get params "valid-from") 
-              areals     (sap-interface/call-sap-interface request "read-areals" date-from)
-              buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
-              floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
-              end-time   (System/currentTimeMillis)
-              timestamp  (rest-api-utils/get-timestamp)
-              response {:status    :ok
-                        :duration  (- end-time start-time)
-                        :timestamp timestamp
-                        :aoids     (concat (:areals areals) buildings floors)}]
-            (rest-api-utils/send-response response request))
+        (let [params     (:params request)
+              valid-from (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/all-aoids request valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-all-aoids")
+            (log/error e "list-all-aoids")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -121,23 +117,13 @@
     "REST API handler for the /api/{version}/objects endpoint."
     [request uri]
     (try
-        (let [start-time (System/currentTimeMillis)
-              params     (:params request)
-              date-from  (get params "valid-from") 
-              areals     (sap-interface/call-sap-interface request "read-areals" date-from)
-              buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
-              floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
-              end-time   (System/currentTimeMillis)
-              timestamp  (rest-api-utils/get-timestamp)
-              response {:status    :ok
-                        :duration  (- end-time start-time)
-                        :timestamp timestamp
-                        :areals    areals
-                        :buildings buildings
-                        :floors    floors}]
-            (rest-api-utils/send-response response request))
+        (let [params     (:params request)
+              valid-from (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/all-objects request valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-all-aoids")
+            (log/error e "list-all-objects")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -145,20 +131,13 @@
     "REST API handler for the /api/{version}/areals endpoint."
     [request uri]
     (try
-        (let [start-time (System/currentTimeMillis)
-              params     (:params request)
-              date-from  (get params "valid-from") 
-              result     (sap-interface/call-sap-interface request "read-areals" date-from)
-              end-time   (System/currentTimeMillis)
-              timestamp  (rest-api-utils/get-timestamp)
-              response {:status    :ok
-                        :duration  (- end-time start-time)
-                        :timestamp timestamp
-                        :date-from (:date-from result)
-                        :areals    (:areals result)}]
-            (rest-api-utils/send-response response request))
+        (let [params     (:params request)
+              valid-from (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/areals request valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-areals")
+            (log/error e "list-of-areals")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -166,21 +145,14 @@
     "REST API handler for the /api/{version}/buildings endpoint."
     [request uri]
     (try
-        (let [start-time (System/currentTimeMillis)
-              params     (:params request)
+        (let [params     (:params request)
               areal-id   (get params "areal-id")
-              date-from  (get params "valid-from") 
-              buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id date-from)
-              end-time   (System/currentTimeMillis)
-              timestamp  (rest-api-utils/get-timestamp)
-              response {:status    :ok
-                        :duration  (- end-time start-time)
-                        :timestamp timestamp
-                        :areal-id  areal-id
-                        :buildings buildings}]
-            (rest-api-utils/send-response response request))
+              valid-from (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/buildings request areal-id valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-buildings")
+            (log/error e "list-of-buildings")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -188,23 +160,15 @@
     "REST API handler for the /api/{version}/floors endpoint."
     [request uri]
     (try
-        (let [start-time  (System/currentTimeMillis)
-              params      (:params request)
+        (let [params      (:params request)
               areal-id    (get params "areal-id")
               building-id (get params "building-id")
-              date-from   (get params "valid-from")
-              floors      (sap-interface/call-sap-interface request "read-floors" areal-id building-id date-from)
-              end-time    (System/currentTimeMillis)
-              timestamp   (rest-api-utils/get-timestamp)
-              response {:status       :ok
-                        :duration     (- end-time start-time)
-                        :timestamp    timestamp
-                        :areal-id     areal-id
-                        :building-id  building-id
-                        :floors       floors}]
-            (rest-api-utils/send-response response request))
+              valid-from  (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/floors request areal-id building-id valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-floors")
+            (log/error e "list-of-floors")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
@@ -212,26 +176,88 @@
     "REST API handler for the /api/{version}/rooms endpoint."
     [request uri]
     (try
-        (let [start-time  (System/currentTimeMillis)
-              params      (:params request)
+        (let [params      (:params request)
               areal-id    (get params "areal-id")
               building-id (get params "building-id")
               floor-id    (get params "floor-id")
-              date-from   (get params "valid-from")
-              rooms       (sap-interface/call-sap-interface request "read-rooms" floor-id date-from)
-              end-time    (System/currentTimeMillis)
-              timestamp   (rest-api-utils/get-timestamp)
-              response {:status       :ok
-                        :duration     (- end-time start-time)
-                        :timestamp    timestamp
-                        :areal-id     areal-id
-                        :building-id  building-id
-                        :floor-id     floor-id
-                        :rooms        rooms}]
-            (rest-api-utils/send-response response request))
+              valid-from  (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/rooms request areal-id building-id floor-id valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
-            (log/error e "read-rooms")
+            (log/error e "list-of-rooms")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn info-about-areal-handler
+    "REST API handler for /api/{version}/areal endpoint."
+    [request uri]
+    (try
+        (let [params     (:params request)
+              valid-from (get params "valid-from") 
+              areal-id   (get params "areal-id")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (if areal-id
+                      (rest-api-utils/send-response (rest-api-impl/areal request areal-id valid-from) request)
+                      (rest-api-utils/send-error-response "areal-id parameter is not specified" uri request :bad-request))
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
+        (catch Exception e
+            (log/error e "info-about-areal")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn info-about-building-handler
+    "REST API handler for the /api/{version}/building endpoint."
+    [request uri]
+    (try
+        (let [params        (:params request)
+              valid-from    (get params "valid-from") 
+              building-id   (get params "building-id")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (if building-id
+                      (rest-api-utils/send-response (rest-api-impl/building request building-id valid-from) request)
+                      (rest-api-utils/send-error-response "building-id parameter is not specified" uri request :bad-request))
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
+        (catch Exception e
+            (log/error e "info-about-building")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn info-about-floor-handler
+    "REST API handler for the /api/{version}/floor endpoint."
+    [request uri]
+    (try
+        (let [params        (:params request)
+              valid-from    (get params "valid-from") 
+              floor-id      (get params "floor-id")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (if floor-id
+                      (rest-api-utils/send-response (rest-api-impl/floor request floor-id valid-from) request)
+                      (rest-api-utils/send-error-response "floor-id parameter is not specified" uri request :bad-request))
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
+        (catch Exception e
+            (log/error e "info-about-floor")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+(defn info-about-room-handler
+    "REST API handler for the /api/{version}/room endpoint."
+    [request uri]
+    (try
+        (let [params       (:params request)
+              valid-from   (get params "valid-from") 
+              room-id      (get params "room-id")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (if room-id
+                      (rest-api-utils/send-response (rest-api-impl/room request room-id valid-from) request)
+                      (rest-api-utils/send-error-response "room-id parameter is not specified" uri request :bad-request))
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
+        (catch Exception e
+            (log/error e "info-about-room")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
+; ------------------------------------------------
 
 
 (defn list-all-dates-from
@@ -270,68 +296,6 @@
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
-(defn read-project-info
-    "REST API handler for /api/{version}/project endpoint."
-    [project-id]
-    (let [project-info (db-interface/read-project-info project-id)
-          buildings    (db-interface/read-building-list project-id)]
-         (log/info "Project ID:" project-id)
-         (log/info "Project info:" project-info)
-         (log/info "Buildings:" buildings)
-         ; result structure
-         {:id        project-id
-          :info      project-info
-          :buildings buildings}))
-
-
-(defn read-building-info
-    "REST API handler for /api/{version}/building-info endpoint."
-    [building-id]
-    (let [building-info (db-interface/read-building-info building-id)
-          floors        (db-interface/read-floor-list building-id)]
-          (log/info "Building ID:" building-id)
-          (log/info "Building info:" building-info)
-          (log/info "Floors:" floors)
-          ; result response
-          {:id      building-id
-           :info    building-info
-           :floors  floors}))
-
-
-(defn project-handler
-    "REST API handler for the /api/{version}/project request."
-    [request uri]
-    (let [params       (:params request)
-          project-id   (get params "project-id")]
-          (if project-id
-              (rest-api-utils/send-response (read-project-info project-id) request)
-              (rest-api-utils/send-error-response "you need to specify project ID" uri request :internal-server-error))))
-
-
-(defn building-handler
-    "REST API handler for the /api/{version}/building endpoint."
-    [request uri]
-    (let [params        (:params request)
-          building-id   (get params "building-id")]
-          (if building-id
-              (rest-api-utils/send-response (read-building-info building-id) request)
-              (rest-api-utils/send-error-response "you need to specify building ID" uri request :internal-server-error))))
-
-
-(defn floor-handler
-    "REST API handler for the /api/{version}/floor endpoint."
-    [request uri]
-    (let [params     (:params request)
-          floor-id   (get params "floor-id")
-          floor-info (db-interface/read-floor-info floor-id)]
-          (log/info "Floor ID:" floor-id)
-          (log/info "Floor info" floor-info)
-          (if floor-id
-              (let [drawings (db-interface/read-drawing-list floor-id)]
-                  (log/info "Drawings" drawings)
-                  (rest-api-utils/send-response drawings request))
-              (rest-api-utils/send-error-response "you need to specify floor ID" uri request :internal-server-error))))
-
 
 (defn drawing-handler
     "REST API handler for the /api/{version}/drawing endpoint."
@@ -350,22 +314,6 @@
                   (rest-api-utils/send-response result request)
                   (rest-api-utils/send-error-response "no drawing info" uri request :internal-server-error))
               (rest-api-utils/send-error-response "you need to specify drawing ID" uri request :internal-server-error))))
-
-
-(defn all-buildings
-    "REST API handler for the /api/{version}/buildings endpoint."
-    [request uri]
-    (let [params    (:params request)
-          buildings (db-interface/read-all-buildings)]
-         (rest-api-utils/send-response buildings request)))
-
-
-(defn all-floors
-    "REST API handler for the /api/{version}/floors endpoint."
-    [request uri]
-    (let [params    (:params request)
-          floors    (db-interface/read-all-floors)]
-         (rest-api-utils/send-response floors request)))
 
 
 (defn sap-reload-mock-data
@@ -409,31 +357,17 @@
          (log/info params)
          (rest-api-utils/send-response params request)))
 
-(defn read-attributes-for-rooms
-    [attribute]
-    [1 2 3 4])
-
 (defn rooms-attribute
     [request uri]
     (let [params     (:params request)
           floor      (get params "floor-aoid")
           valid-from (get params "valid_from")
           attribute  (get params "attribute")
-          sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)]
-        (rest-api-utils/send-response sap-response request)
+          sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)
+          cookie-val (clojure.string/join "_" (for [r sap-response] (str (key r) "-" (val r))))]
+        (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val)
     ))
 
-(defn rooms-with-attribute
-    [request uri]
-    (let [params     (:params request)
-          attribute  (get params "attribute")
-          project    (get params "project-aoid")
-          building   (get params "building-aoid")
-          floor      (get params "floor-aoid")
-          valid_from (get params "valid_from")]
-          (let [rooms     (read-attributes-for-rooms attribute)]
-              (rest-api-utils/send-response rooms request)
-          )))
 
 (defn all-drawings-handler
     "REST API handler for the /api/{version}/drawings endpoint."
