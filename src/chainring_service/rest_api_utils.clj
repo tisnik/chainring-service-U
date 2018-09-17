@@ -63,6 +63,22 @@
      (send-response response request :ok)))
 
 
+(defn send-response-with-cookie
+    "Send normal response (with application/json MIME type) back to the client."
+    ([response request http-code cookie-name cookie-value]
+     (if (config/pretty-print? request)
+         (-> (http-response/response (with-out-str (json/pprint response)))
+             (http-response/set-cookie cookie-name cookie-value {:max-age 36000000 :path "/"})
+             (http-response/content-type "application/json; charset=utf-8")
+             (http-response/status (get http-codes http-code)))
+         (-> (http-response/response (json/write-str response))
+             (http-response/set-cookie cookie-name cookie-value {:max-age 36000000})
+             (http-response/content-type "application/json; charset=utf-8")
+             (http-response/status (get http-codes http-code)))))
+    ([response request]
+     (send-response response request :ok)))
+
+
 (defn send-ok-response
     "Send ok response (with application/json MIME type) back to the client."
     [message request]
@@ -80,6 +96,16 @@
         (send-response response request http-code)))
 
 
+(defn send-error-response-wrong-date
+    "Send error response (with application/json MIME type) back to the client."
+    [valid-from cause request]
+    (let [response {:status "error"
+                    :message "parameter valid-from should has format YYYY-MM-DD"
+                    :entered valid-from
+                    :cause cause}]
+        (send-response response request :bad-request)))
+
+
 (defn send-plain-response
     "Send a response (with application/json MIME type) back to the client."
     [response]
@@ -92,3 +118,13 @@
     (->> (new java.util.Date)
          (.format timeformatter)))
 
+
+(defn current-time
+    []
+    (System/currentTimeMillis))
+ 
+ 
+(defn valid-date?
+    [date]
+    (or (nil? date)
+        (re-matches #"\d\d\d\d-\d\d-\d\d" date)))
