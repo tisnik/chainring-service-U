@@ -22,6 +22,17 @@ var selectedRoom = null;
 var counter = 0;
 
 
+function setCookie(name,value) {
+    var date = new Date();
+    var days = 10;
+    date.setTime(date.getTime() + (days*24*60*60*1000));
+    var expires = '; expires=' + date.toUTCString();
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+setCookie("attribute", "");
+setCookie("rooms", "");
+
 function changeXpos(delta) {
     xpos += delta;
     reloadImage(null, null);
@@ -347,6 +358,18 @@ function selectRoomInSap(aoid) {
     setTimeout("clickOnSapHref()", 500);
 }
 
+
+function setText(element, text) {
+    if (element != null) {
+        if (typeof element.textContent !== "undefined") {
+            element.textContent = text;
+        }
+        else {
+            element.innerText = text;
+        }
+    }
+}
+
 function deleteRoomAttributes() {
     var container = document.getElementById("room_list");
     var rows = container.getElementsByTagName("tr");
@@ -354,7 +377,7 @@ function deleteRoomAttributes() {
         var row = rows[i];
         var col3 = row.children[2];
         if (col3.id != null && col3.id.startsWith("room_")) {
-            col3.innerText = "";
+            setText(col3, "");
         }
     }
 }
@@ -366,20 +389,71 @@ function onRoomAttributesReceived(data) {
         attribute = attributes[room];
         var elementId = "room_" + room + "_attribute_value";
         var element = document.getElementById(elementId);
-        console.log(element.innerText);
-        if (element != null) {
-            element.innerText = attribute;
-        }
+        //console.log(element.innerText);
+        //console.log(attribute);
+        setText(element, attribute);
     }
+
+    reloadImage(null, null);
 }
+
 
 function urlForRoomWithAttributes(attribute, floor_id, valid_from) {
     return "/api/v1/rooms-attribute?floor-id=" + floor_id + "&valid-from=" + valid_from + "&attribute=" + attribute;
 }
 
+
 function setRoomAttributeLabel(label) {
     var element = document.getElementById("room_attribute_label");
-    element.innerText = label;
+    setText(element, label);
+}
+
+
+function colorBox(color, text) {
+    return "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>" + text + "<br/>";
+}
+
+function showLegendForAttribute(attribute) {
+    var element = document.getElementById("legenda");
+    var html = "";
+
+    switch (attribute) {
+    case "plocha":
+        html =  colorBox("rgb(250, 250,   0)", "< 10 m<sup>2</sup>");
+        html += colorBox("rgb(200, 250,  40)", "< 20 m<sup>2</sup>");
+        html += colorBox("rgb(160, 250,  80)", "< 40 m<sup>2</sup>");
+        html += colorBox("rgb(120, 250, 120)", "< 60 m<sup>2</sup>");
+        html += colorBox("rgb( 80, 250, 160)", "< 80 m<sup>2</sup>");
+        html += colorBox("rgb( 40, 250, 200)", "< 100 m<sup>2</sup>");
+        html += colorBox("rgb(  0, 250, 250)", "> 100 m<sup>2</sup>");
+        break;
+    case "obsazenost":
+        html =  colorBox("rgb(240, 100, 00)", "0");
+        html += colorBox("rgb(200, 100, 40)", "1");
+        html += colorBox("rgb(160, 100, 80)", "2");
+        html += colorBox("rgb(120, 100, 120)", "3");
+        html += colorBox("rgb( 80, 100, 160)", "4");
+        html += colorBox("rgb( 40, 100, 240)", "5");
+        html += colorBox("rgb( 00, 100, 100)", "6");
+        html += colorBox("rgb(100,  40, 100)", "7");
+        break;
+    case "typ":
+        html =  colorBox("rgb(200,150,100)", "Chodba");
+        html += colorBox("rgb(100,150,200)", "Sklad");
+        html += colorBox("rgb(200,140,200)", "Kancelar");
+        html += colorBox("rgb(100,200,200)", "Vyroba");
+        html += colorBox("rgb(200,200,100)", "Zazemi");
+        html += colorBox("rgb(250, 50, 50)", "WC");
+        break;
+    case "kapacita":
+        html =  colorBox("rgb(50, 50, 50)", "0");
+        html += colorBox("rgb(100, 100, 100)", "1");
+        html += colorBox("rgb(150, 150, 150)", "2");
+        html += colorBox("rgb(255, 255, 255)", ">2");
+        break;
+    }
+
+    element.innerHTML = html;
 }
 
 function onAttributeTypeClicked(attribute, floor_id, valid_from) {
@@ -389,9 +463,15 @@ function onAttributeTypeClicked(attribute, floor_id, valid_from) {
     deleteRoomAttributes();
     // set the new label (1st row)
     setRoomAttributeLabel(attribute);
+    // show legend
+    showLegendForAttribute(attribute);
     // try to set attributes (2nd... rows)
     callAjax(url, onRoomAttributesReceived);
-    reloadImage(null, null);
+
+    // cookies used by raster renderer
+    setCookie("attribute", attribute);
+    setCookie("floor_id", floor_id);
+    setCookie("valid_from", valid_from);
 }
 
 function onImageClick(obj, e) {
