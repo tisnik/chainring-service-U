@@ -28,6 +28,7 @@
 (require '[chainring-service.config             :as config])
 (require '[chainring-service.http-utils         :as http-utils])
 (require '[chainring-service.sap-interface      :as sap-interface])
+(require '[chainring-service.real-sap-interface :as real-sap-interface])
 
 (use     '[clj-utils.utils])
 
@@ -84,9 +85,18 @@
 
 (defn process-db-statistic-page
     [request]
-    (let [db-stats (db-interface/get-db-status)]
-        (log/info "db stats" db-stats)
-        (finish-processing request (html-renderer/render-db-statistic-page db-stats))))
+    (let [last-update @real-sap-interface/last-update
+          timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
+          now           (new java.util.Date)
+          now-str       (.format timeformatter now)
+          areals        (count (real-sap-interface/read-areals now-str))
+          buildings     (count (real-sap-interface/read-buildings nil now-str))
+          floors        (count (real-sap-interface/read-floors nil nil now-str))
+          rooms         (count (real-sap-interface/read-rooms nil now-str))
+          drawings      (count (fileutils/filename-list "drawings/" ".json"))]
+
+        ;(log/info "db stats" db-stats)
+        (finish-processing request (html-renderer/render-db-statistic-page last-update areals buildings floors rooms drawings))))
 
 (defn process-drawings-statistic-page
     [request]
@@ -437,6 +447,10 @@
             [:get  "rooms"]                  (rest-api/list-of-rooms-handler request uri)
 
             ; endpoints to return information about selected AOID
+            [:get  "areal"]                  (rest-api/info-about-areal-handler request uri)
+            [:get  "building"]               (rest-api/info-about-building-handler request uri)
+            [:get  "floor"]                  (rest-api/info-about-floor-handler request uri)
+            [:get  "room"]                   (rest-api/info-about-room-handler request uri)
 
             ; endpoints to work with dates
             [:get  "dates-from"]             (rest-api/list-all-dates-from request uri)
@@ -444,9 +458,6 @@
 
             [:get  "rooms-attribute"]        (rest-api/rooms-attribute request uri)
 
-            [:get  "project"]                (rest-api/project-handler request uri)
-            [:get  "building"]               (rest-api/building-handler request uri)
-            [:get  "floor"]                  (rest-api/floor-handler request uri)
             [:get  "drawing"]                (rest-api/drawing-handler request uri)
             [:get  "drawings"]               (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data-to-db"] (rest-api/store-drawing-raw-data request)
@@ -458,7 +469,6 @@
             [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
             [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
             [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
-            [:get  "rooms-with-attribute"]   (rest-api/rooms-with-attribute request uri)
                                              (rest-api/unknown-endpoint-handler request uri)
         )))
 
@@ -531,7 +541,7 @@
     "Handler that is called by Ring for all requests received from user(s)."
     [request]
     (log/info "request URI:   " (:uri request))
-    (log/info "configuration: " (:configuration request))
+    ;(log/info "configuration: " (:configuration request))
     (let [uri             (:uri request)
           method          (:request-method request)
           api-prefix      (config/get-api-prefix request)
