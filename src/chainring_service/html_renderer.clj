@@ -134,7 +134,7 @@
 
 (defn render-db-statistic-page
     "Render page with database statistic."
-    [db-stats]
+    [last-update areals buildings floors rooms drawings]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -142,15 +142,17 @@
                 (widgets/navigation-bar "/")
                 [:h1 "Stav databáze"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "Tabulka"]                [:th "Počet záznamů"]]
-                    [:tr [:td "Areály"]                 [:td (:projects db-stats)]]
-                    [:tr [:td "Budovy"]                 [:td (:buildings db-stats)]]
-                    [:tr [:td "Podlaží"]                [:td (:floors db-stats)]]
-                    [:tr [:td "Místnosti (SAP)"]        [:td (:sap-rooms db-stats)]]
-                    [:tr [:td "Výkresy"]                [:td (:drawings db-stats)]]
-                    [:tr [:td "Data výkresů"]           [:td (:drawings-data db-stats)]]
-                    [:tr [:td "Místnosti na výkresech"] [:td (:drawing-rooms db-stats)]]
-                    [:tr [:td "Uživatelé"]              [:td (:users db-stats)]]
+                    [:tr [:th "Typ objektu"]          [:th "Počet záznamů"]]
+                    [:tr [:td "Areály"]               [:td areals]]
+                    [:tr [:td "Budovy"]               [:td buildings]]
+                    [:tr [:td "Podlaží"]              [:td floors]]
+                    [:tr [:td "Místnosti"]            [:td rooms]]
+                    [:tr [:td "Výkresy"]              [:td drawings]]
+                    ;[:tr [:td "Data výkresů"]           [:td (:drawings-data db-stats)]]
+                    ;[:tr [:td "Místnosti na výkresech"] [:td (:drawing-rooms db-stats)]]
+                    ;[:tr [:td "Uživatelé"]              [:td (:users db-stats)]]
+                    [:tr [:td "&nbsp;"] [:td "&nbsp;"]]
+                    [:tr [:th "Poslední aktualizace"] [:td last-update]]
                 ]
                 [:br]
                 (form/form-to [:get "/"]
@@ -173,9 +175,9 @@
                 [:h1 "Stav výkresů"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Formát"]        [:th "Počet výkresů"] [:th ""]]
-                    [:tr [:td "Drw"]           [:td drawings-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
-                    [:tr [:td "JSON"]          [:td json-count] [:td [:a {:href "/json-list"} "seznam"]]]
-                    [:tr [:td "Binary"]        [:td binary-count] [:td [:a {:href "/binary-list"} "seznam"]]]
+                    ;[:tr [:td "Drw"]           [:td drawings-count] [:td [:a {:href "/drawings-list"} "seznam"]]]
+                    [:tr [:td "JSON"]          [:td json-count] [:td [:a {:href "/json-list"} "seznam výkresů"]]]
+                    ;[:tr [:td "Binary"]        [:td binary-count] [:td [:a {:href "/binary-list"} "seznam"]]]
                 ]
                 [:br]
                 (form/form-to [:get "/"]
@@ -752,7 +754,8 @@
                         )]]
             [:td {:style "width:1em"} "&nbsp;"]
             [:td {:style "vertical-align:top"}
-                 "Legenda"
+                 [:div "Legenda"]
+                 [:span {:id "legenda"}]
             ]]])
        ;[:tr {:class "vcell"}
        ;    [:td "Typ"]
