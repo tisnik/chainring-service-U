@@ -460,60 +460,88 @@
                       first
                       :aoid)))))
 
-;;;{:capacity 0, :occupied_by , :area 15.0
-;;;
-;;;        boolean selectArea         = "area".equals(configuration.selectType);
-;;;        boolean selectCapacity     = "capacity".equals(configuration.selectType);
-;;;        boolean selectOwner        = "owner".equals(configuration.selectType);
-;;;        boolean selectAvailability = "availability".equals(configuration.selectType);
-;;;        boolean selectPozadavek    = "pozadavek".equals(configuration.selectType);                             ]
-;;;
 
+(def color1  (new Color 240 100 00))
+(def color2  (new Color 200 100 40))
+(def color3  (new Color 160 100 80))
+(def color4  (new Color 120 100 120))
+(def color5  (new Color  80 100 160))
+(def color6  (new Color  40 100 200))
+(def color7  (new Color  00 100 240))
+(def color8  (new Color 100  40 100))
+(def color9  (new Color 100  80 100))
+(def color10 (new Color 100 120 100))
+
+(def color1-alpha (new Color 240 100 00 127))
+(def color2-alpha (new Color 200 100 40 127))
+(def color3-alpha (new Color 160 100 80 127))
+(def color4-alpha (new Color 120 100 120 127))
+(def color5-alpha (new Color  80 100 160 127))
+(def color6-alpha (new Color  40 100 200 127))
+(def color7-alpha (new Color  00 100 240 127))
+(def color8-alpha (new Color 100  40 100 127))
+(def color9-alpha (new Color 100  80 100 127))
+(def color10-alpha (new Color 100 120 100 127))
 
 (def occupation-colors
-    {"I" {:foreground (new Color 200 100 100)
-          :background (new Color 200 100 100 127)}
-     "E" {:foreground (new Color 100 100 200)
-          :background (new Color 100 100 200 127)}
+    {"0" {:foreground color1
+          :background color1-alpha}
+     "1" {:foreground color2
+          :background color2-alpha}
+     "2" {:foreground color3
+          :background color3-alpha}
+     "3" {:foreground color4
+          :background color4-alpha}
+     "4" {:foreground color5
+          :background color5-alpha}
+     "5" {:foreground color6
+          :background color6-alpha}
+     "6" {:foreground color7
+          :background color7-alpha}
     })
+
+
+(def room-capacity
+    {"0"  {:foreground Color/BLACK :background (new Color 50 50 50 127)}
+     "1"  {:foreground Color/GRAY  :background (new Color 100 100 100 127)}
+     "2"  {:foreground Color/GRAY  :background (new Color 150 150 150 127)}
+})
 
 
 (def room-type-colors
-    {1 {:foreground (new Color 200 150 100)
-        :background (new Color 200 150 100 127)}
-     2 {:foreground (new Color 100 150 200)
-        :background (new Color 100 150 200 127)}
-     3 {:foreground (new Color 200 140 200)
-        :background (new Color 200 140 200 127)}
-     4 {:foreground (new Color 100 200 200)
-        :background (new Color 100 200 200 127)}
-     5 {:foreground (new Color 200 200 100)
-        :background (new Color 200 200 100 127)}
-    })
+    {"chodba"   {:foreground (new Color 200 150 100) :background (new Color 200 150 100 127)}
+     "sklad"    {:foreground (new Color 100 150 200) :background (new Color 100 150 200 127)}
+     "kancelar" {:foreground (new Color 200 140 200) :background (new Color 200 140 200 127)}
+     "vyroba"   {:foreground (new Color 100 200 200) :background (new Color 100 200 200 127)}
+     "zazemi"   {:foreground (new Color 200 200 100) :background (new Color 200 200 100 127)}
+     "WC"       {:foreground (new Color 250 50 50) :background (new Color 250 50 50 127)}
+})
 
 
-(defn color-for-room-capacity
-    [capacity]
-    (cond (zero? capacity) {:foreground Color/BLACK :background (new Color 50 50 50 127)}
-          (== capacity 1)  {:foreground Color/GRAY :background (new Color 100 100 100 127)}
-          (== capacity 2)  {:foreground Color/GRAY :background (new Color 150 150 150 127)}
-          :else            {:foreground Color/GRAY :background (new Color 200 200 200 127)}))
-
-
+(defn area-colors
+    [area]
+    (let [area (utils/parse-int area)]
+        (cond (< area 10)  {:foreground Color/BLACK :background (new Color 250 250   0 127)}
+              (< area 20)  {:foreground Color/GRAY  :background (new Color 200 250  40 127)}
+              (< area 40)  {:foreground Color/GRAY  :background (new Color 160 250  80 127)}
+              (< area 60)  {:foreground Color/GREEN :background (new Color 120 250 120 127)}
+              (< area 80)  {:foreground Color/GREEN :background (new Color  80 250 160 127)}
+              (< area 100) {:foreground Color/GREEN :background (new Color  40 250 200 127)}
+              :else        {:foreground Color/BLUE  :background (new Color   0 250 250 127)})))
+         
 (defn compute-room-color
-    [highlight-groups room]
-    (if highlight-groups
-        (or (and (contains? highlight-groups "occupation") (get occupation-colors (:occupation room)))
-            (and (contains? highlight-groups "room_type")  (get room-type-colors  (:room_type room)))
-            (and (contains? highlight-groups "capacity") (color-for-room-capacity (:capacity room)))
-    )))
+    [highlight-group room-attribute]
+    (condp = highlight-group
+        :obsazenost (get occupation-colors room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
+        :typ        (get room-type-colors  room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
+        :kapacita   (get room-capacity     room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
+        :plocha     (area-colors room-attribute)
+        nil))
 
 
 (defn compute-room-colors
-    [floor-id version highlight-groups]
-    (let [rooms (db-interface/read-sap-room-list floor-id version)]
-         (zipmap (map #(:id %) rooms)
-                 (map #(compute-room-color highlight-groups %) rooms))))
+    [highlight-group room-attrs]
+    (into {} (for [room room-attrs] [(key room) (compute-room-color highlight-group (val room))])))
 
 
 (defn use-binary-rendering?
@@ -525,10 +553,24 @@
         use-binary?))
 
 
+(defn decode-attrs
+    [rooms]
+    (try
+        (if rooms
+            (let [room+attr (str/split rooms #"_")]
+                (into {} (for [r room+attr] (str/split r #"-")))))
+        (catch Exception e
+            nil)))
+
+
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
+          cookies             (:cookies request)
+          highlight-group     (-> (get cookies "attribute") :value keyword)
+          room-attrs          (-> (get cookies "rooms") :value decode-attrs)
+          room-colors         (compute-room-colors highlight-group room-attrs)
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
@@ -541,8 +583,6 @@
           user-y-offset       (utils/parse-int (get params "y-offset" "0"))
           user-scale          (utils/parse-float (get params "scale" "1.0"))
           selected            (get params "selected")
-          highlight-p         (get params "highlight")
-          highlight-groups    (into #{} (if highlight-p (str/split highlight-p #",")))
           coordsx             (get params "coordsx")
           coordsy             (get params "coordsy")
           ; make sure that only 'true' is converted into truth value, nil/false otherwise
@@ -553,8 +593,10 @@
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
           debug               (get params "debug" nil)
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
-          room-colors         (compute-room-colors floor-id version highlight-groups)
           image-output-stream (ByteArrayOutputStream.)]
+          (println "******************")
+          (println cookies)
+          (println "******************")
           (try
               (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
