@@ -750,7 +750,7 @@
             [:td {:style "vertical-align:top"}
                 [:table {:id "filter-list" :class "table table-stripped table-hover" :style "width:auto;"}
                     (for [attribute room-attribute-types]
-                        [:tr {:class "vcell"} [:td [:a {:href "#" :onclick (str "onAttributeTypeClicked('" (:Atribut attribute) "', '" floor-id "', '" valid-from "')")} (:Atribut attribute)]]]
+                        [:tr {:class "vcell"} [:td [:a {:href "#" :onclick (str "onAttributeTypeClicked('" (:ID attribute) "', '" floor-id "', '" valid-from "')")} (:Atribut attribute)]]]
                         )]]
             [:td {:style "width:1em"} "&nbsp;"]
             [:td {:style "vertical-align:top"}
