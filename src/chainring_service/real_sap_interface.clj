@@ -56,22 +56,6 @@
     [building-id]
     [1 2])
 
-(defn minutes-to-seconds
-    "Converts minutes to seconds."
-    [minutes]
-    (* minutes 60))
-
-(defn seconds-to-ms
-    "Converts seconds to milliseconds."
-    [seconds]
-    (* seconds 1000))
-
-(defn compute-sleep-amount
-    [minutes]
-    (-> minutes
-        minutes-to-seconds
-        seconds-to-ms))
-
 (defn load-all-data-files
     []
     (reset! areals               (csv-loader/load-csv "data/2018-09-01/areals.csv"))
@@ -85,25 +69,6 @@
 (println "********************")
 (load-all-data-files)
 (println "********************")
-
-(defn run-fetcher-in-a-loop
-    "Run the fetcher periodically. The sleep amount should containg time delay in minutes."
-    [sleep-amount]
-    (let [ms-to-sleep (compute-sleep-amount sleep-amount)]
-        (while true
-            (do
-                (log/info "SAP fetcher started")
-                (load-all-data-files)
-                (reset! last-update (new java.util.Date))
-                (log/info (str "SAP fetcher finished, sleeping for " sleep-amount " minutes"))
-                (Thread/sleep ms-to-sleep)))))
-
-
-(defn run-fetcher
-    "Run the endless fetcher loop."
-    []
-    (log/info "SAP fetcher started in its own thread")
-    (run-fetcher-in-a-loop 1))
 
 
 (defn today?
