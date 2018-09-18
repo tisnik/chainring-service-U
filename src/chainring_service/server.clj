@@ -365,7 +365,7 @@
           areal-info           (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
           building-info        (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
           floor-info           (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
-          drawing-info         '() ;(db-interface/read-drawing-info drawing-id)
+          drawing-info         '()
           rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session              (assoc session :drawing-id drawing-id)]
@@ -392,7 +392,7 @@
           areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
           building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
           floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
-          drawing-info  '() ;(db-interface/read-drawing-info drawing-id)
+          drawing-info  '()
           rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session       (assoc session :drawing-id drawing-id)]
