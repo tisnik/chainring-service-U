@@ -382,32 +382,23 @@ function deleteRoomAttributes() {
     }
 }
 
-function onRoomAttributesReceived(data) {
-    var attributes = JSON.parse(data);
-    for(var prop in attributes) {
-        room = prop;
-        attribute = attributes[room];
-        var elementId = "room_" + room + "_attribute_value";
-        var element = document.getElementById(elementId);
-        //console.log(element.innerText);
-        //console.log(attribute);
-        setText(element, attribute);
+function isAttributeWithStaticValues(attribute_id) {
+    if (attribute_id != null) {
+        return attribute_id == "uklid" || attribute_id == "typ" || attribute_id == "obsazenost" || attribute_id == "smlouva";
     }
-
-    reloadImage(null, null);
+    else {
+        return false;
+    }
 }
 
-
-function urlForRoomWithAttributes(attribute, floor_id, valid_from) {
-    return "/api/v1/rooms-attribute?floor-id=" + floor_id + "&valid-from=" + valid_from + "&attribute=" + attribute;
+function isAttributeWithListOfValues(attribute_id) {
+    if (attribute_id != null) {
+        return attributeToHighlight == "projekt" || attributeToHighlight == "ucel";
+    }
+    else {
+        return false;
+    }
 }
-
-
-function setRoomAttributeLabel(label) {
-    var element = document.getElementById("room_attribute_label");
-    setText(element, label);
-}
-
 
 function colorBox(color, text) {
     return "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>" + text + "<br/>";
@@ -427,15 +418,15 @@ function showLegendForAttribute(attribute) {
         html += colorBox("rgb( 40, 250, 200)", "< 100 m<sup>2</sup>");
         html += colorBox("rgb(  0, 250, 250)", "> 100 m<sup>2</sup>");
         break;
+    case "smlouva":
+        html =  colorBox("rgb( 70,  70, 240)", "krátkodobé");
+        html += colorBox("rgb(220, 220,  70)", "dlouhodobé");
+        break;
     case "obsazenost":
-        html =  colorBox("rgb(240, 100, 00)", "0");
-        html += colorBox("rgb(200, 100, 40)", "1");
-        html += colorBox("rgb(160, 100, 80)", "2");
-        html += colorBox("rgb(120, 100, 120)", "3");
-        html += colorBox("rgb( 80, 100, 160)", "4");
-        html += colorBox("rgb( 40, 100, 240)", "5");
-        html += colorBox("rgb( 00, 100, 100)", "6");
-        html += colorBox("rgb(100,  40, 100)", "7");
+        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné");
+        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené");
+        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné");
+        html += colorBox("rgb( 40,  40, 200)", "interní");
         break;
     case "typ":
         html =  colorBox("rgb(200,150,100)", "Chodba");
@@ -445,31 +436,98 @@ function showLegendForAttribute(attribute) {
         html += colorBox("rgb(200,200,100)", "Zazemi");
         html += colorBox("rgb(250, 50, 50)", "WC");
         break;
-    case "kapacita":
-        html =  colorBox("rgb(50, 50, 50)", "0");
-        html += colorBox("rgb(100, 100, 100)", "1");
-        html += colorBox("rgb(150, 150, 150)", "2");
-        html += colorBox("rgb(255, 255, 255)", ">2");
+    case "uklid":
+        html =  colorBox("rgb(250, 250,   0)", "1");
+        html += colorBox("rgb(200, 250,  40)", "2");
+        html += colorBox("rgb(160, 250,  80)", "3");
+        html += colorBox("rgb(120, 250, 120)", "4");
+        html += colorBox("rgb( 80, 250, 160)", "5");
+        html += colorBox("rgb( 40, 250, 200)", "6");
+        html += colorBox("rgb(  0, 250, 250)", "7");
         break;
     }
 
     element.innerHTML = html;
 }
 
-function onAttributeTypeClicked(attribute, floor_id, valid_from) {
-    var url = urlForRoomWithAttributes(attribute, floor_id, valid_from)
-    attributeToHighlight = attribute;
+function showLegendForAttributeList(attribute_list) {
+    var palette = [
+        "rgb(150, 150,  40)",
+        "rgb( 40, 250,  40)",
+        "rgb( 40, 250, 250)",
+        "rgb( 40,  40, 250)",
+        "rgb(250,  40, 250)",
+        "rgb(250,  40,  40)",
+        "rgb( 40,  40,  40)",
+        "rgb(120, 120, 120)",
+        "rgb(240, 240, 240)",
+    ];
+
+    var element = document.getElementById("legenda");
+    var html = "";
+
+    for (var i = 0; i < attribute_list.length; i++) {
+        color = palette[i % palette.length];
+        html += colorBox(color, attribute_list[i]);
+    }
+
+    element.innerHTML = html;
+}
+
+function onRoomAttributesReceived(data) {
+    var attributes = JSON.parse(data);
+    var attribute_list = [];
+    for(var prop in attributes) {
+        room = prop;
+        attribute = attributes[room];
+        var elementId = "room_" + room + "_attribute_value";
+        var element = document.getElementById(elementId);
+        //console.log(element.innerText);
+        //console.log(attribute);
+        setText(element, attribute);
+        attribute_list.push(attribute);
+    }
+
+    if (isAttributeWithListOfValues(attributeToHighlight)) {
+        attribute_list = attribute_list.sort().filter(function(element, index, array) {
+             return (index == array.indexOf(element));
+        });
+        // now the attribute list is sorted and unique
+        showLegendForAttributeList(attribute_list);
+        console.log(attribute_list);
+    }
+
+    reloadImage(null, null);
+}
+
+
+function urlForRoomWithAttributes(attribute, floor_id, valid_from) {
+    return "/api/v1/rooms-attribute?floor-id=" + floor_id + "&valid-from=" + valid_from + "&attribute=" + attribute;
+}
+
+
+function setRoomAttributeLabel(label) {
+    var element = document.getElementById("room_attribute_label");
+    setText(element, label);
+}
+
+
+function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_from) {
+    var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from)
+    attributeToHighlight = attribute_id;
     // clear the 3rd column in room table
     deleteRoomAttributes();
     // set the new label (1st row)
-    setRoomAttributeLabel(attribute);
+    setRoomAttributeLabel(attribute_name);
     // show legend
-    showLegendForAttribute(attribute);
+    if (isAttributeWithStaticValues(attribute_id)) {
+        showLegendForAttribute(attribute_id);
+    }
     // try to set attributes (2nd... rows)
     callAjax(url, onRoomAttributesReceived);
 
     // cookies used by raster renderer
-    setCookie("attribute", attribute);
+    setCookie("attribute", attribute_id);
     setCookie("floor_id", floor_id);
     setCookie("valid_from", valid_from);
 }
