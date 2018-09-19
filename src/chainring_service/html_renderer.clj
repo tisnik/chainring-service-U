@@ -841,7 +841,7 @@
                     (render-view-tools)
                 ; 2nd row - drawing on the right side
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
-                                 :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&version=C")
+                                 :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&ignore-type=true")
                                  :border "0"
                                  :onclick "onImageClick(this, event)"}]]
                                  ; [:div {:id "sap_href_div" :style "display:none"} "&nbsp;"]

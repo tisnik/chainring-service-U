@@ -579,6 +579,7 @@
 
 (defn get-all-room-attributes
     [room-attrs]
+    []
     (->> room-attrs
          vals
          distinct
@@ -624,14 +625,14 @@
     (let [params              (:params request)
           configuration       (:configuration request)
           cookies             (:cookies request)
+          ignore-type         (get params "ignore-type")
           highlight-group     (-> (get cookies "attribute") :value keyword)
           room-attrs          (-> (get cookies "rooms") :value decode-attrs)
           all-room-attributes (get-all-room-attributes room-attrs)
-          room-colors         (compute-room-colors all-room-attributes highlight-group room-attrs)
+          room-colors         (if (= ignore-type "true") nil (compute-room-colors all-room-attributes highlight-group room-attrs))
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
-          version             (get params "version")
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
@@ -683,7 +684,6 @@
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
-          version             (get params "version")
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
