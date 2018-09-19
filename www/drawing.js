@@ -21,17 +21,21 @@ var debugMode = true;
 var selectedRoom = null;
 var counter = 0;
 
+setCookie("attribute", "");
+setCookie("rooms", "");
+
+
+function checkBoxValue(id) {
+    return document.getElementById(id).checked;
+}
 
 function setCookie(name,value) {
     var date = new Date();
     var days = 10;
     date.setTime(date.getTime() + (days*24*60*60*1000));
-    var expires = '; expires=' + date.toUTCString();
+    var expires = "; expires=" + date.toUTCString();
     document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
-
-setCookie("attribute", "");
-setCookie("rooms", "");
 
 function changeXpos(delta) {
     xpos += delta;
@@ -113,8 +117,8 @@ function disableScrollOnMouseWheel(e) {
     }
 }
 
-function onMouseWheel(e) {
-    var e = window.event || e; // old IE support
+function onMouseWheel(ev) {
+    var e = window.event || ev; // old IE support
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
     console.log("mouse wheel: " + delta);
 
@@ -168,10 +172,10 @@ function callAjax(url, callback) {
             if (xmlHttpRequest.status == 200) {
                 callback(xmlHttpRequest.responseText);
             } else {
-                window.alert("Load failed")
+                window.alert("Load failed");
             }
         }
-    }
+    };
     xmlHttpRequest.open("GET", url, true);
     xmlHttpRequest.send();
 }
@@ -190,7 +194,7 @@ function findRoomUrl(drawing_id, floor_id, version) {
 }
 
 function rasterDrawingHighlight() {
-    url = "";
+    var url = "";
     var highlightRoomType = checkBoxValue("room-type-checkbox");
     var highlightRoomCapacity = checkBoxValue("room-capacity-checkbox");
     var highlightRoomOccupation = checkBoxValue("room-ocupation-checkbox");
@@ -199,7 +203,7 @@ function rasterDrawingHighlight() {
         var firstItem = true;
         url += "&highlight=";
         if (highlightRoomType) {
-            url += "room_type"
+            url += "room_type";
             firstItem = false;
         }
         if (highlightRoomCapacity) {
@@ -247,7 +251,7 @@ function findRoomOnDrawing(clickedX, clickedY) {
     }
     var url = findRoomUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
     url += transformation();
-    
+
     if (debugMode) {
         console.log(url);
     }
@@ -280,7 +284,9 @@ function registerMouseWheelCallbackFunction(drawingElement) {
         drawingElement.addEventListener("DOMMouseScroll", onMouseWheel, false);
     }
     // IE 6/7/8
-    else drawingElement.attachEvent("onmousewheel", onMouseWheel);
+    else {
+        drawingElement.attachEvent("onmousewheel", onMouseWheel);
+    }
 }
 
 function addAttributeToHighlight() {
@@ -303,16 +309,16 @@ function reloadImage(clickedX, clickedY) {
     url += otherOptions();
     url += addAttributeToHighlight();
     url += "&counter=" + counter;
-    counter++;
+    counter += 1;
     console.log(url);
-    var drawingElement = document.getElementById('drawing');
+    var drawingElement = document.getElementById("drawing");
     drawingElement.src=url;
 
     registerMouseWheelCallbackFunction(drawingElement);
 }
 
 function printSelectedRoom(selectedRoom) {
-    element = document.getElementById("selected_room");
+    var element = document.getElementById("selected_room");
     if (selectedRoom != null) {
         element.innerText = selectedRoom;
     }
@@ -330,11 +336,11 @@ function clickOnSapHref()
         if (xmlhttp.readyState==4)
         {
             var sapHref = xmlhttp.responseText;
+
             if (sapHref.indexOf('"') === 0) {
                 sapHref = sapHref.substring(1 + sapHref.indexOf('"'), sapHref.lastIndexOf('"'));
             }
 
-            // alert(sapHref);
             console.log(sapHref);
 
             // vytvoreni odkazu ve vybranem elementu
@@ -345,7 +351,7 @@ function clickOnSapHref()
             // simulace kliku na odkaz "SAP"
             hrefElement.click();
         }
-    }
+    };
     // ziskame specialni URL vedouci do SAPu
     console.log(sap_url);
     xmlhttp.open("GET", "/api/v1/sap-href/room", true);
@@ -373,7 +379,8 @@ function setText(element, text) {
 function deleteRoomAttributes() {
     var container = document.getElementById("room_list");
     var rows = container.getElementsByTagName("tr");
-    for (var i = 0; i < rows.length; i++) {
+    var i;
+    for (i = 0; i < rows.length; i+=1) {
         var row = rows[i];
         var col3 = row.children[2];
         if (col3.id != null && col3.id.startsWith("room_")) {
@@ -384,7 +391,7 @@ function deleteRoomAttributes() {
 
 function isAttributeWithStaticValues(attribute_id) {
     if (attribute_id != null) {
-        return attribute_id == "uklid" || attribute_id == "typ" || attribute_id == "obsazenost" || attribute_id == "smlouva";
+        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "obsazenost" || attribute_id === "smlouva";
     }
     else {
         return false;
@@ -393,7 +400,7 @@ function isAttributeWithStaticValues(attribute_id) {
 
 function isAttributeWithListOfValues(attribute_id) {
     if (attribute_id != null) {
-        return attributeToHighlight == "projekt" || attributeToHighlight == "ucel";
+        return attributeToHighlight === "projekt" || attributeToHighlight === "ucel";
     }
     else {
         return false;
@@ -460,14 +467,15 @@ function showLegendForAttributeList(attribute_list) {
         "rgb(250,  40,  40)",
         "rgb( 40,  40,  40)",
         "rgb(120, 120, 120)",
-        "rgb(240, 240, 240)",
+        "rgb(240, 240, 240)"
     ];
 
     var element = document.getElementById("legenda");
     var html = "";
 
-    for (var i = 0; i < attribute_list.length; i++) {
-        color = palette[i % palette.length];
+    var i;
+    for (i = 0; i < attribute_list.length; i+=1) {
+        var color = palette[i % palette.length];
         html += colorBox(color, attribute_list[i]);
     }
 
@@ -477,9 +485,10 @@ function showLegendForAttributeList(attribute_list) {
 function onRoomAttributesReceived(data) {
     var attributes = JSON.parse(data);
     var attribute_list = [];
-    for(var prop in attributes) {
-        room = prop;
-        attribute = attributes[room];
+    var prop;
+    for(prop in attributes) {
+        var room = prop;
+        var attribute = attributes[room];
         var elementId = "room_" + room + "_attribute_value";
         var element = document.getElementById(elementId);
         //console.log(element.innerText);
@@ -490,7 +499,7 @@ function onRoomAttributesReceived(data) {
 
     if (isAttributeWithListOfValues(attributeToHighlight)) {
         attribute_list = attribute_list.sort().filter(function(element, index, array) {
-             return (index == array.indexOf(element));
+             return (index === array.indexOf(element));
         });
         // now the attribute list is sorted and unique
         showLegendForAttributeList(attribute_list);
@@ -513,7 +522,7 @@ function setRoomAttributeLabel(label) {
 
 
 function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_from) {
-    var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from)
+    var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from);
     attributeToHighlight = attribute_id;
     // clear the 3rd column in room table
     deleteRoomAttributes();
@@ -566,10 +575,6 @@ function onRoomSelect(aoid) {
     reloadImage(null, null);
 }
 
-function checkBoxValue(id) {
-    return document.getElementById(id).checked;
-}
-
 function roomTypeCheckBoxClicked() {
     reloadImage(null, null);
 }
@@ -589,7 +594,7 @@ function roomOccupiedByCheckBoxClicked() {
 // Initialize container when document is loaded
 window.onload = function () {
     // drawGrid
-    console.log(version);
+    // console.log(version);
 };
 
 function showHideSomething(elementId, iconId, hide, className) {
@@ -598,7 +603,7 @@ function showHideSomething(elementId, iconId, hide, className) {
         document.getElementById(iconId).src = "icons/1uparrow.gif";
     }
     else {
-        if (className != null) {
+        if (className !== null) {
             document.getElementById(elementId).className = className;
         }
         else {
