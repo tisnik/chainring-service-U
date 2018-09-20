@@ -447,10 +447,10 @@ function showLegendForAttribute(attribute) {
         html += colorBox("rgb(220, 220,  70)", "dlouhodobé", 1);
         break;
     case "obsazenost":
-        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné", 1);
-        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené", 2);
-        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné", 3);
-        html += colorBox("rgb( 40,  40, 200)", "interní", 4);
+        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné", 0);
+        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené", 1);
+        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné", 2);
+        html += colorBox("rgb( 40,  40, 200)", "interní", 3);
         break;
     case "typ":
         html =  colorBox("rgb(200,150,100)", "Chodba", 0);

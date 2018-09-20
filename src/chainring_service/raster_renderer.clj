@@ -491,72 +491,68 @@
     [r g b]
     (new Color r g b 127))
 
-(def occupation-colors
-    {"nepronajímatelné"        {:foreground (fg-color 70 70 70)
-                                :background (bg-color 100 100 100)}
-     "pronajímatelné obsazené" {:foreground (fg-color 200 0 0),
-                                :background (bg-color 240 70 70)}
-     "pronajímatelné volné"    {:foreground (fg-color 0 200 0)
-                                :background (bg-color 70 240 70)}
-     "interní"                 {:foreground (fg-color 0 0 200)
-                                :background (bg-color 70 70 200)}
-    })
+(def occupation-colors [
+     {:foreground (fg-color 70 70 70)
+      :background (bg-color 100 100 100)}
+     {:foreground (fg-color 200 0 0),
+      :background (bg-color 240 70 70)}
+     {:foreground (fg-color 0 200 0)
+      :background (bg-color 70 240 70)}
+     {:foreground (fg-color 0 0 200)
+      :background (bg-color 70 70 200)}
+])
 
 
-(def room-capacity
-    {"0"  {:foreground Color/BLACK :background (new Color 50 50 50 127)}
-     "1"  {:foreground Color/GRAY  :background (new Color 100 100 100 127)}
-     "2"  {:foreground Color/GRAY  :background (new Color 150 150 150 127)}
-})
-
-
-(def cleanup
-    {"0"  {:foreground Color/BLACK :background (bg-color 250 250   0)}
+(def cleanup-colors [
+     "0"  {:foreground Color/BLACK :background (bg-color 250 250   0)}
      "1"  {:foreground Color/BLACK :background (bg-color 200 250  40)}
      "2"  {:foreground Color/BLACK :background (bg-color 160 250  80)}
      "3"  {:foreground Color/BLACK :background (bg-color 120 250 120)}
      "4"  {:foreground Color/BLACK :background (bg-color  80 250 160)}
      "5"  {:foreground Color/BLACK :background (bg-color  40 250 200)}
      "6"  {:foreground Color/BLACK :background (bg-color   0 250 250)}
-})
+])
 
 
-(def room-type-colors
-    {"chodba"   {:foreground (new Color 200 150 100) :background (new Color 200 150 100 127)}
-     "sklad"    {:foreground (new Color 100 150 200) :background (new Color 100 150 200 127)}
-     "kancelar" {:foreground (new Color 200 140 200) :background (new Color 200 140 200 127)}
-     "vyroba"   {:foreground (new Color 100 200 200) :background (new Color 100 200 200 127)}
-     "zazemi"   {:foreground (new Color 200 200 100) :background (new Color 200 200 100 127)}
-     "WC"       {:foreground (new Color 250 50 50) :background (new Color 250 50 50 127)}
-})
+(def room-colors [
+    {:foreground (new Color 200 150 100) :background (new Color 200 150 100 127)}
+    {:foreground (new Color 100 150 200) :background (new Color 100 150 200 127)}
+    {:foreground (new Color 200 140 200) :background (new Color 200 140 200 127)}
+    {:foreground (new Color 100 200 200) :background (new Color 100 200 200 127)}
+    {:foreground (new Color 200 200 100) :background (new Color 200 200 100 127)}
+    {:foreground (new Color 250 50 50) :background (new Color 250 50 50 127)}
+])
 
-(def contract-type
-    {"krátkodobé" {:foreground (fg-color 0 0 200),
-                   :background (bg-color 70 70 240)}
-     "dlouhodobé" {:foreground (fg-color 100 100 0)
-                   :background (bg-color 220 220 70)}
-})
 
-(defn area-colors
-    [area]
-    (let [area (utils/parse-int area)]
-        (cond (< area 10)  {:foreground Color/BLACK :background (new Color 250 250   0 127)}
-              (< area 20)  {:foreground Color/GRAY  :background (new Color 200 250  40 127)}
-              (< area 40)  {:foreground Color/GRAY  :background (new Color 160 250  80 127)}
-              (< area 60)  {:foreground Color/GREEN :background (new Color 120 250 120 127)}
-              (< area 80)  {:foreground Color/GREEN :background (new Color  80 250 160 127)}
-              (< area 100) {:foreground Color/GREEN :background (new Color  40 250 200 127)}
-              :else        {:foreground Color/BLUE  :background (new Color   0 250 250 127)})))
-         
+(def contract-colors [
+    {:foreground (fg-color 0 0 200),
+     :background (bg-color 70 70 240)}
+    {:foreground (fg-color 100 100 0)
+     :background (bg-color 220 220 70)}
+])
+
+
+(def room-types        ["chodba" "sklad" "kancelar" "vyroba" "zazemi" "WC"])
+(def contract-types    ["krátkodobé" "dlouhodobé"])
+(def occupation-types  ["nepronajímatelné" "pronajímatelné obsazené" "pronajímatelné volné" "interní"])
+(def cleanup-types     ["1" "2" "3" "4" "5" "6" "7"])
+
+
+(defn attribute-color
+    [room-attribute values-to-show values colors]
+    (let [i (.indexOf values room-attribute)]
+        (if (>= i 0)
+            (if (get values-to-show i)
+                (get colors i {:foreground Color/GRAY :background (new Color 255 255 255 127)})))))
+
+
 (defn compute-room-color-static-values
-    [highlight-group room-attribute]
+    [highlight-group room-attribute values-to-show]
     (condp = highlight-group
-        :typ        (get room-type-colors  room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
-        :uklid      (get cleanup           room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
-        :obsazenost (get occupation-colors room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
-        :smlouva    (get contract-type     room-attribute {:foreground Color/GRAY :background (new Color 255 255 255 127)})
-        ;:projekt    (project-color room-attribute)
-        ;:ucel       (purpose-color room-attribute)
+        :typ        (attribute-color room-attribute values-to-show room-types       room-colors)
+        :obsazenost (attribute-color room-attribute values-to-show occupation-types occupation-colors)
+        :smlouva    (attribute-color room-attribute values-to-show contract-types   contract-colors)
+        :uklid      (attribute-color room-attribute values-to-show cleanup-types    cleanup-colors)
         nil))
 
 (def palette [
@@ -572,10 +568,11 @@
 ])
 
 (defn compute-room-color-list-of-values
-    [all-room-attributes room-attribute]
+    [all-room-attributes room-attribute values-to-show]
     (let [i (.indexOf all-room-attributes room-attribute)
           im (mod i (count palette))]
-          (nth palette im)))
+          (if (get values-to-show im)
+              (nth palette im))))
 
 (defn get-all-room-attributes
     [room-attrs]
@@ -587,10 +584,10 @@
          (into [])))
 
 (defn compute-room-colors
-    [all-room-attributes highlight-group room-attrs]
+    [all-room-attributes highlight-group room-attrs values-to-show]
     (if (some #{highlight-group} [:typ :uklid :obsazenost :smlouva])
-        (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (val room))]))
-        (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (val room))]))))
+        (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (val room) values-to-show)]))
+        (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (val room) values-to-show)]))))
 
 
 (defn use-binary-rendering?
@@ -620,16 +617,30 @@
             (log/error e))))
 
 
+(defn read-values-to-show
+    [cookies]
+    (let [ks (->> cookies
+                  keys
+                  (filter #(.startsWith % "value_"))
+                  sort)
+          result (zipmap (for [k ks] (utils/parse-int (subs k (count "value_"))))
+                         (for [k ks] (= "1" (-> (get cookies k) :value))))]
+        result))
+
+
 (defn perform-raster-drawing
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
           cookies             (:cookies request)
           ignore-type         (get params "ignore-type")
+          values-to-show      (read-values-to-show cookies)
           highlight-group     (-> (get cookies "attribute") :value keyword)
           room-attrs          (-> (get cookies "rooms") :value decode-attrs)
           all-room-attributes (get-all-room-attributes room-attrs)
-          room-colors         (if (= ignore-type "true") nil (compute-room-colors all-room-attributes highlight-group room-attrs))
+          room-colors         (if (= ignore-type "true")
+                                  nil
+                                  (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show))
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
