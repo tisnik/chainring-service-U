@@ -361,7 +361,7 @@ function clickOnSapHref()
 function selectRoomInSap(aoid) {
     console.log("selectRoomInSap");
     console.log(aoid);
-    setTimeout("clickOnSapHref()", 500);
+    setTimeout("clickOnSapHref();", 500);
 }
 
 
@@ -407,8 +407,25 @@ function isAttributeWithListOfValues(attribute_id) {
     }
 }
 
-function colorBox(color, text) {
-    return "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>" + text + "<br/>";
+function valueShowOrHide(id) {
+    var full_id = "enable_value_" + id;
+    var checkbox = document.getElementById(full_id);
+    if (checkbox.checked) {
+        setCookie("value_" + id, 1);
+    }
+    else {
+        setCookie("value_" + id, 0);
+    }
+    reloadImage(null, null);
+}
+
+
+function colorBox(color, text, id) {
+    var full_id = "enable_value_" + id;
+    var box = "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>";
+    var check = "<input type='checkbox' name='" + full_id + "' id='" + full_id + "' checked='checked' onclick='valueShowOrHide(" + id +")' />";
+    setCookie("value_" + id, 1);
+    return box + check + text + "<br/>";
 }
 
 function showLegendForAttribute(attribute) {
@@ -417,8 +434,8 @@ function showLegendForAttribute(attribute) {
 
     switch (attribute) {
     case "plocha":
-        html =  colorBox("rgb(250, 250,   0)", "< 10 m<sup>2</sup>");
-        html += colorBox("rgb(200, 250,  40)", "< 20 m<sup>2</sup>");
+        html =  colorBox("rgb(250, 250,   0)", "< 10 m<sup>2</sup>", 1);
+        html += colorBox("rgb(200, 250,  40)", "< 20 m<sup>2</sup>", 1);
         html += colorBox("rgb(160, 250,  80)", "< 40 m<sup>2</sup>");
         html += colorBox("rgb(120, 250, 120)", "< 60 m<sup>2</sup>");
         html += colorBox("rgb( 80, 250, 160)", "< 80 m<sup>2</sup>");
@@ -426,31 +443,31 @@ function showLegendForAttribute(attribute) {
         html += colorBox("rgb(  0, 250, 250)", "> 100 m<sup>2</sup>");
         break;
     case "smlouva":
-        html =  colorBox("rgb( 70,  70, 240)", "krátkodobé");
-        html += colorBox("rgb(220, 220,  70)", "dlouhodobé");
+        html =  colorBox("rgb( 70,  70, 240)", "krátkodobé", 0);
+        html += colorBox("rgb(220, 220,  70)", "dlouhodobé", 1);
         break;
     case "obsazenost":
-        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné");
-        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené");
-        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné");
-        html += colorBox("rgb( 40,  40, 200)", "interní");
+        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné", 1);
+        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené", 2);
+        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné", 3);
+        html += colorBox("rgb( 40,  40, 200)", "interní", 4);
         break;
     case "typ":
-        html =  colorBox("rgb(200,150,100)", "Chodba");
-        html += colorBox("rgb(100,150,200)", "Sklad");
-        html += colorBox("rgb(200,140,200)", "Kancelar");
-        html += colorBox("rgb(100,200,200)", "Vyroba");
-        html += colorBox("rgb(200,200,100)", "Zazemi");
-        html += colorBox("rgb(250, 50, 50)", "WC");
+        html =  colorBox("rgb(200,150,100)", "Chodba", 0);
+        html += colorBox("rgb(100,150,200)", "Sklad", 1);
+        html += colorBox("rgb(200,140,200)", "Kancelar", 2);
+        html += colorBox("rgb(100,200,200)", "Vyroba", 3);
+        html += colorBox("rgb(200,200,100)", "Zazemi", 4);
+        html += colorBox("rgb(250, 50, 50)", "WC", 5);
         break;
     case "uklid":
-        html =  colorBox("rgb(250, 250,   0)", "1");
-        html += colorBox("rgb(200, 250,  40)", "2");
-        html += colorBox("rgb(160, 250,  80)", "3");
-        html += colorBox("rgb(120, 250, 120)", "4");
-        html += colorBox("rgb( 80, 250, 160)", "5");
-        html += colorBox("rgb( 40, 250, 200)", "6");
-        html += colorBox("rgb(  0, 250, 250)", "7");
+        html =  colorBox("rgb(250, 250,   0)", "1", 0);
+        html += colorBox("rgb(200, 250,  40)", "2", 1);
+        html += colorBox("rgb(160, 250,  80)", "3", 2);
+        html += colorBox("rgb(120, 250, 120)", "4", 3);
+        html += colorBox("rgb( 80, 250, 160)", "5", 4);
+        html += colorBox("rgb( 40, 250, 200)", "6", 5);
+        html += colorBox("rgb(  0, 250, 250)", "7", 6);
         break;
     }
 
@@ -476,7 +493,7 @@ function showLegendForAttributeList(attribute_list) {
     var i;
     for (i = 0; i < attribute_list.length; i+=1) {
         var color = palette[i % palette.length];
-        html += colorBox(color, attribute_list[i]);
+        html += colorBox(color, attribute_list[i], i);
     }
 
     element.innerHTML = html;
@@ -540,6 +557,7 @@ function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_fr
     setCookie("floor_id", floor_id);
     setCookie("valid_from", valid_from);
 }
+
 
 function onImageClick(obj, e) {
     var evt = getEvent(e);
