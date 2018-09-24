@@ -404,10 +404,20 @@
                     [:tr [:th "Jméno"]
                          [:td (:Label floor-info)]
                          [:td [:a {:href "/help_name_floor"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Začátek platnosti"]
+                         [:td (:valid-from floor-info)]
+                         [:td [:a {:href "/help_valid_from_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Konec platnosti"]
+                         [:td (:valid-to floor-info)]
+                         [:td [:a {:href "/help_valid_to_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
                     [:tr [:th "Počet verzí výkresů"]
                          [:td (or drawing-count "nelze zjistit")]
                          [:td [:a {:href "/help_drawing_count_floor"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Interní identifikátor"]
+                         [:td (:ID floor-info)]
+                         [:td [:a {:href "/help_intreno"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td "Zadaná platnost od:"]
                          [:td valid-from]
                          [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
@@ -527,7 +537,7 @@
                                  ;    [:div {:class "has-drawings"} (:drawings floor)])
                                  ;]
                                  [:td [:a {:title "Podrobnější informace o podlaží"
-                                           :href (str "floor-info?floor-id=" (:AOID floor) "&valid-from=" valid-from)}
+                                           :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
