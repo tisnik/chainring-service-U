@@ -62,6 +62,23 @@
             ]]))
 
 
+(defn intreno
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Interní identifikátor objektu"]
+                [:p "Interní identifikátor objektu používaný SAPem."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+
 (defn aoid-areal
     []
     (page/xhtml
