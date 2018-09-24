@@ -526,6 +526,8 @@
             "/test"                       (process-test request)
 
             "/help_valid_from"            (process-help-page request html-renderer-help/valid-from)
+            "/help_valid_from_areal"      (process-help-page request html-renderer-help/valid-from-areal)
+            "/help_valid_to_areal"        (process-help-page request html-renderer-help/valid-to-areal)
             "/help_valid_from_settings"   (process-help-page request html-renderer-help/valid-from-settings)
             "/help_aoid_areal"            (process-help-page request html-renderer-help/aoid-areal)
             "/help_name_areal"            (process-help-page request html-renderer-help/name-areal)

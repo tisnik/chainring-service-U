@@ -94,6 +94,38 @@
                 (widgets/footer)
             ]]))
 
+(defn valid-from-areal
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Počátek platnosti"]
+                [:p "Počátek platnosti informací o areálu převzaný ze SAPu"]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn valid-to-areal
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Konec platnosti"]
+                [:p "Konec platnosti informací o areálu převzaný ze SAPu"]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
 (defn aoid-building
     []
     (page/xhtml
