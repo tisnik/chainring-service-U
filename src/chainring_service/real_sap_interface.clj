@@ -272,6 +272,14 @@
             nil)))
 
 
+(defn read-floor-info
+    [areal building floor valid-from]
+    (let [floors (read-floors areal building valid-from)]
+        (if floors
+            (first (filter #(= floor (:AOID %)) floors))
+            nil)))
+
+
 (defn read-rooms
     [areal building floor]
     [1 2 3 4 5])
@@ -297,14 +305,6 @@
               now-str       (.format timeformatter now)]
               (= now-str valid-from))
         true))
-
-
-(defn read-floor-info
-    [floor valid-from]
-    (if (today? valid-from)
-        (if floor
-            (first (filter #(= floor (:AOID %)) @floors))
-            @floors)))
 
 
 (defn read-rooms

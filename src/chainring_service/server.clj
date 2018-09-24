@@ -191,16 +191,21 @@
     [floor-id]
     (let [files     (fileutils/file-list "drawings/" ".json")
           filenames (for [file files] (.getName file))
-          floor-id  (clojure.string/replace floor-id \. \_)
+          floor-id  (-> floor-id
+                        (clojure.string/replace \. \_)
+                        (clojure.string/replace \\ \_)
+                        (clojure.string/replace \/ \_))
           drawings  (filter #(startsWith % floor-id) filenames)]
           (sort drawings)))
 
 (defn process-floor-info-page
     [request]
     (let [params                (:params request)
+          areal-id              (get params "areal-id")
+          building-id           (get params "building-id")
           floor-id              (get params "floor-id")
           valid-from            (get params "valid-from")
-          floor-info            (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
+          floor-info            (sap-interface/call-sap-interface request "read-floor-info" areal-id building-id floor-id valid-from)
           drawings              (all-drawings-for-floor floor-id)]
           (log/info "Floor ID:" floor-id)
           (log/info "Drawings: " drawings)
@@ -525,6 +530,7 @@
             "/binary-list"                (process-binary-list request)
             "/test"                       (process-test request)
 
+            "/help_intreno"               (process-help-page request html-renderer-help/intreno)
             "/help_valid_from"            (process-help-page request html-renderer-help/valid-from)
             "/help_valid_from_areal"      (process-help-page request html-renderer-help/valid-from-areal)
             "/help_valid_to_areal"        (process-help-page request html-renderer-help/valid-to-areal)
