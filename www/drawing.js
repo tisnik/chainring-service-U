@@ -148,6 +148,7 @@ function onViewBlip() {
 function setElementValue(elementId, value) {
     var e = document.getElementById(elementId);
     e.innerText = value;
+    e.innerHTML = value;
 }
 
 function getXmlHttpRequest() {
@@ -320,10 +321,10 @@ function reloadImage(clickedX, clickedY) {
 function printSelectedRoom(selectedRoom) {
     var element = document.getElementById("selected_room");
     if (selectedRoom != null) {
-        element.innerText = selectedRoom;
+        setText(element, selectedRoom);
     }
     else {
-        element.innerText = "?";
+        setText(element, "?");
     }
 }
 
@@ -391,7 +392,7 @@ function deleteRoomAttributes() {
 
 function isAttributeWithStaticValues(attribute_id) {
     if (attribute_id != null) {
-        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "obsazenost" || attribute_id === "smlouva";
+        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "OB" || attribute_id === "smlouva";
     }
     else {
         return false;
@@ -443,22 +444,25 @@ function showLegendForAttribute(attribute) {
         html += colorBox("rgb(  0, 250, 250)", "> 100 m<sup>2</sup>");
         break;
     case "smlouva":
-        html =  colorBox("rgb( 70,  70, 240)", "krátkodobé", 0);
-        html += colorBox("rgb(220, 220,  70)", "dlouhodobé", 1);
+        html =  colorBox("rgb( 70,  70, 240)", "Krátkodobé", 0);
+        html += colorBox("rgb(220, 220,  70)", "Dlouhodobé", 1);
         break;
+    case "OB":
     case "obsazenost":
-        html =  colorBox("rgb(100, 100, 100)", "nepronajímatelné", 0);
-        html += colorBox("rgb(240,  20, 20)", "pronajímatelné obsazené", 1);
-        html += colorBox("rgb( 20, 240, 20)", "pronajímatelné volné", 2);
-        html += colorBox("rgb( 40,  40, 200)", "interní", 3);
+        html =  colorBox("rgb(100, 100, 100)", "Nepronajímatelné", 0);
+        html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 1);
+        html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 2);
+        html += colorBox("rgb( 40,  40, 200)", "Interní", 3);
         break;
     case "typ":
-        html =  colorBox("rgb(200,150,100)", "Chodba", 0);
-        html += colorBox("rgb(100,150,200)", "Sklad", 1);
-        html += colorBox("rgb(200,140,200)", "Kancelar", 2);
-        html += colorBox("rgb(100,200,200)", "Vyroba", 3);
-        html += colorBox("rgb(200,200,100)", "Zazemi", 4);
-        html += colorBox("rgb(250, 50, 50)", "WC", 5);
+        html =  colorBox("rgb(150,150,150)", "Chodba", 0);
+        html += colorBox("rgb(250,150,150)", "Hala", 1);
+        html += colorBox("rgb(100,150,200)", "Sklad", 2);
+        html += colorBox("rgb(200,140,200)", "Kancelář", 3);
+        html += colorBox("rgb(100,200,200)", "Výroba", 4);
+        html += colorBox("rgb(200,200,100)", "Zázemí", 5);
+        html += colorBox("rgb(250, 50, 50)", "Technická místnost", 6);
+        html += colorBox("rgb(250,  0,  0)", "WC", 7);
         break;
     case "uklid":
         html =  colorBox("rgb(250, 250,   0)", "1", 0);
@@ -503,15 +507,17 @@ function onRoomAttributesReceived(data) {
     var attributes = JSON.parse(data);
     var attribute_list = [];
     var prop;
-    for(prop in attributes) {
-        var room = prop;
-        var attribute = attributes[room];
+    var i;
+    for(i=0; i < attributes.length; i++) {
+        var attribute = attributes[i];
+        var room = attribute["AOID"];
+        var value = attribute["value"];
+        //console.log(room);
+        //console.log(value);
         var elementId = "room_" + room + "_attribute_value";
         var element = document.getElementById(elementId);
-        //console.log(element.innerText);
-        //console.log(attribute);
-        setText(element, attribute);
-        attribute_list.push(attribute);
+        setText(element, value);
+        attribute_list.push(value);
     }
 
     if (isAttributeWithListOfValues(attributeToHighlight)) {
