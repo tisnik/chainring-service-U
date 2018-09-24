@@ -85,7 +85,7 @@
 
 (defn process-db-statistic-page
     [request]
-    (let [last-update @real-sap-interface/last-update
+    (let [last-update   (new java.util.Date)
           timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
           now           (new java.util.Date)
           now-str       (.format timeformatter now)
@@ -314,7 +314,7 @@
           valid-from    (get params "valid-from")
           areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
           building-info (sap-interface/call-sap-interface request "read-building-info" areal-id building-id valid-from)
-          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)]
+          floor-info    (sap-interface/call-sap-interface request "read-floor-info" areal-id building-id floor-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info" areal-info)
           (log/info "Building ID:" building-id)
@@ -368,8 +368,8 @@
           drawing-id           (get params "drawing-id")
           valid-from           (get params "valid-from")
           areal-info           (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-info        (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
-          floor-info           (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
+          building-info        (sap-interface/call-sap-interface request "read-building-info" areal-id building-id valid-from)
+          floor-info           (sap-interface/call-sap-interface request "read-floor-info" areal-id building-id floor-id valid-from)
           drawing-info         '()
           rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")

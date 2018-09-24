@@ -528,7 +528,7 @@
                          [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:AOID floor)]
-                                 [:td [:a {:href (str "floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (:Label floor)]]
+                                 [:td [:a {:href (str "floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (get-building-name floor)]]
                                  ;[:td (:aoid floor)]
                                  ;[:td (:created floor)]
                                  ;[:td
@@ -633,13 +633,13 @@
                         [:th "Budova"] [:td (get-building-name building-info)]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
+                                  :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Podlaží"] [:td (:Label floor-info)]
                         [:th "AOID"]   [:td (:AOID floor-info)]
                         [:td [:a {:title "Podrobnější informace o podlaží"
-                                  :href (str "floor-info?floor-id=" floor-id "&valid-from=" valid-from)}
+                                  :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr [:td {:colspan 5} "&nbsp;"]]
                     [:tr [:td {:colspan 2} "Zadaná platnost od:"]
@@ -688,7 +688,7 @@
             [:th "Budova"] [:td (:Label building-info)]
             [:th "AOID"]   [:td (:AOID building-info)]
             [:td [:a {:title "Podrobnější informace o budově"
-                      :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
+                      :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jinou budovu"
                       :href (str "/areal?areal-id=" project-id "&valid-from=" valid-from)}
@@ -697,10 +697,10 @@
             [:th "Podlaží"] [:td (:Label floor-info)]
             [:th "AOID"]   [:td (:AOID floor-info)]
             [:td [:a {:title "Podrobnější informace o podlaží"
-                      :href (str "floor-info?floor-id=" floor-id "&valid-from=" valid-from)}
+                      :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiné podlaží"
-                      :href (str "/building?project-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
+                      :href (str "/building?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Výkres"] [:td {:colspan 3} drawing-id]
@@ -708,7 +708,7 @@
                       :href (str "drawing-info?drawing-id=" drawing-id)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiný výkres"
-                      :href (str "/floor?project-id=" project-id "&building-id=" building-id "&floor-id=" floor-id)}
+                      :href (str "/floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
     ])
 
