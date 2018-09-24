@@ -11,30 +11,14 @@
 --
 
 
--- also named 'Hospodářská jednotka' in SAP
-create table PROJECT (
-    id       text primary key not null,
-    name     text not null,
-    created  text,
-    modified text
-);
-
-create table BUILDING (
-    id       text primary key not null,
-    project  text not null,
-    name     text not null,
-    created  text,
-    modified text,
-    foreign key (project) references PROJECT(id)
-);
-
-create table FLOOR (
-    id       text primary key not null,
-    building text not null,
-    name     text not null,
-    created  text,
-    modified text,
-    foreign key (building) references BUILDING(id)
+create table DRAWING (
+    id         integer primary key asc,
+    areal      text not null,
+    building   text not null,
+    floor      text not null,
+    valid_from text not null,
+    filename   text not null,
+    modified   text,
 );
 
 create table SAP_ROOM (
@@ -72,16 +56,6 @@ create table ROOM_ATTRIBUTE (
 create table ROOM_TYPE (
     id       integer primary key asc,
     label    text
-);
-
-create table DRAWING (
-    id       integer primary key asc,
-    floor    text not null,
-    name     text not null,
-    created  text,
-    modified text,
-    version  integer not null,
-    foreign key (floor) references FLOOR(id)
 );
 
 create table DRAWING_NEW (
