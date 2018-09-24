@@ -31,8 +31,10 @@
 (defn get-aoid-row-i
     [return-table i]
     (.setRow return-table i)
-    {:AOID       (.getString return-table "AOID")
+    {:ID         (.getString return-table "INTRENO")
+     :AOID       (.getString return-table "AOID")
      :Label      (.getString return-table "XAO")
+     :Function   (.getString return-table "XMAOFUNCTION")
      :valid-from (.getString return-table "VALIDFROM")
      :valid-to   (.getString return-table "VALIDTO")})
 
@@ -82,6 +84,7 @@
 
 
 (defn read-areals
+    "Read list of areals from SAP."
     [valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_AREAS")]
@@ -100,6 +103,7 @@
 
 
 (defn read-buildings
+    "Read list of buildings from SAP."
     [areal-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_BUILDINGS")]
@@ -117,14 +121,14 @@
           (get-aoids-from-sap-table function "ET_BUILDINGS")))
 
 
-(defn floor-list
-    [building-id valid-from]
+(defn read-floors
+    [areal building-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOORS")]
     
           (if (not function) nil)
     
-          (.setValue (.getImportParameterList function) "I_DATE", "20180101")
+          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
           (.setValue (.getImportParameterList function) "I_BUILDING", building-id)
     
           (try
@@ -233,11 +237,6 @@
 ;    (println)
 ;    (println (room-attributes "HOST.10.0P" "20000101"))
 ;)
-(def areals
-    (atom nil))
-
-(def buildings
-    (atom nil))
 
 (def floors
     (atom nil))
@@ -256,6 +255,7 @@
 
 
 (defn read-areal-info
+    "Read info about selected areal."
     [areal valid-from]
     (let [areals (read-areals valid-from)]
          (if areals
@@ -263,22 +263,21 @@
              nil)))
 
 
-(defn read-floors
-    [areal building]
-    [1 2 3 4])
+(defn read-building-info
+    "Read info about selected building."
+    [areal building valid-from]
+    (let [buildings (read-buildings areal valid-from)]
+        (if buildings
+            (first (filter #(= building (:AOID %)) buildings))
+            nil)))
+
 
 (defn read-rooms
     [areal building floor]
     [1 2 3 4 5])
 
-(defn read-building-info
-    [building-id]
-    [1 2])
-
 (defn load-all-data-files
     []
-    (reset! areals               (csv-loader/load-csv "data/2018-09-01/areals.csv"))
-    (reset! buildings            (csv-loader/load-csv "data/2018-09-01/buildings.csv"))
     (reset! floors               (csv-loader/load-csv "data/2018-09-01/floors.csv"))
     (reset! rooms                (csv-loader/load-csv "data/2018-09-01/rooms.csv"))
     (reset! room-attribute-types (csv-loader/load-csv "data/attribute_types.csv"))
@@ -298,42 +297,6 @@
               now-str       (.format timeformatter now)]
               (= now-str valid-from))
         true))
-
-
-(defn read-buildings-----
-    [areal valid-from]
-    (if (today? valid-from)
-        (if areal
-            (let [prefix (str areal ".")]
-                (filter #(.startsWith (:AOID %) prefix) @buildings))
-            @buildings)
-         nil))
-
-
-(defn read-building-info
-    [building valid-from]
-    (if (today? valid-from)
-        (if building
-            (first (filter #(= building (:AOID %)) @buildings)))))
-
-
-(defn read-floors
-    [areal building valid-from]
-    (if (today? valid-from)
-        (if areal
-            (if building
-                ; filter by areal-id and building-id
-                (let [prefix (str building ".")]
-                    (filter #(.startsWith (:AOID %) prefix) @floors))
-                ; filter by areal-id
-                (let [prefix (str areal ".")]
-                    (filter #(.startsWith (:AOID %) prefix) @floors)))
-            (if building
-                ; filter by building-id
-                (let [prefix (str building ".")]
-                    (filter #(.startsWith (:AOID %) prefix) @floors))
-                ; no filtering at all
-                @floors))))
 
 
 (defn read-floor-info

@@ -102,8 +102,8 @@
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
                 [:h1 "Nápověda"]
-                [:h3 "Počátek platnosti"]
-                [:p "Počátek platnosti informací o areálu převzaný ze SAPu"]
+                [:h3 "Začátek platnosti"]
+                [:p "Začátek platnosti informací o areálu převzaný ze SAPu"]
                 [:br]
                 (widgets/back-button)
                 [:br][:br][:br][:br]
@@ -152,6 +152,38 @@
                 [:h1 "Nápověda"]
                 [:h3 "Jméno budovy"]
                 [:p "Jedná se o jméno budovy používané v SAPu. Tvar jména může být prakticky libovolný a není povinný."]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn valid-from-building
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Začátek platnosti"]
+                [:p "Začátek platnosti informací o budově převzaný ze SAPu"]
+                [:br]
+                (widgets/back-button)
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ]]))
+
+(defn valid-to-building
+    []
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Nápověda"]
+                [:h3 "Konec platnosti"]
+                [:p "Konec platnosti informací o budově převzaný ze SAPu"]
                 [:br]
                 (widgets/back-button)
                 [:br][:br][:br][:br]

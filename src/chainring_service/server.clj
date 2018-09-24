@@ -174,16 +174,16 @@
           areal-id       (get params "areal-id")
           valid-from     (get params "valid-from")
           building-id    (get params "building-id")
-          building-info  (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
-          floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id valid-from))]
+          building-info  (sap-interface/call-sap-interface request "read-building-info" areal-id building-id valid-from)]
+          ;floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id valid-from))]
           (log/info "Areal ID:" building-id)
           (log/info "Building ID:" building-id)
-          (log/info "Floor count:" floor-count)
+          ;(log/info "Floor count:" floor-count)
           (log/info "Building info" building-info)
           (log/info "Valid from" valid-from)
           (if building-id
               (if building-info
-                  (finish-processing request (html-renderer/render-building-info building-id building-info floor-count valid-from))
+                  (finish-processing request (html-renderer/render-building-info building-id building-info valid-from))
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
@@ -285,7 +285,7 @@
           building-id   (get params "building-id")
           valid-from    (get params "valid-from")
           areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)]
+          building-info (sap-interface/call-sap-interface request "read-building-info" areal-id building-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info" areal-info)
           (log/info "Building ID:" building-id)
@@ -308,7 +308,7 @@
           floor-id      (get params "floor-id")
           valid-from    (get params "valid-from")
           areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
+          building-info (sap-interface/call-sap-interface request "read-building-info" areal-id building-id valid-from)
           floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)]
           (log/info "Areal ID:" areal-id)
           (log/info "Areal info" areal-info)
@@ -528,6 +528,8 @@
             "/help_valid_from"            (process-help-page request html-renderer-help/valid-from)
             "/help_valid_from_areal"      (process-help-page request html-renderer-help/valid-from-areal)
             "/help_valid_to_areal"        (process-help-page request html-renderer-help/valid-to-areal)
+            "/help_valid_from_building"   (process-help-page request html-renderer-help/valid-from-building)
+            "/help_valid_to_building"     (process-help-page request html-renderer-help/valid-to-building)
             "/help_valid_from_settings"   (process-help-page request html-renderer-help/valid-from-settings)
             "/help_aoid_areal"            (process-help-page request html-renderer-help/aoid-areal)
             "/help_name_areal"            (process-help-page request html-renderer-help/name-areal)

@@ -323,11 +323,10 @@
                     [:tr [:th "Konec platnosti"]
                          [:td (:valid-to project-info)]
                          [:td [:a {:href "/help_valid_to_areal"} [:img {:src "icons/help.gif"}]]]]
-                    ;[:tr [:th "Vytvořeno"] [:td (:created project-info)]]
-                    ;[:tr [:th "Modifikováno"] [:td (:modified project-info)]]
-                    ;[:tr [:th "Počet budov"] [:td (or building-count "nelze zjistit")]
-                    ;     [:td "&nbsp;"]]
                     [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Interní identifikátor"]
+                         [:td (:ID project-info)]
+                         [:td [:a {:href "/help_intreno"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td "Zadaná platnost od:"]
                          [:td valid-from]
                          [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
@@ -351,7 +350,7 @@
 
 
 (defn render-building-info
-    [building-id building-info floor-count valid-from]
+    [building-id building-info valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
@@ -365,12 +364,20 @@
                     [:tr [:th "Jméno"]
                          [:td (get-building-name building-info "nezadáno")]
                          [:td [:a {:href "/help_name_building"} [:img {:src "icons/help.gif"}]]]]
-                    ;[:tr [:th "Vytvořeno"] [:td (:created building-info)]]
-                    ;[:tr [:th "Modifikováno"] [:td (:modified building-info)]]
-                    [:tr [:th "Počet podlaží"]
-                         [:td (or floor-count "nelze zjistit")]
-                         [:td [:a {:href "/help_floor_count_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Funkce"]
+                         [:td (:Function building-info)]
+                         [:td [:a {:href "/help_function_areal"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:th "Začátek platnosti"]
+                         [:td (:valid-from building-info)]
+                         [:td [:a {:href "/help_valid_from_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Konec platnosti"]
+                         [:td (:valid-to building-info)]
+                         [:td [:a {:href "/help_valid_to_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:td {:colspan 3} "&nbsp;"]]
+                    [:tr [:td "Interní identifikátor"]
+                         [:td (:ID building-info)]
+                         [:td [:a {:href "/help_intreno"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:td "Zadaná platnost od:"]
                          [:td valid-from]
                          [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
@@ -397,8 +404,6 @@
                     [:tr [:th "Jméno"]
                          [:td (:Label floor-info)]
                          [:td [:a {:href "/help_name_floor"} [:img {:src "icons/help.gif"}]]]]
-                    ;[:tr [:th "Vytvořeno"] [:td (:created floor-info)] [:td "&nbsp;"]]
-                    ;[:tr [:th "Modifikováno"] [:td (:modified floor-info)] [:td "&nbsp;"]]
                     [:tr [:th "Počet verzí výkresů"]
                          [:td (or drawing-count "nelze zjistit")]
                          [:td [:a {:href "/help_drawing_count_floor"} [:img {:src "icons/help.gif"}]]]]
@@ -462,10 +467,8 @@
                             [:tr [:td (:AOID building)]
                                  [:td [:a {:href (str "building?areal-id=" project-id "&building-id=" (:AOID building) "&valid-from=" valid-from)}
                                           (if (empty? (:Label building)) (:AOID building) (:Label building))]]
-                                 ;[:td (:AOID building)]
-                                 ;[:td (:created building)]
                                  [:td [:a {:title "Podrobnější informace o budově"
-                                           :href (str "building-info?building-id=" (:AOID building) "&valid-from=" valid-from)}
+                                           :href (str "building-info?areal-id=" project-id "&building-id=" (:AOID building) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                     [:tr [:td {:colspan 3} "&nbsp;"]]
                     [:tr [:td "Zadaná platnost od:"]
@@ -498,7 +501,7 @@
                         [:th "Budova"] [:td (get-building-name building-info "nezadáno")]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
+                                  :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr [:td {:colspan 5} "&nbsp;"]]
                     [:tr [:td {:colspan 2} "Zadaná platnost od:"]
