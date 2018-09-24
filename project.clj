@@ -43,4 +43,5 @@
               [lein-cloverage "1.0.6"]]
     :ring {:handler chainring-service.core/app}
     :target-path "target/%s"
+    :resource-paths ["resources/sapjco3.jar" "resources/"]
     :profiles {:uberjar {:aot :all}})
