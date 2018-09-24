@@ -65,9 +65,13 @@
 
 (defn get-sap-function
     [destination function-name]
-    (-> destination
-        .getRepository
-        (.getFunction function-name)))
+    (try
+        (-> destination
+            .getRepository
+            (.getFunction function-name))
+        (catch Exception e
+            (log/error "SAP error" e)
+            nil)))
 
 
 (defn get-aoids-from-sap-table
@@ -88,17 +92,16 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_AREAS")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-          {:date-from valid-from
-           :areals (get-aoids-from-sap-table function "ET_AREAS")}))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              {:date-from valid-from
+               :areals (get-aoids-from-sap-table function "ET_AREAS")})))
 
 
 (defn read-buildings
@@ -107,17 +110,16 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_BUILDINGS")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-          (.setValue (.getImportParameterList function) "I_AREA", areal-id)
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-          (get-aoids-from-sap-table function "ET_BUILDINGS")))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (.setValue (.getImportParameterList function) "I_AREA", areal-id)
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (get-aoids-from-sap-table function "ET_BUILDINGS"))))
 
 
 (defn read-floors
@@ -125,17 +127,16 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOORS")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-          (.setValue (.getImportParameterList function) "I_BUILDING", building-id)
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-          (get-aoids-from-sap-table function "ET_FLOORS")))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (.setValue (.getImportParameterList function) "I_BUILDING", building-id)
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (get-aoids-from-sap-table function "ET_FLOORS"))))
 
 
 (defn read-rooms
@@ -143,17 +144,16 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ROOMS")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-          (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-          (get-aoids-from-sap-table function "ET_ROOMS")))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (get-aoids-from-sap-table function "ET_ROOMS"))))
 
 
 (defn read-room-attribute-types
@@ -161,21 +161,20 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ATTRS")]
     
-          (if (not function) nil)
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-    (let [return-table (.getTable (.getTableParameterList function) "ET_ATTRS")]
-          (let [result (for [i (range (.getNumRows return-table))]
-                       (get-attribute-row-i return-table i))]
-                       (conj result {:ID "typ"
-                                     :Atribut "Typ místnosti"
-                                     :radiobutton nil
-                                     :dyncolor nil
-                       })))))
+          (when function
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (let [return-table (.getTable (.getTableParameterList function) "ET_ATTRS")]
+                    (let [result (for [i (range (.getNumRows return-table))]
+                                 (get-attribute-row-i return-table i))]
+                                 (conj result {:ID "typ"
+                                               :Atribut "Typ místnosti"
+                                               :radiobutton nil
+                                               :dyncolor nil
+                           }))))))
 
 
 (defn values-for-attribute
@@ -183,17 +182,16 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ATTR_VALUES")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_ID", attribute)
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-    (let [return-table (.getTable (.getTableParameterList function) "ET_VALUES")]
-          (for [i (range (.getNumRows return-table))]
-               (get-attribute-value-row-i return-table i)))))
+          (when function
+              (.setValue (.getImportParameterList function) "I_ID", attribute)
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (let [return-table (.getTable (.getTableParameterList function) "ET_VALUES")]
+                    (for [i (range (.getNumRows return-table))]
+                         (get-attribute-value-row-i return-table i))))))
 
 
 (defn room-attributes
@@ -201,20 +199,19 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", "20180101")
-          (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
-          (.setValue (.getImportParameterList function) "I_ID", "OB")
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-    (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
-          (for [i (range (.getNumRows return-table))]
-               (get-room-row-i return-table i)))))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", "20180101")
+              (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
+              (.setValue (.getImportParameterList function) "I_ID", "OB")
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+                  (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
+                        (for [i (range (.getNumRows return-table))]
+                             (get-room-row-i return-table i))))))
 
 
 (defn read-common-rooms-attribute
@@ -222,20 +219,19 @@
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
     
-          (if (not function) nil)
-    
-          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-          (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
-          (.setValue (.getImportParameterList function) "I_ID", attribute-id)
-    
-          (try
-              (.execute function destination)
-              (catch AbapException e
-                  (println e)
-                  nil))
-    (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
-          (for [i (range (.getNumRows return-table))]
-               (get-room-row-i return-table i)))))
+          (when function
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
+              (.setValue (.getImportParameterList function) "I_ID", attribute-id)
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+                  (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
+                        (for [i (range (.getNumRows return-table))]
+                             (get-room-row-i return-table i))))))
 
 
 (defn read-room-type
