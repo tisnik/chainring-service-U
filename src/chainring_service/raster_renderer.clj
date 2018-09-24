@@ -515,12 +515,14 @@
 
 
 (def room-colors [
-    {:foreground (new Color 200 150 100) :background (new Color 200 150 100 127)}
+    {:foreground (new Color 150 150 100) :background (new Color 150 150 100 127)}
+    {:foreground (new Color 250 150 150) :background (new Color 250 150 150 127)}
     {:foreground (new Color 100 150 200) :background (new Color 100 150 200 127)}
     {:foreground (new Color 200 140 200) :background (new Color 200 140 200 127)}
     {:foreground (new Color 100 200 200) :background (new Color 100 200 200 127)}
     {:foreground (new Color 200 200 100) :background (new Color 200 200 100 127)}
     {:foreground (new Color 250 50 50) :background (new Color 250 50 50 127)}
+    {:foreground (new Color 250 0 0) :background (new Color 250 0 0 127)}
 ])
 
 
@@ -532,9 +534,9 @@
 ])
 
 
-(def room-types        ["chodba" "sklad" "kancelar" "vyroba" "zazemi" "WC"])
+(def room-types        ["Chodba" "Hala" "Sklad" "Kancelář" "Výroba" "Zázemí" "Technická místnost" "WC"])
 (def contract-types    ["krátkodobé" "dlouhodobé"])
-(def occupation-types  ["nepronajímatelné" "pronajímatelné obsazené" "pronajímatelné volné" "interní"])
+(def occupation-types  ["Nepronajímatelné" "Pronajímatelné - obsazené" "Pronajímatelné - neobsazené" "Interní"])
 (def cleanup-types     ["1" "2" "3" "4" "5" "6" "7"])
 
 
@@ -550,7 +552,7 @@
     [highlight-group room-attribute values-to-show]
     (condp = highlight-group
         :typ        (attribute-color room-attribute values-to-show room-types       room-colors)
-        :obsazenost (attribute-color room-attribute values-to-show occupation-types occupation-colors)
+        :OB         (attribute-color room-attribute values-to-show occupation-types occupation-colors)
         :smlouva    (attribute-color room-attribute values-to-show contract-types   contract-colors)
         :uklid      (attribute-color room-attribute values-to-show cleanup-types    cleanup-colors)
         nil))
@@ -585,7 +587,7 @@
 
 (defn compute-room-colors
     [all-room-attributes highlight-group room-attrs values-to-show]
-    (if (some #{highlight-group} [:typ :uklid :obsazenost :smlouva])
+    (if (some #{highlight-group} [:typ :uklid :OB :obsazenost :smlouva])
         (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (val room) values-to-show)]))
         (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (val room) values-to-show)]))))
 
@@ -601,7 +603,7 @@
 
 (defn room->aoid+attribute
     [room]
-    (let [splitted (str/split room #"-")]
+    (let [splitted (str/split room #"\|")]
         (if (== (count splitted) 2)
             [(first splitted) (second splitted)]
             nil)))

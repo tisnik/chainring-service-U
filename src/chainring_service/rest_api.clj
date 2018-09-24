@@ -360,13 +360,14 @@
 (defn rooms-attribute
     [request uri]
     (let [params     (:params request)
-          floor      (get params "floor-aoid")
-          valid-from (get params "valid_from")
+          floor      (get params "floor-id")
+          valid-from (get params "valid-from")
           attribute  (get params "attribute")
-          sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)
-          cookie-val (clojure.string/join "_" (for [r sap-response] (str (key r) "-" (val r))))]
+          sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)]
+          (let [
+          cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r))))]
         (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val)
-    ))
+    )))
 
 
 (defn all-drawings-handler
