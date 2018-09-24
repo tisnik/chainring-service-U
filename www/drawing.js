@@ -392,7 +392,7 @@ function deleteRoomAttributes() {
 
 function isAttributeWithStaticValues(attribute_id) {
     if (attribute_id != null) {
-        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "OB" || attribute_id === "smlouva";
+        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "OB" || attribute_id === "obsazenost" || attribute_id === "smlouva";
     }
     else {
         return false;

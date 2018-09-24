@@ -553,6 +553,7 @@
     (condp = highlight-group
         :typ        (attribute-color room-attribute values-to-show room-types       room-colors)
         :OB         (attribute-color room-attribute values-to-show occupation-types occupation-colors)
+        :obsazenost (attribute-color room-attribute values-to-show occupation-types occupation-colors)
         :smlouva    (attribute-color room-attribute values-to-show contract-types   contract-colors)
         :uklid      (attribute-color room-attribute values-to-show cleanup-types    cleanup-colors)
         nil))

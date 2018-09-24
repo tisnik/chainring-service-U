@@ -129,7 +129,7 @@
 
 
 (defn read-building-info
-    [building valid-from]
+    [areal building valid-from]
     (let [real-date-from     (get-real-date-from valid-from)
           buildings-for-date (get @buildings real-date-from)]
         (if building
@@ -157,7 +157,7 @@
 
 
 (defn read-floor-info
-    [floor valid-from]
+    [areal building floor valid-from]
     (let [real-date-from  (get-real-date-from valid-from)
           floors-for-date (get @floors real-date-from)]
         (if floor
@@ -193,6 +193,7 @@
     [floor valid-from attribute-name]
     (let [ra @room-attributes
           selector (keyword attribute-name)]
-        (zipmap (for [room ra] (:Room room))
-                (for [room ra] (get room selector)))))
-
+        (for [room ra] {:AOID (:Room room)
+                        :Label attribute-name
+                        :key (get room selector)
+                        :value (get room selector)})))
