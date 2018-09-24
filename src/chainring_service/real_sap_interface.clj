@@ -25,7 +25,6 @@
 (import com.sap.conn.jco.ext.DestinationDataProvider)
 
 (require '[clojure.tools.logging        :as log])
-(require '[chainring-service.csv-loader :as csv-loader])
 
 
 (defn get-aoid-row-i
@@ -52,7 +51,7 @@
     [return-table i]
     (.setRow return-table i)
     {:ID          (.getString return-table "ID")
-     :Label       (.getString return-table "TITLE")
+     :Atribut     (.getString return-table "TITLE")
      :radiobutton (.getString return-table "RAD")
      :dyncolors   (.getString return-table "DYN")})
 
@@ -139,14 +138,14 @@
           (get-aoids-from-sap-table function "ET_FLOORS")))
 
 
-(defn room-list
+(defn read-rooms
     [floor-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ROOMS")]
     
           (if (not function) nil)
     
-          (.setValue (.getImportParameterList function) "I_DATE", "20180101")
+          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
           (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
     
           (try
@@ -157,7 +156,7 @@
           (get-aoids-from-sap-table function "ET_ROOMS")))
 
 
-(defn all-attributes
+(defn read-room-attribute-types
     []
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ATTRS")]
@@ -170,8 +169,13 @@
                   (println e)
                   nil))
     (let [return-table (.getTable (.getTableParameterList function) "ET_ATTRS")]
-          (for [i (range (.getNumRows return-table))]
-               (get-attribute-row-i return-table i)))))
+          (let [result (for [i (range (.getNumRows return-table))]
+                       (get-attribute-row-i return-table i))]
+                       (conj result {:ID "typ"
+                                     :Atribut "Typ místnosti"
+                                     :radiobutton nil
+                                     :dyncolor nil
+                       })))))
 
 
 (defn values-for-attribute
@@ -213,45 +217,39 @@
                (get-room-row-i return-table i)))))
 
 
-;(defn -main
-;    [& args]
-;    (println (areal-list "20000101"))
-;    (println)
-;    (println (building-list "BARR" "20000101"))
-;    (println (building-list "HOST" "20000101"))
-;    (println)
-;    (println (floor-list "HOST.10" "20000101"))
-;    (println (floor-list "HOST.15" "20000101"))
-;    (println (floor-list "BARR/10" "20000101"))
-;    (println)
-;    (println (room-list "HOST.10.0P" "20000101"))
-;    (println (room-list "HOST.10.1P" "20000101"))
-;    (println (room-list "BARR/10/1S" "20000101"))
-;    (println)
-;    (println (all-attributes))
-;    (println)
-;    (println)
-;    (println (values-for-attribute "OB"))
-;    (println)
-;    (println)
-;    (println)
-;    (println (room-attributes "HOST.10.0P" "20000101"))
-;)
+(defn read-common-rooms-attribute
+    [floor-id valid-from attribute-id]
+    (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
+          function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
+    
+          (if (not function) nil)
+    
+          (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+          (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
+          (.setValue (.getImportParameterList function) "I_ID", attribute-id)
+    
+          (try
+              (.execute function destination)
+              (catch AbapException e
+                  (println e)
+                  nil))
+    (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
+          (for [i (range (.getNumRows return-table))]
+               (get-room-row-i return-table i)))))
 
-(def floors
-    (atom nil))
 
-(def rooms
-    (atom nil))
+(defn read-room-type
+    [floor-id valid-from]
+    (let [rooms (read-rooms floor-id valid-from)]
+         (for [room rooms] {:AOID  (:AOID room)
+                            :value (:Function room)})))
 
-(def room-attribute-types
-    (atom nil))
 
-(def room-attributes
-    (atom nil))
-
-(def last-update
-    (atom nil))
+(defn read-rooms-attribute
+    [floor-id valid-from attribute-id]
+    (if (= attribute-id "typ")
+        (read-room-type floor-id valid-from)
+        (read-common-rooms-attribute floor-id valid-from attribute-id)))
 
 
 (defn read-areal-info
@@ -273,57 +271,9 @@
 
 
 (defn read-floor-info
+    "Read info about floor."
     [areal building floor valid-from]
     (let [floors (read-floors areal building valid-from)]
         (if floors
             (first (filter #(= floor (:AOID %)) floors))
             nil)))
-
-
-(defn read-rooms
-    [areal building floor]
-    [1 2 3 4 5])
-
-(defn load-all-data-files
-    []
-    (reset! floors               (csv-loader/load-csv "data/2018-09-01/floors.csv"))
-    (reset! rooms                (csv-loader/load-csv "data/2018-09-01/rooms.csv"))
-    (reset! room-attribute-types (csv-loader/load-csv "data/attribute_types.csv"))
-    (reset! room-attributes      (csv-loader/load-csv "data/room_attributes.csv"))
-)
-
-(println "********************")
-(load-all-data-files)
-(println "********************")
-
-
-(defn today?
-    [valid-from]
-    (if valid-from
-        (let [timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
-              now           (new java.util.Date)
-              now-str       (.format timeformatter now)]
-              (= now-str valid-from))
-        true))
-
-
-(defn read-rooms
-    [floor valid-from]
-    (if (today? valid-from)
-       (if floor
-           (let [prefix (str floor ".")]
-                (filter #(.startsWith (:AOID %) prefix) @rooms))
-           @rooms)))
-
-
-(defn read-room-attribute-types
-    []
-    @room-attribute-types)
-
-
-(defn read-rooms-attribute
-    [floor valid-from attribute-name]
-    (let [ra @room-attributes
-          selector (keyword attribute-name)]
-        (zipmap (for [room ra] (:Room room))
-                (for [room ra] (get room selector)))))
