@@ -322,13 +322,27 @@
           (log/info "Floor ID:" floor-id)
           (log/info "Floor info" floor-info)
           (log/info "Valid from" valid-from)
-          (if building-id
+          (if floor-id
               (let [drawings (all-drawings-for-floor floor-id)]
                   (log/info "Drawings" drawings)
                   (if (seq drawings)
                       (finish-processing request (html-renderer/render-drawing-list areal-id building-id floor-id areal-info building-info floor-info valid-from drawings))
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
-              (finish-processing request (html-renderer/render-error-page "Budova nebyla vybrána")))))
+              (finish-processing request (html-renderer/render-error-page "Podlaží nebylo vybráno")))))
+
+(defn process-select-drawing-from-sap-page
+    "Function that prepares data for the page with list of floors."
+    [request]
+    (let [params        (:params request)
+          floor-id      (get params "floor-id")]
+          (log/info "Floor ID:" floor-id)
+          (if floor-id
+              (let [drawings (all-drawings-for-floor floor-id)]
+                  (log/info "Drawings" drawings)
+                  (if (seq drawings)
+                      (finish-processing request (html-renderer/render-drawing-list-from-sap floor-id drawings))
+                      (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
+              (finish-processing request (html-renderer/render-error-page "Podlaží nebylo vybráno")))))
 
 (defn process-raster-preview-page
     [request]
@@ -388,24 +402,15 @@
     (let [params        (:params request)
           session       (:session request)
           configuration (:configuration request)
-          areal-id      (get params "areal-id")
-          building-id   (get params "building-id")
           floor-id      (get params "floor-id")
           drawing-id    (get params "drawing-id")
           valid-from    (get params "valid-from")
 
-          areal-info    (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-info (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)
-          floor-info    (sap-interface/call-sap-interface request "read-floor-info" floor-id valid-from)
-          drawing-info  '()
           rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session       (assoc session :drawing-id drawing-id)]
-          (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
-              (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms room-attribute-types true) session)
-                  (no-drawing-error-page request))
+              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from rooms room-attribute-types true) session)
               (no-drawing-error-page request))))
 
 
@@ -516,6 +521,7 @@
 
             ; pages with drawings
             "/drawing"                    (process-drawing-page request)
+            "/select-drawing-from-sap"    (process-select-drawing-from-sap-page request)
             "/drawing-from-sap"           (process-drawing-from-sap-page request)
             "/drawing-info"               (process-drawing-info request)
 
