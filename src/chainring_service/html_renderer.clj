@@ -608,6 +608,13 @@
           wo-ext))
 
 
+(defn filename->valid-from
+    [filename floor-id]
+    (let [wo-prefix (subs filename (inc (count floor-id)))
+          wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
+          (str (subs wo-ext 0 4) "-" (subs wo-ext 4 6) "-" (subs wo-ext 6 8))))
+
+
 (defn filename->drawing-id
     [filename]
     (subs filename 0 (- (count filename) (count ".json"))))
@@ -657,6 +664,37 @@
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+                (widgets/footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+
+(defn render-drawing-list-from-sap
+    "Render page with list of drawings."
+    [floor-id drawings]
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Výběr výkresu"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr
+                        [:th "Podlaží"] [:td "&nbsp;"]
+                        [:th "AOID"]    [:td floor-id]
+                    ]
+                ]
+                [:br]
+                [:h3 "Seznam výkresů"]
+                [:table {:class "table table-stripped table-hover" :style "width:auto"}
+                    [:tr [:th "Platnost od"] [:th "&nbsp;"]]
+                    (for [drawing drawings]
+                            [:tr [:td [:a {:href (str "drawing-from-sap?floor-id=" floor-id "&valid-from=" (filename->valid-from drawing floor-id) "&drawing-id=" (filename->drawing-id drawing))} (filename->drawing-version drawing floor-id)]]
+                                 [:td [:a {:title "Podrobnější informace o výkresu"
+                                           :href (str "drawing-info?drawing-id=" (filename->drawing-id drawing))}
+                                           [:img {:src "icons/info.gif"}]]]])
+                ]
                 (widgets/footer)
             ] ; </div class="container">
         ] ; </body>
@@ -845,7 +883,7 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
-                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:20em;" "vertical-align:top;width:35em;" )}
+                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:30em;" "vertical-align:top;width:35em;" )}
                         (if (not sap?)
                             [:span
                                 (render-floor-info-header)
@@ -856,7 +894,9 @@
                                 (render-room-list rooms)]
                             [:span
                                 (render-filters-header)
-                                (render-filters project-id building-id floor-id valid-from room-attribute-types)])
+                                (render-filters project-id building-id floor-id valid-from room-attribute-types)
+                                (render-room-list-header)
+                                (render-room-list rooms)])
                     ]
                     (render-view-tools)
                 ; 2nd row - drawing on the right side
