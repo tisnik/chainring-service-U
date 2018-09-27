@@ -265,6 +265,12 @@
           (.drawLine gc x (- y blip-size) x (+ y blip-size))))
 
 
+(defn draw-timestamp
+    [gc timestamp width height]
+    (.setColor gc (new Color 50 50 50))
+    (.drawString gc timestamp (- width 140) (- height 6)))
+
+
 (defn drawing-full-name
     [drawing-id drawing-name]
     (if drawing-id
@@ -384,7 +390,7 @@
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy use-memory-cache
      show-grid show-boundary show-blips
-     debug configuration]
+     debug configuration timestamp]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
         (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
@@ -425,6 +431,7 @@
                     (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color h-center v-center))
                 (if (or debug show-blips)
                     (draw-selection-point gc coordsx coordsy blip-size blip-color))
+                (draw-timestamp gc timestamp width height)
                 (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
         )
     )))
@@ -699,6 +706,7 @@
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
           debug               (get params "debug" nil)
+          timestamp           (.toString (new java.util.Date))
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
           (println "******************")
@@ -711,14 +719,14 @@
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    show-grid show-boundary show-blips
-                                   debug configuration)
+                                   debug configuration timestamp)
                   (draw-into-image image drawing-id drawing-name
                                    width height
                                    user-x-offset user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    use-memory-cache
                                    show-grid show-boundary show-blips
-                                   debug configuration))
+                                   debug configuration timestamp))
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
