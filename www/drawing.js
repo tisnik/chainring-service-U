@@ -25,6 +25,19 @@ setCookie("attribute", "");
 setCookie("rooms", "");
 
 
+// dummy logs for Internet Explorer 11:
+if (!window.console) console = {log: function() {}};
+
+
+// prototype for startsWith for Internet Explorer 11
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function(searchString, position){
+      position = position || 0;
+      return this.substr(position, searchString.length) === searchString;
+  };
+}
+
+
 function checkBoxValue(id) {
     return document.getElementById(id).checked;
 }
@@ -434,44 +447,71 @@ function showLegendForAttribute(attribute) {
     var html = "";
 
     switch (attribute) {
-    case "plocha":
-        html =  colorBox("rgb(250, 250,   0)", "< 10 m<sup>2</sup>", 1);
-        html += colorBox("rgb(200, 250,  40)", "< 20 m<sup>2</sup>", 1);
-        html += colorBox("rgb(160, 250,  80)", "< 40 m<sup>2</sup>");
-        html += colorBox("rgb(120, 250, 120)", "< 60 m<sup>2</sup>");
-        html += colorBox("rgb( 80, 250, 160)", "< 80 m<sup>2</sup>");
-        html += colorBox("rgb( 40, 250, 200)", "< 100 m<sup>2</sup>");
-        html += colorBox("rgb(  0, 250, 250)", "> 100 m<sup>2</sup>");
-        break;
+    case "DS":
     case "smlouva":
-        html =  colorBox("rgb( 70,  70, 240)", "Krátkodobé", 0);
-        html += colorBox("rgb(220, 220,  70)", "Dlouhodobé", 1);
+        html =  colorBox("rgb( 70,  70, 240)", "Krátkodobé pronájmy", 0);
+        html += colorBox("rgb(220, 220,  70)", "Dlouhodobé pronájmy", 1);
         break;
     case "OB":
     case "obsazenost":
         html =  colorBox("rgb(100, 100, 100)", "Nepronajímatelné", 0);
-        html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 1);
-        html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 2);
-        html += colorBox("rgb( 40,  40, 200)", "Interní", 3);
+        html += colorBox("rgb( 40,  40, 200)", "Interní", 1);
+        html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 2);
+        html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 3);
         break;
     case "typ":
-        html =  colorBox("rgb(150,150,150)", "Chodba", 0);
-        html += colorBox("rgb(250,150,150)", "Hala", 1);
-        html += colorBox("rgb(100,150,200)", "Sklad", 2);
-        html += colorBox("rgb(200,140,200)", "Kancelář", 3);
-        html += colorBox("rgb(100,200,200)", "Výroba", 4);
-        html += colorBox("rgb(200,200,100)", "Zázemí", 5);
-        html += colorBox("rgb(250, 50, 50)", "Technická místnost", 6);
-        html += colorBox("rgb(250,  0,  0)", "WC", 7);
+        html =  colorBox("rgb(  0,  0,150)", "Kancelář", 0);
+        html += colorBox("rgb(  0,150,  0)", "Ateliér", 1);
+        html += colorBox("rgb(  0,150,150)", "Dílna", 2);
+        html += colorBox("rgb(150,  0,  0)", "Sklad", 3);
+        html += colorBox("rgb(150,  0,150)", "Technický prostor", 4);
+        html += colorBox("rgb(150,150,  0)", "Schody", 5);
+        html += colorBox("rgb(150,150,150)", "Garáž", 6);
+        html += colorBox("rgb(  0,  0,250)", "WC", 7);
+        html += colorBox("rgb(  0,250,  0)", "Sprchy", 8);
+        html += colorBox("rgb(  0,250,250)", "Šatna", 9);
+        html += colorBox("rgb(250,  0,  0)", "Úklidová místnost", 10);
+        html += colorBox("rgb(250,  0,250)", "Chodba", 11);
+        html += colorBox("rgb(250,250,  0)", "Sociální zázemí", 12);
+        html += colorBox("rgb(250,250,250)", "Umývárna", 13);
+        html += colorBox("rgb(150,150,150)", "Kuchyň", 14);
+        html += colorBox("rgb( 50, 50, 50)", "Jídelna", 15);
         break;
     case "uklid":
-        html =  colorBox("rgb(250, 250,   0)", "1", 0);
-        html += colorBox("rgb(200, 250,  40)", "2", 1);
-        html += colorBox("rgb(160, 250,  80)", "3", 2);
-        html += colorBox("rgb(120, 250, 120)", "4", 3);
-        html += colorBox("rgb( 80, 250, 160)", "5", 4);
-        html += colorBox("rgb( 40, 250, 200)", "6", 5);
-        html += colorBox("rgb(  0, 250, 250)", "7", 6);
+    case "UK":
+        html =  colorBox("rgb(150,150,150)", "Četnost úklidu-bez úklidu", 0);
+        html += colorBox("rgb(  0, 50,  0)", "Četnost úklidu-1xtýdně", 1);
+        html += colorBox("rgb(  0,150,  0)", "Četnost úklidu-2xtýdně", 2);
+        html += colorBox("rgb(  0,250,  0)", "Četnost úklidu-3xtýdně", 3);
+        html += colorBox("rgb( 50,  0,  0)", "Četnost úklidu-4xtýdně", 4);
+        html += colorBox("rgb(150,  0,  0)", "Četnost úklidu-5xtýdně", 5);
+        html += colorBox("rgb(250,  0,  0)", "Četnost úklidu-6x týdně", 6);
+        html += colorBox("rgb(  0,  0, 50)", "Četnost úklidu-7x týdně", 7);
+        html += colorBox("rgb(  0,  0,150)", "Četnost úklidu-1x 14dní", 8);
+        html += colorBox("rgb(  0,  0,250)", "Četnost úklidu-1x měsíc", 9);
+        html += colorBox("rgb(  0,250,250)", "Četnost úklidu-Ostatní", 10);
+        break;
+    case "ucel":
+    case "UP":
+        html =  colorBox("rgb(  0,  0,150)", "kancelář  ", 0);
+        html += colorBox("rgb(  0,150,  0)", "sklad/rekvizitárna", 1);
+        html += colorBox("rgb(  0,150,150)", "dílna/patinerna", 2);
+        html += colorBox("rgb(150,  0,  0)", "chodba", 3);
+        html += colorBox("rgb(150,  0,150)", "kamerová místnost", 4);
+        html += colorBox("rgb(150,150,  0)", "herecká šatna", 5);
+        html += colorBox("rgb(150,150,150)", "make-up", 6);
+        html += colorBox("rgb(  0,  0,250)", "kostymérna", 7);
+        html += colorBox("rgb(  0,250,  0)", "kuchyňka", 8);
+        html += colorBox("rgb(  0,250,250)", "catering", 9);
+        html += colorBox("rgb(250,  0,  0)", "ateliér", 10);
+        html += colorBox("rgb(250,  0,250)", "sociální zázemí", 11);
+        html += colorBox("rgb(250,250,  0)", "WC", 12);
+        html += colorBox("rgb(250,250,250)", "schody, výtah ", 13);
+        html += colorBox("rgb(150,150,150)", "kuchyň", 14);
+        html += colorBox("rgb( 50, 50, 50)", "jídelna", 15);
+        html += colorBox("rgb(250,250,  0)", "garáž", 16);
+        html += colorBox("rgb(250,250,250)", "střecha, anténa", 17);
+        html += colorBox("rgb(150,150,150)", "ostatní", 18);
         break;
     }
 
@@ -511,6 +551,7 @@ function onRoomAttributesReceived(data) {
     for(i=0; i < attributes.length; i++) {
         var attribute = attributes[i];
         var room = attribute["AOID"];
+        var key = attribute["key"];
         var value = attribute["value"];
         //console.log(room);
         //console.log(value);
