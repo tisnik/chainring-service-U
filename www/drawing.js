@@ -323,6 +323,8 @@ function reloadImage(clickedX, clickedY) {
     url += otherOptions();
     url += addAttributeToHighlight();
     url += "&counter=" + counter;
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
     counter += 1;
     console.log(url);
     var drawingElement = document.getElementById("drawing");
