@@ -677,7 +677,7 @@
         (widgets/header "/")
         [:body
             [:div {:class "container"}
-                (widgets/navigation-bar "/")
+                (widgets/navigation-bar "#")
                 [:h1 "Výběr výkresu"]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
@@ -879,7 +879,9 @@
                              :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
                              :sap-url     (-> configuration :sap-interface :url)})
         [:body {:class "body-drawing"}
-            (widgets/navigation-bar "/")
+            (if sap?
+                (widgets/navigation-bar "#")
+                (widgets/navigation-bar "/"))
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
