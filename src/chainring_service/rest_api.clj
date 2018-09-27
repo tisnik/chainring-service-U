@@ -365,7 +365,7 @@
           attribute  (get params "attribute")
           sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)]
           (let [
-          cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r))))]
+          cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r) "|" (:key r))))]
         (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val)
     )))
 

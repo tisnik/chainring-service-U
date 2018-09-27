@@ -33,6 +33,7 @@
     {:ID         (.getString return-table "INTRENO")
      :AOID       (.getString return-table "AOID")
      :Label      (.getString return-table "XAO")
+     :FunctionId (.getString return-table "AOFUNCTION")
      :Function   (.getString return-table "XMAOFUNCTION")
      :valid-from (.getString return-table "VALIDFROM")
      :valid-to   (.getString return-table "VALIDTO")})
@@ -238,11 +239,13 @@
     [floor-id valid-from]
     (let [rooms (read-rooms floor-id valid-from)]
          (for [room rooms] {:AOID  (:AOID room)
+                            :key   (:FunctionId room)
                             :value (:Function room)})))
 
 
 (defn read-rooms-attribute
     [floor-id valid-from attribute-id]
+    (println (read-room-type floor-id valid-from))
     (if (= attribute-id "typ")
         (read-room-type floor-id valid-from)
         (read-common-rooms-attribute floor-id valid-from attribute-id)))
