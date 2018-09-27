@@ -492,38 +492,68 @@
     (new Color r g b 127))
 
 (def occupation-colors [
-     {:foreground (fg-color 70 70 70)
-      :background (bg-color 100 100 100)}
-     {:foreground (fg-color 200 0 0),
-      :background (bg-color 240 70 70)}
-     {:foreground (fg-color 0 200 0)
-      :background (bg-color 70 240 70)}
-     {:foreground (fg-color 0 0 200)
-      :background (bg-color 70 70 200)}
+     {:foreground (fg-color 70 70 70) :background (bg-color 100 100 100)} ; Nepronajímatelné
+     {:foreground (fg-color 0 200 0)  :background (bg-color 70 70 200)}   ; Interní
+     {:foreground (fg-color 200 0 0)  :background (bg-color 240 70 70)}   ; Pronajímatelné - obsazené
+     {:foreground (fg-color 0 0 200)  :background (bg-color 70 240 70)}   ; Pronajímatelné - neobsazené
 ])
-
 
 (def cleanup-colors [
-     "0"  {:foreground Color/BLACK :background (bg-color 250 250   0)}
-     "1"  {:foreground Color/BLACK :background (bg-color 200 250  40)}
-     "2"  {:foreground Color/BLACK :background (bg-color 160 250  80)}
-     "3"  {:foreground Color/BLACK :background (bg-color 120 250 120)}
-     "4"  {:foreground Color/BLACK :background (bg-color  80 250 160)}
-     "5"  {:foreground Color/BLACK :background (bg-color  40 250 200)}
-     "6"  {:foreground Color/BLACK :background (bg-color   0 250 250)}
+    {:foreground (new Color 150 150 100) :background (new Color 150,150,150,127)}   ; 100601 Četnost úklidu-bez úklidu
+    {:foreground (new Color 250 150 150) :background (new Color   0, 50,  0,127)}   ; 100602 Četnost úklidu-1xtýdně
+    {:foreground (new Color 100 150 200) :background (new Color   0,150,  0,127)}   ; 100603 Četnost úklidu-2xtýdně
+    {:foreground (new Color 200 140 200) :background (new Color   0,250,  0,127)}   ; 100604 Četnost úklidu-3xtýdně
+    {:foreground (new Color 100 200 200) :background (new Color  50,  0,  0,127)}   ; 100605 Četnost úklidu-4xtýdně
+    {:foreground (new Color 200 200 100) :background (new Color 150,  0,  0,127)}   ; 100606 Četnost úklidu-5xtýdně
+    {:foreground (new Color 250 50 50)   :background (new Color 250,  0,  0,127)}   ; 100607 Četnost úklidu-6x týdně
+    {:foreground (new Color 250 0 0)     :background (new Color   0,  0, 50,127)}   ; 100608 Četnost úklidu-7x týdně
+    {:foreground (new Color 150 150 100) :background (new Color   0,  0,150,127)}   ; 100609 Četnost úklidu-1x 14dní
+    {:foreground (new Color 250 150 150) :background (new Color   0,  0,250,127)}   ; 100610 Četnost úklidu-1x měsíc
+    {:foreground (new Color 100 150 200) :background (new Color   0,250,250,127)}   ; 100611 Četnost úklidu-Ostatní
 ])
-
 
 (def room-colors [
-    {:foreground (new Color 150 150 100) :background (new Color 150 150 100 127)}
-    {:foreground (new Color 250 150 150) :background (new Color 250 150 150 127)}
-    {:foreground (new Color 100 150 200) :background (new Color 100 150 200 127)}
-    {:foreground (new Color 200 140 200) :background (new Color 200 140 200 127)}
-    {:foreground (new Color 100 200 200) :background (new Color 100 200 200 127)}
-    {:foreground (new Color 200 200 100) :background (new Color 200 200 100 127)}
-    {:foreground (new Color 250 50 50) :background (new Color 250 50 50 127)}
-    {:foreground (new Color 250 0 0) :background (new Color 250 0 0 127)}
+    {:foreground (new Color 150 150 100) :background (new Color   0,  0,150,127)}
+    {:foreground (new Color 250 150 150) :background (new Color   0,150,  0,127)}
+    {:foreground (new Color 100 150 200) :background (new Color   0,150,150,127)}
+    {:foreground (new Color 200 140 200) :background (new Color 150,  0,  0,127)}
+    {:foreground (new Color 100 200 200) :background (new Color 150,  0,150,127)}
+    {:foreground (new Color 200 200 100) :background (new Color 150,150,  0,127)}
+    {:foreground (new Color 250 50 50)   :background (new Color 150,150,150,127)}
+    {:foreground (new Color 250 0 0)     :background (new Color   0,  0,250,127)}
+    {:foreground (new Color 150 150 100) :background (new Color   0,250,  0,127)}
+    {:foreground (new Color 250 150 150) :background (new Color   0,250,250,127)}
+    {:foreground (new Color 100 150 200) :background (new Color 250,  0,  0,127)}
+    {:foreground (new Color 200 140 200) :background (new Color 250,  0,250,127)}
+    {:foreground (new Color 100 200 200) :background (new Color 250,250,  0,127)}
+    {:foreground (new Color 200 200 100) :background (new Color 250,250,250,127)}
+    {:foreground (new Color 250 50 50)   :background (new Color 150,150,150,127)}
+    {:foreground (new Color 250 0 0)     :background (new Color  50, 50, 50,127)}
 ])
+
+(def purpose-colors [
+    {:foreground (new Color 150 150 100) :background (new Color   0,  0,150,127)}
+    {:foreground (new Color 250 150 150) :background (new Color   0,150,  0,127)}
+    {:foreground (new Color 100 150 200) :background (new Color   0,150,150,127)}
+    {:foreground (new Color 200 140 200) :background (new Color 150,  0,  0,127)}
+    {:foreground (new Color 100 200 200) :background (new Color 150,  0,150,127)}
+    {:foreground (new Color 200 200 100) :background (new Color 150,150,  0,127)}
+    {:foreground (new Color 250 50 50)   :background (new Color 150,150,150,127)}
+    {:foreground (new Color 250 0 0)     :background (new Color   0,  0,250,127)}
+    {:foreground (new Color 150 150 100) :background (new Color   0,250,  0,127)}
+    {:foreground (new Color 250 150 150) :background (new Color   0,250,250,127)}
+    {:foreground (new Color 100 150 200) :background (new Color 250,  0,  0,127)}
+    {:foreground (new Color 200 140 200) :background (new Color 250,  0,250,127)}
+    {:foreground (new Color 100 200 200) :background (new Color 250,250,  0,127)}
+    {:foreground (new Color 200 200 100) :background (new Color 250,250,250,127)}
+    {:foreground (new Color 250 50 50)   :background (new Color 150,150,150,127)}
+    {:foreground (new Color 250 0 0)     :background (new Color  50, 50, 50,127)}
+    {:foreground (new Color 150 200 200) :background (new Color 250,250,  0,127)}
+    {:foreground (new Color 200 200 150) :background (new Color 250,250,250,127)}
+    {:foreground (new Color 250 150 50)  :background (new Color 150,150,150,127)}
+    {:foreground (new Color 250 0 100)   :background (new Color  50, 50, 50,127)}
+])
+
 
 
 (def contract-colors [
@@ -534,14 +564,15 @@
 ])
 
 
-(def room-types        ["Chodba" "Hala" "Sklad" "Kancelář" "Výroba" "Zázemí" "Technická místnost" "WC"])
-(def contract-types    ["krátkodobé" "dlouhodobé"])
-(def occupation-types  ["Nepronajímatelné" "Pronajímatelné - obsazené" "Pronajímatelné - neobsazené" "Interní"])
-(def cleanup-types     ["1" "2" "3" "4" "5" "6" "7"])
-
+(def contract-types    [1 2])
+(def occupation-types  [1 2 3 4])
+(def room-types        [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16])
+(def purpose-types     [1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20])
+(def cleanup-types     [100601 100602 100603 100604 100605 100606 100607 100608 100609 100610 100611])
 
 (defn attribute-color
     [room-attribute values-to-show values colors]
+    (print room-attribute " ")
     (let [i (.indexOf values room-attribute)]
         (if (>= i 0)
             (if (get values-to-show i)
@@ -549,14 +580,18 @@
 
 
 (defn compute-room-color-static-values
-    [highlight-group room-attribute values-to-show]
+    [highlight-group room-attribute-numeric-code values-to-show]
     (condp = highlight-group
-        :typ        (attribute-color room-attribute values-to-show room-types       room-colors)
-        :OB         (attribute-color room-attribute values-to-show occupation-types occupation-colors)
-        :obsazenost (attribute-color room-attribute values-to-show occupation-types occupation-colors)
-        :smlouva    (attribute-color room-attribute values-to-show contract-types   contract-colors)
-        :uklid      (attribute-color room-attribute values-to-show cleanup-types    cleanup-colors)
+        :typ        (attribute-color room-attribute-numeric-code values-to-show room-types       room-colors)
+        :OB         (attribute-color room-attribute-numeric-code values-to-show occupation-types occupation-colors)
+        :DS         (attribute-color room-attribute-numeric-code values-to-show contract-types   contract-colors)
+        :UK         (attribute-color room-attribute-numeric-code values-to-show cleanup-types    cleanup-colors)
+        :UP         (attribute-color room-attribute-numeric-code values-to-show purpose-types    purpose-colors)
+        ;:obsazenost (attribute-color room-attribute-numeric-code values-to-show occupation-types occupation-colors)
+        ;:smlouva    (attribute-color room-attribute-numeric-code values-to-show contract-types   contract-colors)
+        ;:uklid      (attribute-color room-attribute-numeric-code values-to-show cleanup-types    cleanup-colors)
         nil))
+
 
 (def palette [
     {:foreground Color/GRAY :background (bg-color 150 150  40)}
@@ -579,18 +614,18 @@
 
 (defn get-all-room-attributes
     [room-attrs]
-    []
     (->> room-attrs
          vals
+         :value
          distinct
          sort
          (into [])))
 
 (defn compute-room-colors
     [all-room-attributes highlight-group room-attrs values-to-show]
-    (if (some #{highlight-group} [:typ :uklid :OB :obsazenost :smlouva])
-        (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (val room) values-to-show)]))
-        (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (val room) values-to-show)]))))
+    (if (some #{highlight-group} [:typ :UP :UK :DS :OB :uklid :obsazenost :smlouva])
+        (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (:key (val room)) values-to-show)]))
+        (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (:value (val room)) values-to-show)]))))
 
 
 (defn use-binary-rendering?
@@ -605,8 +640,8 @@
 (defn room->aoid+attribute
     [room]
     (let [splitted (str/split room #"\|")]
-        (if (== (count splitted) 2)
-            [(first splitted) (second splitted)]
+        (if (== (count splitted) 3)
+            [(first splitted) {:value (second splitted) :key (utils/parse-int (utils/third splitted))}]
             nil)))
 
 
