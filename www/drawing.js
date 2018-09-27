@@ -264,7 +264,9 @@ function findRoomOnDrawing(clickedX, clickedY) {
         console.log(clickedX, clickedY);
     }
     var url = findRoomUrl(drawing_id, floor_id, version) + "&coordsx=" + clickedX + "&coordsy=" + clickedY;
+    random = (Math.random() + 1).toString(36).substring(2);
     url += transformation();
+    url += "&random=" + random;
 
     if (debugMode) {
         console.log(url);
@@ -362,6 +364,8 @@ function clickOnSapHref()
             // vytvoreni odkazu ve vybranem elementu
             var hrefElement = document.getElementById("sap_href");
             hrefElement.href = sapHref + selectedRoom;
+            random = (Math.random() + 1).toString(36).substring(2);
+            hrefElement.href += "&random=" + random;
             console.log(hrefElement.href);
 
             // simulace kliku na odkaz "SAP"
@@ -589,6 +593,10 @@ function setRoomAttributeLabel(label) {
 
 function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_from) {
     var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from);
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
+    console.log(url)
+    url += "&random=" + random;
     attributeToHighlight = attribute_id;
     // clear the 3rd column in room table
     deleteRoomAttributes();
@@ -598,6 +606,11 @@ function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_fr
     if (isAttributeWithStaticValues(attribute_id)) {
         showLegendForAttribute(attribute_id);
     }
+    // cookies used by raster renderer
+    setCookie("attribute", attribute_id);
+    setCookie("floor_id", floor_id);
+    setCookie("valid_from", valid_from);
+
     // try to set attributes (2nd... rows)
     callAjax(url, onRoomAttributesReceived);
 
