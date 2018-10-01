@@ -601,15 +601,26 @@
 
 
 (def palette [
-    {:foreground Color/GRAY :background (bg-color 150 150  40)}
-    {:foreground Color/GRAY :background (bg-color  40 250  40)}
-    {:foreground Color/GRAY :background (bg-color  40 250 250)}
-    {:foreground Color/GRAY :background (bg-color  40  40 250)}
-    {:foreground Color/GRAY :background (bg-color 250  40 250)}
-    {:foreground Color/GRAY :background (bg-color 250  40  40)}
-    {:foreground Color/GRAY :background (bg-color  40  40  40)}
-    {:foreground Color/GRAY :background (bg-color 120 120 120)}
-    {:foreground Color/GRAY :background (bg-color 240 240 240)}
+    {:foreground Color/GRAY :background (bg-color   0   0 150)}
+    {:foreground Color/GRAY :background (bg-color   0 150   0)}
+    {:foreground Color/GRAY :background (bg-color   0 150 150)}
+    {:foreground Color/GRAY :background (bg-color 150   0   0)}
+    {:foreground Color/GRAY :background (bg-color 150   0 150)}
+    {:foreground Color/GRAY :background (bg-color 150 150   0)}
+    {:foreground Color/GRAY :background (bg-color 150 150 150)}
+    {:foreground Color/GRAY :background (bg-color   0   0 250)}
+    {:foreground Color/GRAY :background (bg-color   0 250   0)}
+    {:foreground Color/GRAY :background (bg-color   0 250 250)}
+    {:foreground Color/GRAY :background (bg-color 250   0   0)}
+    {:foreground Color/GRAY :background (bg-color 250   0 250)}
+    {:foreground Color/GRAY :background (bg-color 250 250   0)}
+    {:foreground Color/GRAY :background (bg-color 250 250 250)}
+    {:foreground Color/GRAY :background (bg-color 150 150 150)}
+    {:foreground Color/GRAY :background (bg-color  50  50  50)}
+    {:foreground Color/GRAY :background (bg-color 250 250   0)}
+    {:foreground Color/GRAY :background (bg-color 250 250 250)}
+    {:foreground Color/GRAY :background (bg-color 150 150 150)}
+    {:foreground Color/GRAY :background (bg-color  50  50  50)}
 ])
 
 (defn compute-room-color-list-of-values
@@ -623,7 +634,7 @@
     [room-attrs]
     (->> room-attrs
          vals
-         :value
+         (map #(:value %))
          distinct
          sort
          (into [])))
@@ -648,7 +659,10 @@
     [room]
     (let [splitted (str/split room #"\|")]
         (if (== (count splitted) 3)
-            [(first splitted) {:value (second splitted) :key (utils/parse-int (utils/third splitted))}]
+            (try
+                 [(first splitted) {:value (second splitted) :key (utils/parse-int (utils/third splitted))}]
+             (catch NumberFormatException e
+                 [(first splitted) {:value (second splitted) :key (utils/third splitted)}]))
             nil)))
 
 
