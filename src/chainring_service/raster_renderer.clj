@@ -630,20 +630,67 @@
           (if (get values-to-show im)
               (nth palette im))))
 
-(defn get-all-room-attributes
-    [room-attrs]
-    (->> room-attrs
-         vals
-         (map #(:value %))
-         distinct
-         sort
-         (into [])))
+;
+; input:
+;
+;{1.A1.1MP.500 {:value voda1,voda2,voda3, :key voda1,voda2,voda3},
+; 1.A1.1MP.514 {:value voda5,voda6, :key voda5,voda6},
+; 1.A1.1MP.502 {:value voda1,voda2,voda6, :key voda1,voda2,voda6},
+; 1.A1.1MP.505 {:value voda1, :key voda1},
+;
 
-(defn compute-room-colors
+(defn get-all-room-attributes
+    [room-attrs radio-buttons]
+    (if radio-buttons
+        (->> room-attrs
+             vals
+             (map #(:value %))
+             (map #(clojure.string/split % #","))
+             flatten
+             distinct
+             sort
+             (into []))
+        (->> room-attrs
+             vals
+             (map #(:value %))
+             distinct
+             sort
+             (into []))))
+
+(defn room-with-attribute
+    [room-attrs attribute]
+    (let [room-id    (key room-attrs)
+          values-str (:value (val room-attrs))
+          values     (into #{} (clojure.string/split values-str #","))]
+          (contains? values attribute)))
+
+
+(defn compute-room-colors-radio-buttons
+    [all-room-attributes room-attrs selected-radio-button]
+    (if (seq selected-radio-button)
+        (let [i (utils/parse-int selected-radio-button)
+              im (mod i (count palette))
+              color (nth palette im)
+              attribute (nth all-room-attributes i)
+              rooms (filter #(room-with-attribute % attribute) room-attrs)]
+              (into {} (for [room rooms] [(key room) color])))
+        []))
+
+(defn compute-room-colors-no-radio-buttons
     [all-room-attributes highlight-group room-attrs values-to-show]
     (if (some #{highlight-group} [:typ :UP :UK :DS :OB :uklid :obsazenost :smlouva])
         (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (:key (val room)) values-to-show)]))
         (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (:value (val room)) values-to-show)]))))
+
+(defn compute-room-colors
+    [all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?]
+    ;(println "vvvvvvvvvvvvvvvvvvvvvv")
+    ;(println all-room-attributes)
+    ;(println selected-radio-button)
+    ;(println "^^^^^^^^^^^^^^^^^^^^^^")
+    (if radio-buttons?
+        (compute-room-colors-radio-buttons all-room-attributes room-attrs selected-radio-button)
+        (compute-room-colors-no-radio-buttons all-room-attributes highlight-group room-attrs values-to-show)))
 
 
 (defn use-binary-rendering?
@@ -689,17 +736,19 @@
 
 (defn perform-raster-drawing
     [request]
-    (let [params              (:params request)
-          configuration       (:configuration request)
-          cookies             (:cookies request)
-          ignore-type         (get params "ignore-type")
-          values-to-show      (read-values-to-show cookies)
-          highlight-group     (-> (get cookies "attribute") :value keyword)
-          room-attrs          (-> (get cookies "rooms") :value decode-attrs)
-          all-room-attributes (get-all-room-attributes room-attrs)
-          room-colors         (if (= ignore-type "true")
-                                  nil
-                                  (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show))
+    (let [params                (:params request)
+          configuration         (:configuration request)
+          cookies               (:cookies request)
+          ignore-type           (get params "ignore-type")
+          values-to-show        (read-values-to-show cookies)
+          selected-radio-button (-> (get cookies "radio_value") :value)
+          highlight-group       (-> (get cookies "attribute") :value keyword)
+          radio-buttons?        (some #{highlight-group} [:MT :MV :ME])
+          room-attrs            (-> (get cookies "rooms") :value decode-attrs)
+          all-room-attributes   (get-all-room-attributes room-attrs radio-buttons?)
+          room-colors           (if (= ignore-type "true")
+                                    nil
+                                    (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?))
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           floor-id            (get params "floor-id")
@@ -723,9 +772,9 @@
           timestamp           (.toString (new java.util.Date))
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
-          (println "******************")
+          (println "******** cookies **********")
           (println cookies)
-          (println "******************")
+          (println "******** cookies **********")
           (try
               (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
