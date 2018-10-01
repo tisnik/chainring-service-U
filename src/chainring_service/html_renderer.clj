@@ -775,7 +775,7 @@
         (for [room rooms]
                 [:tr {:class "vcell"} [:td (:Label room)]
                      [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:AOID room) "')")} (:AOID room)]]
-                     [:td {:id (str "room_" (:AOID room) "_attribute_value")} ""]
+                     [:td {:style "white-space: pre" :id (str "room_" (:AOID room) "_attribute_value")} ""]
                      ;[:td (:valid_from room) "<br>"
                      ;     (:valid_to room)]
                      ;[:td (:room_type_str room)]

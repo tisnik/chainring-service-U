@@ -21,6 +21,29 @@ var debugMode = true;
 var selectedRoom = null;
 var counter = 0;
 
+var palette = [
+    "rgb(  0,  0,150)",
+    "rgb(  0,150,  0)",
+    "rgb(  0,150,150)",
+    "rgb(150,  0,  0)",
+    "rgb(150,  0,150)",
+    "rgb(150,150,  0)",
+    "rgb(150,150,150)",
+    "rgb(  0,  0,250)",
+    "rgb(  0,250,  0)",
+    "rgb(  0,250,250)",
+    "rgb(250,  0,  0)",
+    "rgb(250,  0,250)",
+    "rgb(250,250,  0)",
+    "rgb(250,250,250)",
+    "rgb(150,150,150)",
+    "rgb( 50, 50, 50)",
+    "rgb(250,250,  0)",
+    "rgb(250,250,250)",
+    "rgb(150,150,150)",
+    "rgb( 50, 50, 50)"
+];
+
 setCookie("attribute", "");
 setCookie("rooms", "");
 
@@ -541,28 +564,6 @@ function showLegendForAttribute(attribute) {
 }
 
 function showLegendForAttributeList(attribute_list) {
-    var palette = [
-        "rgb(  0,  0,150)",
-        "rgb(  0,150,  0)",
-        "rgb(  0,150,150)",
-        "rgb(150,  0,  0)",
-        "rgb(150,  0,150)",
-        "rgb(150,150,  0)",
-        "rgb(150,150,150)",
-        "rgb(  0,  0,250)",
-        "rgb(  0,250,  0)",
-        "rgb(  0,250,250)",
-        "rgb(250,  0,  0)",
-        "rgb(250,  0,250)",
-        "rgb(250,250,  0)",
-        "rgb(250,250,250)",
-        "rgb(150,150,150)",
-        "rgb( 50, 50, 50)",
-        "rgb(250,250,  0)",
-        "rgb(250,250,250)",
-        "rgb(150,150,150)",
-        "rgb( 50, 50, 50)"
-    ];
 
     var element = document.getElementById("legenda");
     var html = "";
