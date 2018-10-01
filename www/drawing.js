@@ -479,6 +479,12 @@ function valueShowOrHide(id) {
 }
 
 
+function radioValueShowOrHide(id) {
+    setCookie("radio_value", id.toString());
+    reloadImage(null, null);
+}
+
+
 function colorBox(color, text, id) {
     var full_id = "enable_value_" + id;
     var box = "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>";
@@ -486,6 +492,15 @@ function colorBox(color, text, id) {
     setCookie("value_" + id, 1);
     return box + check + text + "<br/>";
 }
+
+
+function colorRadioBox(color, text, id) {
+    var full_id = "enable_value_" + id;
+    var box = "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>";
+    var radio = "<input type='radio' name='meridla' value='" + full_id + "' id='" + full_id + "' onclick='radioValueShowOrHide(" + id +")' />";
+    return box + radio + text + "<br/>";
+}
+
 
 function showLegendForAttribute(attribute) {
     var element = document.getElementById("legenda");
@@ -563,8 +578,8 @@ function showLegendForAttribute(attribute) {
     element.innerHTML = html;
 }
 
-function showLegendForAttributeList(attribute_list) {
 
+function showLegendForAttributeList(attribute_list) {
     var element = document.getElementById("legenda");
     var html = "";
 
@@ -578,12 +593,34 @@ function showLegendForAttributeList(attribute_list) {
 }
 
 
+function showLegendForRadioList(attribute_list) {
+    var element = document.getElementById("legenda");
+    var html = "";
+
+    var i;
+    for (i = 0; i < attribute_list.length; i+=1) {
+        var color = palette[i % palette.length];
+        html += colorRadioBox(color, attribute_list[i], i);
+    }
+
+    element.innerHTML = html;
+}
+
+
+function sortAndUnique(an_array) {
+    return an_array.sort().filter(function(element, index, array) {
+        return (index === array.indexOf(element));
+    });
+}
+
 function onRoomAttributesReceived(data) {
     var attributes = JSON.parse(data);
     var attribute_list = [];
     var prop;
     var i;
-    for(i=0; i < attributes.length; i++) {
+    var meridla = isAttributeWithRadioButtons(attributeToHighlight);
+
+    for (i=0; i < attributes.length; i++) {
         var attribute = attributes[i];
         var room = attribute["AOID"];
         var key = attribute["key"];
@@ -592,17 +629,35 @@ function onRoomAttributesReceived(data) {
         //console.log(value);
         var elementId = "room_" + room + "_attribute_value";
         var element = document.getElementById(elementId);
-        setText(element, value);
-        attribute_list.push(value);
+        if (meridla) {
+            var values = value.split(",");
+            var text_content = values.join("\r\n");
+            setText(element, text_content);
+            var j;
+            for (j=0; j < values.length; j++) {
+                attribute_list.push(values[j]);
+            }
+        } else {
+            setText(element, value);
+            attribute_list.push(value);
+        }
     }
 
-    if (isAttributeWithListOfValues(attributeToHighlight)) {
-        attribute_list = attribute_list.sort().filter(function(element, index, array) {
-             return (index === array.indexOf(element));
-        });
+    if (meridla) {
+        setCookie("radio_value", null);
+        // sort and unique elements
+        attribute_list = sortAndUnique(attribute_list);
+
+        // console.log(attribute_list);
+        showLegendForRadioList(attribute_list);
+    }
+    else if (isAttributeWithListOfValues(attributeToHighlight)) {
+        // sort and unique elements
+        attribute_list = sortAndUnique(attribute_list);
+        // console.log(attribute_list);
+
         // now the attribute list is sorted and unique
         showLegendForAttributeList(attribute_list);
-        console.log(attribute_list);
     }
 
     reloadImage(null, null);
