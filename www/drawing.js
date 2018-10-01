@@ -411,7 +411,11 @@ function deleteRoomAttributes() {
 
 function isAttributeWithStaticValues(attribute_id) {
     if (attribute_id != null) {
-        return attribute_id === "uklid" || attribute_id === "typ" || attribute_id === "OB" || attribute_id === "obsazenost" || attribute_id === "smlouva";
+        return attribute_id === "typ" ||
+               attribute_id === "OB" || attribute_id === "obsazenost" ||
+               attribute_id === "DS" || attribute_id === "smlouva" ||
+               attribute_id === "UK" || attribute_id === "uklid" ||
+               attribute_id === "UP" || attribute_id === "ucel";
     }
     else {
         return false;
@@ -420,7 +424,19 @@ function isAttributeWithStaticValues(attribute_id) {
 
 function isAttributeWithListOfValues(attribute_id) {
     if (attribute_id != null) {
-        return attributeToHighlight === "projekt" || attributeToHighlight === "ucel";
+        return attribute_id === "PR" || attribute_id === "projekt";
+    }
+    else {
+        return false;
+    }
+}
+
+function isAttributeWithRadioButtons(attribute_id) {
+    if (attribute_id != null) {
+        // MV - Měřidla - voda
+        // MT - Měřidla - teplo
+        // ME - Měřidla - elektřina
+        return attribute_id === "MV" || attribute_id === "MT" || attribute_id == "ME";
     }
     else {
         return false;
@@ -526,15 +542,26 @@ function showLegendForAttribute(attribute) {
 
 function showLegendForAttributeList(attribute_list) {
     var palette = [
-        "rgb(150, 150,  40)",
-        "rgb( 40, 250,  40)",
-        "rgb( 40, 250, 250)",
-        "rgb( 40,  40, 250)",
-        "rgb(250,  40, 250)",
-        "rgb(250,  40,  40)",
-        "rgb( 40,  40,  40)",
-        "rgb(120, 120, 120)",
-        "rgb(240, 240, 240)"
+        "rgb(  0,  0,150)",
+        "rgb(  0,150,  0)",
+        "rgb(  0,150,150)",
+        "rgb(150,  0,  0)",
+        "rgb(150,  0,150)",
+        "rgb(150,150,  0)",
+        "rgb(150,150,150)",
+        "rgb(  0,  0,250)",
+        "rgb(  0,250,  0)",
+        "rgb(  0,250,250)",
+        "rgb(250,  0,  0)",
+        "rgb(250,  0,250)",
+        "rgb(250,250,  0)",
+        "rgb(250,250,250)",
+        "rgb(150,150,150)",
+        "rgb( 50, 50, 50)",
+        "rgb(250,250,  0)",
+        "rgb(250,250,250)",
+        "rgb(150,150,150)",
+        "rgb( 50, 50, 50)"
     ];
 
     var element = document.getElementById("legenda");
@@ -548,6 +575,7 @@ function showLegendForAttributeList(attribute_list) {
 
     element.innerHTML = html;
 }
+
 
 function onRoomAttributesReceived(data) {
     var attributes = JSON.parse(data);
