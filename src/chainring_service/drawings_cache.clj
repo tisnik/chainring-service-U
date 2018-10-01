@@ -18,6 +18,8 @@
 (require '[clojure.tools.logging :as log])
 
 
+(def max-cache-size 250)
+
 (def drawings
     (atom {}))
 
@@ -26,16 +28,33 @@
     (atom {}))
 
 
+(def access-times
+    (atom {}))
+
+
 (defn inc-hit-counter
     [id]
     (swap! hit-counters assoc id (inc (get @hit-counters id))))
 
 
+(defn cleanup-least-used-item
+    []
+    (let [drawing-with-min-time (apply min-key #(val %) @access-times)
+          drawing-id (key drawing-with-min-time)]
+         (log/info (str "cleaning up " drawing-id))
+         (swap! drawings dissoc drawing-id)
+         (swap! access-times dissoc drawing-id)
+         (swap! hit-counters dissoc drawing-id)))
+
+
 (defn write
     [id data]
     (log/info (str "writing drawing " id " into cache"))
+    (swap! access-times assoc id (System/currentTimeMillis))
     (swap! drawings assoc id data)
-    (swap! hit-counters assoc id 0))
+    (swap! hit-counters assoc id 0)
+    (if (> (count @drawings) max-cache-size)
+        (cleanup-least-used-item)))
 
 
 (defn delete
@@ -46,6 +65,7 @@
 
 (defn fetch
     [id]
+    (swap! access-times assoc id (System/currentTimeMillis))
     (get @drawings id))
 
 
@@ -59,3 +79,13 @@
 (defn cache-size
     []
     (count @drawings))
+
+
+(defn get-access-times
+    []
+    @access-times)
+
+
+(defn get-counters
+    []
+    @hit-counters)
