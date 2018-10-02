@@ -21,7 +21,7 @@
 (require '[hiccup.form  :as form])
 
 (require '[chainring-service.html-renderer-widgets :as widgets])
-
+(require '[chainring-service.drawing-utils         :as drawing-utils])
 
 
 
@@ -601,24 +601,6 @@
 ))
 
 
-(defn filename->drawing-version
-    [filename floor-id]
-    (let [wo-prefix (subs filename (inc (count floor-id)))
-          wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
-          wo-ext))
-
-
-(defn filename->valid-from
-    [filename floor-id]
-    (let [wo-prefix (subs filename (inc (count floor-id)))
-          wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
-          (str (subs wo-ext 0 4) "-" (subs wo-ext 4 6) "-" (subs wo-ext 6 8))))
-
-
-(defn filename->drawing-id
-    [filename]
-    (subs filename 0 (- (count filename) (count ".json"))))
-
 
 (defn render-drawing-list
     "Render page with list of drawings."
@@ -658,9 +640,9 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Platnost od"] [:th "&nbsp;"]]
                     (for [drawing drawings]
-                            [:tr [:td [:a {:href (str "drawing?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from "&drawing-id=" (filename->drawing-id drawing))} (filename->drawing-version drawing floor-id)]]
+                            [:tr [:td [:a {:href (str "drawing?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from "&drawing-id=" (drawing-utils/filename->drawing-id drawing))} (drawing-utils/filename->drawing-version drawing floor-id)]]
                                  [:td [:a {:title "Podrobnější informace o výkresu"
-                                           :href (str "drawing-info?drawing-id=" (filename->drawing-id drawing))}
+                                           :href (str "drawing-info?drawing-id=" (drawing-utils/filename->drawing-id drawing))}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
@@ -690,9 +672,9 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Platnost od"] [:th "&nbsp;"]]
                     (for [drawing drawings]
-                            [:tr [:td [:a {:href (str "drawing-from-sap?floor-id=" floor-id "&valid-from=" (filename->valid-from drawing floor-id) "&drawing-id=" (filename->drawing-id drawing))} (filename->drawing-version drawing floor-id)]]
+                            [:tr [:td [:a {:href (str "drawing-from-sap?floor-id=" floor-id "&valid-from=" (drawing-utils/filename->valid-from drawing floor-id) "&drawing-id=" (drawing-utils/filename->drawing-id drawing))} (drawing-utils/filename->drawing-version drawing floor-id)]]
                                  [:td [:a {:title "Podrobnější informace o výkresu"
-                                           :href (str "drawing-info?drawing-id=" (filename->drawing-id drawing))}
+                                           :href (str "drawing-info?drawing-id=" (drawing-utils/filename->drawing-id drawing))}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 (widgets/footer)
@@ -792,6 +774,16 @@
     ])
 
 
+(defn render-date-field
+    "Render date field."
+    [floor-id valid-from]
+    (form/form-to {:name "inputForm"} [:get "/select-drawing-from-sap"]
+        [:script "new tcal ({'formname': 'inputForm', 'controlname': 'valid-from'});"]
+        [:input {:type "hidden" :name "floor-id" :id "floor-id" :value floor-id}]
+        [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:8em"}]
+                    [:button {:type "submit" :class "btn btn-success" :style "width:10em"} "Změna platnosti"]
+                ))
+
 (defn render-filters-header
     "Render header for room filters part."
     []
@@ -871,16 +863,23 @@
 
 (defn render-drawing
     "Render page with drawing on the right side and with configurable toolbar on the left side."
-    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from rooms room-attribute-types sap?]
+    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from valid-from-fmt rooms room-attribute-types sap?]
     (page/xhtml
-        (widgets/header "/" {:include-drawing-js? true
-                             :floor-id floor-id
-                             :raster-drawing-id drawing-id
-                             :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
-                             :sap-url     (-> configuration :sap-interface :url)})
-        [:body {:class "body-drawing"}
+        (if sap?
+            (widgets/header "/" {:include-drawing-js? true
+                                 :floor-id floor-id
+                                 :raster-drawing-id drawing-id
+                                 :include-calendar? true
+                                 :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
+                                 :sap-url     (-> configuration :sap-interface :url)})
+            (widgets/header "/" {:include-drawing-js? true
+                                 :floor-id floor-id
+                                 :raster-drawing-id drawing-id
+                                 :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
+                                 :sap-url     (-> configuration :sap-interface :url)}))
+        [:body (if sap? {:class "body-drawing-sap"} {:class "body-drawing"})
             (if sap?
-                (widgets/navigation-bar "#")
+                "" ;(widgets/navigation-bar "#")
                 (widgets/navigation-bar "/"))
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
@@ -895,6 +894,7 @@
                                 (render-room-list-header)
                                 (render-room-list rooms)]
                             [:span
+                                (render-date-field floor-id valid-from-fmt)
                                 (render-filters-header)
                                 (render-filters project-id building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
