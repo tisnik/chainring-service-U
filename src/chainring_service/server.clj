@@ -29,6 +29,7 @@
 (require '[chainring-service.http-utils         :as http-utils])
 (require '[chainring-service.sap-interface      :as sap-interface])
 (require '[chainring-service.real-sap-interface :as real-sap-interface])
+(require '[chainring-service.drawing-utils      :as drawing-utils])
 
 (use     '[clj-utils.utils])
 
@@ -54,12 +55,18 @@
                 (assoc :session session)
                 (http-response/content-type "text/html; charset=utf-8")))))
 
+
+(defn current-date-formatted
+    []
+    (let [timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
+          today         (new java.util.Date)]
+          (.format timeformatter today)))
+
+
 (defn process-front-page
     "Function that prepares data for the front page."
     [request]
-    (let [timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
-          today         (new java.util.Date)
-          valid-from    (.format timeformatter today)]
+    (let [valid-from    (current-date-formatted)]
         (finish-processing request (html-renderer/render-front-page valid-from))))
 
 (defn process-settings-page
@@ -187,14 +194,20 @@
                   (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybrané budově")))
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
+
+(defn floor-id->str
+    [floor-id]
+    (-> floor-id
+        (clojure.string/replace \. \_)
+        (clojure.string/replace \\ \_)
+        (clojure.string/replace \/ \_)))
+
+
 (defn all-drawings-for-floor
     [floor-id]
     (let [files     (fileutils/file-list "drawings/" ".json")
           filenames (for [file files] (.getName file))
-          floor-id  (-> floor-id
-                        (clojure.string/replace \. \_)
-                        (clojure.string/replace \\ \_)
-                        (clojure.string/replace \/ \_))
+          floor-id  (floor-id->str floor-id)
           drawings  (filter #(startsWith % floor-id) filenames)]
           (sort drawings)))
 
@@ -330,7 +343,16 @@
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Podlaží nebylo vybráno")))))
 
-(defn process-select-drawing-from-sap-page
+
+(defn select-nearest-date
+    [today dates]
+    (let [nearest (->> dates
+                  (filter #(not (neg? (compare today %))))
+                  last)]
+         (or nearest (first dates))))
+
+
+(defn process-select-drawing-from-sap-page-
     "Function that prepares data for the page with list of floors."
     [request]
     (let [params        (:params request)
@@ -343,6 +365,7 @@
                       (finish-processing request (html-renderer/render-drawing-list-from-sap floor-id drawings))
                       (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres"))))
               (finish-processing request (html-renderer/render-error-page "Podlaží nebylo vybráno")))))
+
 
 (defn process-raster-preview-page
     [request]
@@ -391,7 +414,7 @@
           (log-process-drawing-info areal-id areal-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from rooms room-attribute-types nil) session)
+                  (finish-processing request (html-renderer/render-drawing configuration areal-id building-id floor-id drawing-id areal-info building-info floor-info drawing-info valid-from nil rooms room-attribute-types nil) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
@@ -405,12 +428,35 @@
           floor-id      (get params "floor-id")
           drawing-id    (get params "drawing-id")
           valid-from    (get params "valid-from")
+          valid-from-fmt (get params "valid-from")
 
           rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session       (assoc session :drawing-id drawing-id)]
           (if drawing-id
-              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from rooms room-attribute-types true) session)
+              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session)
+              (no-drawing-error-page request))))
+
+
+(defn process-select-drawing-from-sap-page
+    "Function that prepares data for the page with list of floors."
+    [request]
+    (let [params         (:params request)
+          session        (:session request)
+          configuration  (:configuration request)
+          floor-id       (get params "floor-id")
+          valid-from-fmt (or (get params "valid-from") (current-date-formatted))
+          valid-from     (clojure.string/replace valid-from-fmt "-" "")
+          drawings       (all-drawings-for-floor floor-id)
+          drawing-dates  (sort (map #(drawing-utils/filename->drawing-version % floor-id) drawings))
+          selected-date  (select-nearest-date valid-from drawing-dates)
+          drawing-id     (str (floor-id->str floor-id) "_" selected-date)
+
+          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+          room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
+          session       (assoc session :drawing-id drawing-id)]
+          (if drawing-id
+              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session)
               (no-drawing-error-page request))))
 
 
