@@ -76,7 +76,7 @@
         (.setRenderingHints gc rh))
     (let [font (new Font "Helvetica" Font/PLAIN 8)]
         (.setFont gc font))
-    (.setBackground gc (new Color 0.9 0.9 0.8))
+    (.setBackground gc (new Color 1.0 1.0 1.0))
     (.clearRect gc 0 0 width height)
     (.setColor gc Color/BLACK)
     (.drawRect gc 0 0 (dec width) (dec height)))
@@ -668,13 +668,16 @@
 (defn compute-room-colors-radio-buttons
     [all-room-attributes room-attrs selected-radio-button]
     (if (seq selected-radio-button)
-        (let [i (utils/parse-int selected-radio-button)
-              im (mod i (count palette))
-              color (nth palette im)
-              attribute (nth all-room-attributes i)
-              rooms (filter #(room-with-attribute % attribute) room-attrs)]
-              (into {} (for [room rooms] [(key room) color])))
-        []))
+        (try
+            (let [i (utils/parse-int selected-radio-button)
+                  im (mod i (count palette))
+                  color (nth palette im)
+                  attribute (nth all-room-attributes i)
+                  rooms (filter #(room-with-attribute % attribute) room-attrs)]
+                  (into {} (for [room rooms] [(key room) color])))
+             (catch Exception e
+                 {})) ; fallback
+        {}))
 
 (defn compute-room-colors-no-radio-buttons
     [all-room-attributes highlight-group room-attrs values-to-show]
