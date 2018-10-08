@@ -733,9 +733,9 @@ function onRoomSelect(aoid) {
     console.log("Selecting room: " + aoid);
     selectedRoom = aoid;
     printSelectedRoom(selectedRoom);
-    if (sap_enabled) {
-        selectRoomInSap(selectedRoom);
-    }
+    //if (sap_enabled) {
+    //    selectRoomInSap(selectedRoom);
+    //}
     reloadImage(null, null);
 }
 

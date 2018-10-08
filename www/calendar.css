@@ -2,7 +2,8 @@
 img.tcalIcon {
 	cursor: pointer;
 	margin-left: 1px;
-	vertical-align: middle;
+	margin-right: 3px;
+	vertical-align: top;
 }
 /* calendar container element */
 div#tcal {
