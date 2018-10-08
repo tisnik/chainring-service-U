@@ -195,24 +195,24 @@
                          (get-attribute-value-row-i return-table i))))))
 
 
-(defn room-attributes
-    [floor-id valid-from]
+(defn read-room-common-possible-attributes
+    [floor-id valid-from attribute-id]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
     
           (when function
-              (.setValue (.getImportParameterList function) "I_DATE", "20180101")
+              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
               (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
-              (.setValue (.getImportParameterList function) "I_ID", "OB")
+              (.setValue (.getImportParameterList function) "I_ID", attribute-id)
         
               (try
                   (.execute function destination)
                   (catch AbapException e
                       (println e)
                       nil))
-                  (let [return-table (.getTable (.getTableParameterList function) "ET_ROOMS")]
-                        (for [i (range (.getNumRows return-table))]
-                             (get-room-row-i return-table i))))))
+                  (let [return-table (.getTable (.getTableParameterList function) "ET_VALUES")]
+                        (distinct (for [i (range (.getNumRows return-table))]
+                             (:value (get-room-row-i return-table i))))))))
 
 
 (defn read-common-rooms-attribute
@@ -243,12 +243,26 @@
                             :value (:Function room)})))
 
 
+(defn read-room-type-possible-attributes
+    [floor-id valid-from]
+    (let [rooms (read-rooms floor-id valid-from)]
+         (distinct (for [room rooms] (:Function room)))))
+
+
 (defn read-rooms-attribute
     [floor-id valid-from attribute-id]
-    (println (read-room-type floor-id valid-from))
-    (if (= attribute-id "typ")
-        (read-room-type floor-id valid-from)
-        (read-common-rooms-attribute floor-id valid-from attribute-id)))
+    (if (and floor-id valid-from attribute-id)
+        (if (= attribute-id "typ")
+            (read-room-type floor-id valid-from)
+            (read-common-rooms-attribute floor-id valid-from attribute-id))))
+
+
+(defn read-rooms-possible-attributes
+    [floor-id valid-from attribute-id]
+    (if (and floor-id valid-from attribute-id)
+        (if (= attribute-id "typ")
+            (read-room-type-possible-attributes floor-id valid-from)
+            (read-room-common-possible-attributes floor-id valid-from attribute-id))))
 
 
 (defn read-areal-info

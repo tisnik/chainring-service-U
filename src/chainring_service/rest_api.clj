@@ -374,6 +374,23 @@
     )))
 
 
+(defn possible-attributes
+    [request uri]
+    (let [params     (:params request)
+          floor      (get params "floor-id")
+          valid-from (get params "valid-from")
+          attribute  (get params "attribute")
+          sap-response (sap-interface/call-sap-interface request "read-rooms-possible-attributes" floor valid-from attribute)]
+          (println "-------------")
+          (println (count sap-response))
+          (println "~~~~~~~~~~~~~")
+          (println sap-response)
+          (println "-------------")
+          (let [cookie-val (clojure.string/join "_" (for [r sap-response] r))]
+        (rest-api-utils/send-response-with-cookie sap-response request :ok "possible_attributes" cookie-val)
+    )))
+
+
 (defn all-drawings-handler
     "REST API handler for the /api/{version}/drawings endpoint."
     [request uri]

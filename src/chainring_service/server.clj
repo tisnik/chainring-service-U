@@ -513,6 +513,7 @@
             [:get  "nearest-date-from"]      (rest-api/nearest-date-from request uri)
 
             [:get  "rooms-attribute"]        (rest-api/rooms-attribute request uri)
+            [:get  "possible-attributes"]    (rest-api/possible-attributes request uri)
 
             [:get  "drawing"]                (rest-api/drawing-handler request uri)
             [:get  "drawings"]               (rest-api/all-drawings-handler request uri)
