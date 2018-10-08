@@ -780,9 +780,9 @@
     (form/form-to {:name "inputForm"} [:get "/select-drawing-from-sap"]
         [:script "new tcal ({'formname': 'inputForm', 'controlname': 'valid-from'});"]
         [:input {:type "hidden" :name "floor-id" :id "floor-id" :value floor-id}]
-        [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:8em;height:28px;vertical-align:bottom;border:none;"}]
-        [:button {:type "submit" :class "btn btn-primary btn-sm" :style "width:10em;height:28px;"} "Změna platnosti"]
-                ))
+        [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:7em;vertical-align:top;border:none;font-size:90%;text-align:center;"}]
+        [:button {:type "submit" :class "btn btn-info btn-xs" :style "width:10em;vertical-align:top;"} "Změna platnosti"]
+    ))
 
 (defn render-filters-header
     "Render header for room filters part."

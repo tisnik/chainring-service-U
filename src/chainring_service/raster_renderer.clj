@@ -646,6 +646,7 @@
              vals
              (map #(:value %))
              (map #(clojure.string/split % #","))
+             (map #(clojure.string/trim %))
              flatten
              distinct
              sort
