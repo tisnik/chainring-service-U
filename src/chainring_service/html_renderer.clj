@@ -780,8 +780,8 @@
     (form/form-to {:name "inputForm"} [:get "/select-drawing-from-sap"]
         [:script "new tcal ({'formname': 'inputForm', 'controlname': 'valid-from'});"]
         [:input {:type "hidden" :name "floor-id" :id "floor-id" :value floor-id}]
-        [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:8em"}]
-                    [:button {:type "submit" :class "btn btn-success" :style "width:10em"} "Změna platnosti"]
+        [:input {:type "text" :id "valid-from" :readonly "readonly" :name "valid-from" :value valid-from :style "width:8em;height:28px;vertical-align:bottom;border:none;"}]
+        [:button {:type "submit" :class "btn btn-primary btn-sm" :style "width:10em;height:28px;"} "Změna platnosti"]
                 ))
 
 (defn render-filters-header
@@ -841,8 +841,8 @@
 
 (defn render-view-tools
     "Render all view tools with icons and help."
-    []
-    [:td {:class "tools"}
+    [sap?]
+    [:td {:class "tools" :background (if sap? "" "icons/elevel-logo-small.png")}
          [:span {:class "tools-spacer"}]
          [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:src "icons/viewmag_plus.gif"}]] "&nbsp;"
          [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:src "icons/viewmag_minus.gif"}]] "&nbsp;"
@@ -858,6 +858,7 @@
          [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
          [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
          [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]]
+         [:span {:class "tools-spacer"}]
     ])
 
 
@@ -900,7 +901,7 @@
                                 (render-room-list-header)
                                 (render-room-list rooms)])
                     ]
-                    (render-view-tools)
+                    (render-view-tools sap?)
                 ; 2nd row - drawing on the right side
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
                                  :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&ignore-type=true")
@@ -912,7 +913,8 @@
                                  [:div {:style "height:100ex"} "&nbsp;"]]]
                 ;[:tr [:td [:div {:class "canvas" :id "drawing_canvas"}]]]
             ]] ; </tr> </table>
-            [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
+            (if (not sap?)
+                [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"])
             (widgets/footer)
         ] ; </body>
 ))

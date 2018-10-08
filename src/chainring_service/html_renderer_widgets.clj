@@ -25,7 +25,7 @@
     "Renders part of HTML page - the header."
     [url-prefix & [options]]
     [:head
-        [:title "Chainring"]
+        [:title "Integrace CAD výkresů v RE-FX SAP"]
         [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
         [:meta {:name "Generator" :content "Clojure"}]
         [:meta {:http-equiv "Content-type" :content "text/html; charset=utf-8"}]
@@ -71,7 +71,7 @@
             [:div {:class "row"}
                 [:div {:class "col-md-7"}
                     [:div {:class "navbar-header"}
-                        [:a {:href url-prefix :class "navbar-brand"} "Chainring"]
+                        [:a {:href url-prefix :class "navbar-brand"} "Integrace CAD výkresů v RE-FX SAP"]
                     ] ; ./navbar-header
                     [:div {:class "navbar-header"}
                         [:ul {:class "nav navbar-nav"}
@@ -95,7 +95,7 @@
 (defn footer
     "Renders part of HTML page - the footer."
     []
-    [:div "<br /><br />Chainring verze 0.1"])
+    [:div "<br /><br />&copy; eLevel system s.r.o."])
 
 
 (defn back-button
