@@ -485,12 +485,18 @@ function radioValueShowOrHide(id) {
 }
 
 
-function colorBox(color, text, id) {
-    var full_id = "enable_value_" + id;
-    var box = "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>";
-    var check = "<input type='checkbox' name='" + full_id + "' id='" + full_id + "' checked='checked' onclick='valueShowOrHide(" + id +")' />";
-    setCookie("value_" + id, 1);
-    return box + check + text + "<br/>";
+function colorBox(color, text, id, used_values) {
+    if (used_values.indexOf(text) > -1) {
+        var full_id = "enable_value_" + id;
+        var box = "<div class='color-box' style='opacity:0.5;filter:alpha(opacity=50);background-color: " + color + "; display:inline-block'></div>";
+        var check = "<input type='checkbox' name='" + full_id + "' id='" + full_id + "' checked='checked' onclick='valueShowOrHide(" + id +")' />";
+        var text = "<span class='color-box-text'>" + text + "</span>";
+        setCookie("value_" + id, 1);
+        return box + check + text + "<br/>";
+    }
+    else {
+        return "";
+    }
 }
 
 
@@ -502,76 +508,78 @@ function colorRadioBox(color, text, id) {
 }
 
 
-function showLegendForAttribute(attribute) {
+function showLegendForAttribute(attribute, used_values) {
     var element = document.getElementById("legenda");
     var html = "";
 
+    // TODO: needs to be refactored
     switch (attribute) {
     case "DS":
     case "smlouva":
-        html =  colorBox("rgb( 70,  70, 240)", "Krátkodobé pronájmy", 0);
-        html += colorBox("rgb(220, 220,  70)", "Dlouhodobé pronájmy", 1);
+        html =  colorBox("rgb( 70,  70, 240)", "Krátkodobé pronájmy", 0, used_values);
+        html += colorBox("rgb(220, 220,  70)", "Dlouhodobé pronájmy", 1, used_values);
         break;
     case "OB":
     case "obsazenost":
-        html =  colorBox("rgb(100, 100, 100)", "Nepronajímatelné", 0);
-        html += colorBox("rgb( 40,  40, 200)", "Interní", 1);
-        html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 2);
-        html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 3);
+        html =  colorBox("rgb(100, 100, 100)", "Nepronajímatelné", 0, used_values);
+        html += colorBox("rgb( 40,  40, 200)", "Interní", 1, used_values);
+        html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 2, used_values);
+        html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 3, used_values);
         break;
     case "typ":
-        html =  colorBox("rgb(  0,  0,150)", "Kancelář", 0);
-        html += colorBox("rgb(  0,150,  0)", "Ateliér", 1);
-        html += colorBox("rgb(  0,150,150)", "Dílna", 2);
-        html += colorBox("rgb(150,  0,  0)", "Sklad", 3);
-        html += colorBox("rgb(150,  0,150)", "Technický prostor", 4);
-        html += colorBox("rgb(150,150,  0)", "Schody", 5);
-        html += colorBox("rgb(150,150,150)", "Garáž", 6);
-        html += colorBox("rgb(  0,  0,250)", "WC", 7);
-        html += colorBox("rgb(  0,250,  0)", "Sprchy", 8);
-        html += colorBox("rgb(  0,250,250)", "Šatna", 9);
-        html += colorBox("rgb(250,  0,  0)", "Úklidová místnost", 10);
-        html += colorBox("rgb(250,  0,250)", "Chodba", 11);
-        html += colorBox("rgb(250,250,  0)", "Sociální zázemí", 12);
-        html += colorBox("rgb(250,250,250)", "Umývárna", 13);
-        html += colorBox("rgb(150,150,150)", "Kuchyň", 14);
-        html += colorBox("rgb( 50, 50, 50)", "Jídelna", 15);
+        html =  colorBox("rgb(  0,  0,150)", "Kancelář", 0, used_values);
+        html += colorBox("rgb(  0,150,  0)", "Ateliér", 1, used_values);
+        html += colorBox("rgb(  0,150,150)", "Dílna", 2, used_values);
+        html += colorBox("rgb(150,  0,  0)", "Sklad", 3, used_values);
+        html += colorBox("rgb(150,  0,150)", "Technický prostor", 4, used_values);
+        // html += colorBox("rgb(150,  0,150)", "Technická místnost", 4, used_values);
+        html += colorBox("rgb(150,150,  0)", "Schody", 5, used_values);
+        html += colorBox("rgb(150,150,150)", "Garáž", 6, used_values);
+        html += colorBox("rgb(  0,  0,250)", "WC", 7, used_values);
+        html += colorBox("rgb(  0,250,  0)", "Sprchy", 8, used_values);
+        html += colorBox("rgb(  0,250,250)", "Šatna", 9, used_values);
+        html += colorBox("rgb(250,  0,  0)", "Úklidová místnost", 10, used_values);
+        html += colorBox("rgb(250,  0,250)", "Chodba", 11, used_values);
+        html += colorBox("rgb(250,250,  0)", "Sociální zázemí", 12, used_values);
+        html += colorBox("rgb(250,250,250)", "Umývárna", 13, used_values);
+        html += colorBox("rgb(150,150,150)", "Kuchyň", 14, used_values);
+        html += colorBox("rgb( 50, 50, 50)", "Jídelna", 15, used_values);
         break;
     case "uklid":
     case "UK":
-        html =  colorBox("rgb(150,150,150)", "Četnost úklidu-bez úklidu", 0);
-        html += colorBox("rgb(  0, 50,  0)", "Četnost úklidu-1xtýdně", 1);
-        html += colorBox("rgb(  0,150,  0)", "Četnost úklidu-2xtýdně", 2);
-        html += colorBox("rgb(  0,250,  0)", "Četnost úklidu-3xtýdně", 3);
-        html += colorBox("rgb( 50,  0,  0)", "Četnost úklidu-4xtýdně", 4);
-        html += colorBox("rgb(150,  0,  0)", "Četnost úklidu-5xtýdně", 5);
-        html += colorBox("rgb(250,  0,  0)", "Četnost úklidu-6x týdně", 6);
-        html += colorBox("rgb(  0,  0, 50)", "Četnost úklidu-7x týdně", 7);
-        html += colorBox("rgb(  0,  0,150)", "Četnost úklidu-1x 14dní", 8);
-        html += colorBox("rgb(  0,  0,250)", "Četnost úklidu-1x měsíc", 9);
-        html += colorBox("rgb(  0,250,250)", "Četnost úklidu-Ostatní", 10);
+        html =  colorBox("rgb(150,150,150)", "Četnost úklidu-bez úklidu", 0, used_values);
+        html += colorBox("rgb(  0, 50,  0)", "Četnost úklidu-1xtýdně", 1, used_values);
+        html += colorBox("rgb(  0,150,  0)", "Četnost úklidu-2xtýdně", 2, used_values);
+        html += colorBox("rgb(  0,250,  0)", "Četnost úklidu-3xtýdně", 3, used_values);
+        html += colorBox("rgb( 50,  0,  0)", "Četnost úklidu-4xtýdně", 4, used_values);
+        html += colorBox("rgb(150,  0,  0)", "Četnost úklidu-5xtýdně", 5, used_values);
+        html += colorBox("rgb(250,  0,  0)", "Četnost úklidu-6x týdně", 6, used_values);
+        html += colorBox("rgb(  0,  0, 50)", "Četnost úklidu-7x týdně", 7, used_values);
+        html += colorBox("rgb(  0,  0,150)", "Četnost úklidu-1x 14dní", 8, used_values);
+        html += colorBox("rgb(  0,  0,250)", "Četnost úklidu-1x měsíc", 9, used_values);
+        html += colorBox("rgb(  0,250,250)", "Četnost úklidu-Ostatní", 10, used_values);
         break;
     case "ucel":
     case "UP":
-        html =  colorBox("rgb(  0,  0,150)", "kancelář  ", 0);
-        html += colorBox("rgb(  0,150,  0)", "sklad/rekvizitárna", 1);
-        html += colorBox("rgb(  0,150,150)", "dílna/patinerna", 2);
-        html += colorBox("rgb(150,  0,  0)", "chodba", 3);
-        html += colorBox("rgb(150,  0,150)", "kamerová místnost", 4);
-        html += colorBox("rgb(150,150,  0)", "herecká šatna", 5);
-        html += colorBox("rgb(150,150,150)", "make-up", 6);
-        html += colorBox("rgb(  0,  0,250)", "kostymérna", 7);
-        html += colorBox("rgb(  0,250,  0)", "kuchyňka", 8);
-        html += colorBox("rgb(  0,250,250)", "catering", 9);
-        html += colorBox("rgb(250,  0,  0)", "ateliér", 10);
-        html += colorBox("rgb(250,  0,250)", "sociální zázemí", 11);
-        html += colorBox("rgb(250,250,  0)", "WC", 12);
-        html += colorBox("rgb(250,250,250)", "schody, výtah ", 13);
-        html += colorBox("rgb(150,150,150)", "kuchyň", 14);
-        html += colorBox("rgb( 50, 50, 50)", "jídelna", 15);
-        html += colorBox("rgb(250,250,  0)", "garáž", 16);
-        html += colorBox("rgb(250,250,250)", "střecha, anténa", 17);
-        html += colorBox("rgb(150,150,150)", "ostatní", 18);
+        html =  colorBox("rgb(  0,  0,150)", "kancelář", 0, used_values);
+        html += colorBox("rgb(  0,150,  0)", "sklad/rekvizitárna", 1, used_values);
+        html += colorBox("rgb(  0,150,150)", "dílna/patinerna", 2, used_values);
+        html += colorBox("rgb(150,  0,  0)", "chodba", 3, used_values);
+        html += colorBox("rgb(150,  0,150)", "kamerová místnost", 4, used_values);
+        html += colorBox("rgb(150,150,  0)", "herecká šatna", 5, used_values);
+        html += colorBox("rgb(150,150,150)", "make-up", 6, used_values);
+        html += colorBox("rgb(  0,  0,250)", "kostymérna", 7, used_values);
+        html += colorBox("rgb(  0,250,  0)", "kuchyňka", 8, used_values);
+        html += colorBox("rgb(  0,250,250)", "catering", 9, used_values);
+        html += colorBox("rgb(250,  0,  0)", "ateliér", 10, used_values);
+        html += colorBox("rgb(250,  0,250)", "sociální zázemí", 11, used_values);
+        html += colorBox("rgb(250,250,  0)", "WC", 12, used_values);
+        html += colorBox("rgb(250,250,250)", "schody, výtah ", 13, used_values);
+        html += colorBox("rgb(150,150,150)", "kuchyň", 14, used_values);
+        html += colorBox("rgb( 50, 50, 50)", "jídelna", 15, used_values);
+        html += colorBox("rgb(250,250,  0)", "garáž", 16, used_values);
+        html += colorBox("rgb(250,250,250)", "střecha, anténa", 17, used_values);
+        html += colorBox("rgb(150,150,150)", "ostatní", 18, used_values);
         break;
     }
 
@@ -586,7 +594,7 @@ function showLegendForAttributeList(attribute_list) {
     var i;
     for (i = 0; i < attribute_list.length; i+=1) {
         var color = palette[i % palette.length];
-        html += colorBox(color, attribute_list[i], i);
+        html += colorBox(color, attribute_list[i], i, attribute_list);
     }
 
     element.innerHTML = html;
@@ -613,9 +621,25 @@ function sortAndUnique(an_array) {
     });
 }
 
+function onPossibleAttributesReceived(data) {
+    var attribute_list = JSON.parse(data);
+
+    // show legend
+    if (isAttributeWithStaticValues(attributeToHighlight)) {
+        showLegendForAttribute(attributeToHighlight, attribute_list);
+    }
+    else if (isAttributeWithListOfValues(attributeToHighlight)) {
+        // now the attribute list is sorted and unique
+        showLegendForAttributeList(attribute_list);
+    }
+    else if (isAttributeWithRadioButtons(attributeToHighlight)) {
+        setCookie("radio_value", null);
+        showLegendForRadioList(attribute_list);
+    }
+}
+
 function onRoomAttributesReceived(data) {
     var attributes = JSON.parse(data);
-    var attribute_list = [];
     var prop;
     var i;
     var meridla = isAttributeWithRadioButtons(attributeToHighlight);
@@ -630,34 +654,26 @@ function onRoomAttributesReceived(data) {
         var elementId = "room_" + room + "_attribute_value";
         var element = document.getElementById(elementId);
         if (meridla) {
-            var values = value.split(",");
-            var text_content = values.join("\r\n");
-            setText(element, text_content);
-            var j;
-            for (j=0; j < values.length; j++) {
-                attribute_list.push(values[j]);
-            }
+            //var values = value.split(",");
+            //var text_content = values.join("\r\n");
+            setText(element, value);
+            //var j;
+            //for (j=0; j < values.length; j++) {
+            //    attribute_list.push(values[j]);
+            //}
         } else {
             setText(element, value);
-            attribute_list.push(value);
+            //attribute_list.push(value);
         }
     }
 
-    if (meridla) {
+    if (false) {
         setCookie("radio_value", null);
         // sort and unique elements
-        attribute_list = sortAndUnique(attribute_list);
+        //attribute_list = sortAndUnique(attribute_list);
 
         // console.log(attribute_list);
-        showLegendForRadioList(attribute_list);
-    }
-    else if (isAttributeWithListOfValues(attributeToHighlight)) {
-        // sort and unique elements
-        attribute_list = sortAndUnique(attribute_list);
-        // console.log(attribute_list);
-
-        // now the attribute list is sorted and unique
-        showLegendForAttributeList(attribute_list);
+        //showLegendForRadioList(attribute_list);
     }
 
     reloadImage(null, null);
@@ -669,6 +685,10 @@ function urlForRoomWithAttributes(attribute, floor_id, valid_from) {
 }
 
 
+function urlForPossibleAttributes(attribute, floor_id, valid_from) {
+    return "/api/v1/possible-attributes?floor-id=" + floor_id + "&valid-from=" + valid_from + "&attribute=" + attribute;
+}
+
 function setRoomAttributeLabel(label) {
     var element = document.getElementById("room_attribute_label");
     setText(element, label);
@@ -676,24 +696,30 @@ function setRoomAttributeLabel(label) {
 
 
 function onAttributeTypeClicked(attribute_id, attribute_name, floor_id, valid_from) {
-    var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from);
-    random = (Math.random() + 1).toString(36).substring(2);
-    url += "&random=" + random;
-    console.log(url)
-    url += "&random=" + random;
     attributeToHighlight = attribute_id;
+
     // clear the 3rd column in room table
     deleteRoomAttributes();
+
     // set the new label (1st row)
     setRoomAttributeLabel(attribute_name);
-    // show legend
-    if (isAttributeWithStaticValues(attribute_id)) {
-        showLegendForAttribute(attribute_id);
-    }
+
+    var url = urlForPossibleAttributes(attribute_id, floor_id, valid_from);
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
+
+    // try display attribute legend
+    callAjax(url, onPossibleAttributesReceived);
+
     // cookies used by raster renderer
     setCookie("attribute", attribute_id);
     setCookie("floor_id", floor_id);
     setCookie("valid_from", valid_from);
+
+    // read all attributes and fill in the table
+    var url = urlForRoomWithAttributes(attribute_id, floor_id, valid_from);
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
 
     // try to set attributes (2nd... rows)
     callAjax(url, onRoomAttributesReceived);
