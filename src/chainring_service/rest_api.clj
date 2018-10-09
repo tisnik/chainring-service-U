@@ -369,9 +369,10 @@
           (println "~~~~~~~~~~~~~")
           (println sap-response)
           (println "-------------")
-          (let [cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r) "|" (:key r))))]
-        (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val)
-    )))
+          (rest-api-utils/send-response sap-response request)
+       ;   (let [cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r) "|" (:key r))))]
+       ; (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val))
+    ))
 
 
 (defn possible-attributes
