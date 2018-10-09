@@ -21,6 +21,7 @@
 (require '[clojure.data.json     :as json])
 (require '[clj-utils.utils       :as utils])
 
+(require '[chainring-service.sap-interface    :as sap-interface])
 (require '[chainring-service.http-utils       :as http-utils])
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.drawings-storage :as drawings-storage])
@@ -641,13 +642,16 @@
 
 (defn get-all-room-attributes
     [room-attrs radio-buttons]
+    (println room-attrs)
+    (println room-attrs)
+    (println room-attrs)
     (if radio-buttons
         (->> room-attrs
              vals
              (map #(:value %))
              (map #(clojure.string/split % #","))
-             (map #(clojure.string/trim %))
              flatten
+             (map clojure.string/trim)
              distinct
              sort
              (into []))
@@ -662,7 +666,7 @@
     [room-attrs attribute]
     (let [room-id    (key room-attrs)
           values-str (:value (val room-attrs))
-          values     (into #{} (clojure.string/split values-str #","))]
+          values     (into #{} (for [v (clojure.string/split values-str #",")] (clojure.string/trim v)))]
           (contains? values attribute)))
 
 
@@ -670,8 +674,8 @@
     [all-room-attributes room-attrs selected-radio-button]
     (if (seq selected-radio-button)
         (try
-            (let [i (utils/parse-int selected-radio-button)
-                  im (mod i (count palette))
+            (let [i     (utils/parse-int selected-radio-button)
+                  im    (mod i (count palette))
                   color (nth palette im)
                   attribute (nth all-room-attributes i)
                   rooms (filter #(room-with-attribute % attribute) room-attrs)]
@@ -689,8 +693,9 @@
 (defn compute-room-colors
     [all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?]
     ;(println "vvvvvvvvvvvvvvvvvvvvvv")
-    ;(println all-room-attributes)
-    ;(println selected-radio-button)
+    (println "all room attributes:" all-room-attributes)
+    (println "radion buttons: " radio-buttons?)
+    (println "radion button: " selected-radio-button)
     ;(println "^^^^^^^^^^^^^^^^^^^^^^")
     (if radio-buttons?
         (compute-room-colors-radio-buttons all-room-attributes room-attrs selected-radio-button)
@@ -706,7 +711,7 @@
         use-binary?))
 
 
-(defn room->aoid+attribute
+(defn room->aoid+attribute-
     [room]
     (let [splitted (str/split room #"\|")]
         (if (== (count splitted) 3)
@@ -715,6 +720,14 @@
              (catch NumberFormatException e
                  [(first splitted) {:value (second splitted) :key (utils/third splitted)}]))
             nil)))
+
+
+(defn room->aoid+attribute
+    [room]
+    (try
+         [(:AOID room) {:value (:value room) :key (utils/parse-int (:key room))}]
+     (catch NumberFormatException e
+         [(:AOID room) {:value (:value room) :key (:key room)}])))
 
 
 (defn decode-attrs
@@ -726,6 +739,14 @@
         (catch Exception e
             (log/error e))))
 
+
+(defn decode-from-sap
+    [rooms]
+    (try
+        (if rooms
+            (into {} (for [r rooms] (room->aoid+attribute r))))
+        (catch Exception e
+            (log/error e))))
 
 (defn read-values-to-show
     [cookies]
@@ -747,15 +768,20 @@
           values-to-show        (read-values-to-show cookies)
           selected-radio-button (-> (get cookies "radio_value") :value)
           highlight-group       (-> (get cookies "attribute") :value keyword)
+          attribute             (-> (get cookies "attribute") :value)
+          floor-id              (-> (get cookies "floor_id") :value)
+          valid-from            (-> (get cookies "valid_from") :value)
           radio-buttons?        (some #{highlight-group} [:MT :MV :ME])
-          room-attrs            (-> (get cookies "rooms") :value decode-attrs)
+          room-attrs            (if (= ignore-type "true")
+                                    []
+                                    (-> (sap-interface/call-sap-interface request "read-rooms-attribute" floor-id valid-from attribute) decode-from-sap))
+          ;room-attrs            (-> (get cookies "rooms") :value decode-attrs)
           all-room-attributes   (get-all-room-attributes room-attrs radio-buttons?)
           room-colors           (if (= ignore-type "true")
                                     nil
                                     (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?))
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
-          floor-id            (get params "floor-id")
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
@@ -776,9 +802,12 @@
           timestamp           (.toString (new java.util.Date))
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
-          (println "******** cookies **********")
+          (println "----------")
+          (println attribute)
+          (println floor-id)
+          (println valid-from)
+          (println room-attrs)
           (println cookies)
-          (println "******** cookies **********")
           (try
               (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
@@ -807,7 +836,6 @@
           configuration       (:configuration request)
           use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
-          floor-id            (get params "floor-id")
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
           width               (get params "width" 800)
