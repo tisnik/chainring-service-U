@@ -27,6 +27,7 @@
 (require '[chainring-service.drawings-storage :as drawings-storage])
 (require '[chainring-service.drawings-cache   :as drawings-cache])
 
+(def default-x-offset 50)
 
 (import java.awt.Color)
 (import java.awt.Font)
@@ -626,10 +627,13 @@
 
 (defn compute-room-color-list-of-values
     [all-room-attributes room-attribute values-to-show]
-    (let [i (.indexOf all-room-attributes room-attribute)
-          im (mod i (count palette))]
-          (if (get values-to-show im)
-              (nth palette im))))
+    (if (seq room-attribute)
+        (let [i (.indexOf all-room-attributes room-attribute)
+              im (mod i (count palette))]
+              (println room-attribute)
+              (println im)
+              (if (get values-to-show im)
+                  (nth palette im)))))
 
 ;
 ; input:
@@ -658,6 +662,7 @@
         (->> room-attrs
              vals
              (map #(:value %))
+             (filter #(seq %))
              distinct
              sort
              (into []))))
@@ -812,13 +817,13 @@
               (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
                                    width height
-                                   user-x-offset user-y-offset user-scale
+                                   (- user-x-offset default-x-offset) user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    show-grid show-boundary show-blips
                                    debug configuration timestamp)
                   (draw-into-image image drawing-id drawing-name
                                    width height
-                                   user-x-offset user-y-offset user-scale
+                                   (- user-x-offset default-x-offset) user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    use-memory-cache
                                    show-grid show-boundary show-blips
@@ -859,7 +864,7 @@
                  ;                 debug)
                   (find-room drawing-id drawing-name
                              width height
-                             user-x-offset user-y-offset user-scale
+                             (- user-x-offset default-x-offset) user-y-offset user-scale
                              coordsx-f coordsy-f use-memory-cache h-center v-center))
               (catch Exception e
                   (log/error "error during finding room!" e)))))
