@@ -450,13 +450,13 @@
           drawings       (all-drawings-for-floor floor-id)
           drawing-dates  (sort (map #(drawing-utils/filename->drawing-version % floor-id) drawings))
           selected-date  (select-nearest-date valid-from drawing-dates)
-          drawing-id     (str (floor-id->str floor-id) "_" selected-date)
+          drawing-id     (str (floor-id->str floor-id) "_" selected-date)]
 
-          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
-          room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
-          session       (assoc session :drawing-id drawing-id)]
-          (if drawing-id
-              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session)
+          (if (and drawing-id (seq drawings))
+              (let [rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+                    room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
+                    session              (assoc session :drawing-id drawing-id)]
+                   (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session))
               (no-drawing-error-page request))))
 
 
