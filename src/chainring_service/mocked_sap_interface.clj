@@ -197,3 +197,9 @@
                         :Label attribute-name
                         :key (get room selector)
                         :value (get room selector)})))
+
+(defn read-rooms-possible-attributes
+    [floor-id valid-from attribute-id]
+    (if (= attribute-id "typ")
+        ["WC" "chodba"]
+        ["voda1" "voda2" "voda3"]))
