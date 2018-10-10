@@ -372,6 +372,7 @@
     [drawing-id drawing-name use-memory-cache]
     (when-let [full-name (drawing-full-name drawing-id drawing-name)]
         (log/info "full drawing name:" full-name)
+        (log/info "memory cache: " use-memory-cache)
         (if (and drawing-id use-memory-cache)
             (let [data (or (drawings-cache/fetch drawing-id) (read-drawing-from-json full-name "Cache miss, must read JSON"))]
                  (drawings-cache/store drawing-id data)
