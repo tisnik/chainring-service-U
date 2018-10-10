@@ -59,6 +59,7 @@
 
 (defn delete
     [id]
+    (log/info (str "deleting drawing " id " from cache"))
     (swap! drawings dissoc id)
     (swap! hit-counters dissoc id))
 

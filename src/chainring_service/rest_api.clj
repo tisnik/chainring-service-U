@@ -471,7 +471,8 @@
     "Try to store the drawing onto the filesystem."
     [drawing-id store-format raw-data configuration]
     (let [directory (-> configuration :drawings :directory)]
-          (drawings-storage/store-drawing-as drawing-id directory store-format raw-data)))
+          (drawings-storage/store-drawing-as drawing-id directory store-format raw-data)
+          (drawings-cache/delete drawing-id)))
 
 
 (defn serialize-drawing
@@ -480,7 +481,7 @@
     (let [params        (:params request)
           configuration (:configuration request)
           drawing-id    (get params "drawing")
-          store-format  (get params "format")
+          store-format  (get params "format" "json")
           raw-data      (rest-api-utils/read-request-body request)]
           (cond (and drawing-id store-format raw-data)
                 (try
