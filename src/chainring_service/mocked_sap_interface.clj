@@ -200,6 +200,7 @@
 
 (defn read-rooms-possible-attributes
     [floor-id valid-from attribute-id]
-    (if (= attribute-id "typ")
-        ["WC" "chodba"]
+    (if (= attribute-id "PR")
+        ["p1" "p2" "p3"]
         ["voda1" "voda2" "voda3"]))
+
