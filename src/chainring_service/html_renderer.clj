@@ -957,6 +957,23 @@
 ))
 
 
+(defn render-error-page-sap
+    "Render an error page without a 'back' button."
+    [message]
+    (page/xhtml
+        (widgets/header "/")
+        [:body
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 "Chyba či neočekávaný stav"]
+                [:p {:class "alert alert-danger"} message]
+                [:br][:br][:br][:br]
+                (widgets/footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
+
 (defn render-store-settings-page
     "Render page with setting dialog and a 'back' button."
     []

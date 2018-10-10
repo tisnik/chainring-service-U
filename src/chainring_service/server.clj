@@ -393,6 +393,10 @@
     [request]
     (finish-processing request (html-renderer/render-error-page "Nebyl nalezen žádný výkres")))
 
+(defn no-drawing-error-page-from-sap
+    [request]
+    (finish-processing request (html-renderer/render-error-page-sap "Nebyl nalezen žádný výkres")))
+
 (defn process-drawing-page
     "Function that prepares data for the page with selected drawing."
     [request]
@@ -422,20 +426,20 @@
 (defn process-drawing-from-sap-page
     "Function that prepares data for the page with selected drawing."
     [request]
-    (let [params        (:params request)
-          session       (:session request)
-          configuration (:configuration request)
-          floor-id      (get params "floor-id")
-          drawing-id    (get params "drawing-id")
-          valid-from    (get params "valid-from")
+    (let [params         (:params request)
+          session        (:session request)
+          configuration  (:configuration request)
+          floor-id       (get params "floor-id")
+          drawing-id     (get params "drawing-id")
+          valid-from     (get params "valid-from")
           valid-from-fmt (get params "valid-from")
 
-          rooms         (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
+          rooms          (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
-          session       (assoc session :drawing-id drawing-id)]
+          session        (assoc session :drawing-id drawing-id)]
           (if drawing-id
               (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session)
-              (no-drawing-error-page request))))
+              (no-drawing-error-page-from-sap request))))
 
 
 (defn process-select-drawing-from-sap-page
@@ -457,7 +461,7 @@
                     room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
                     session              (assoc session :drawing-id drawing-id)]
                    (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session))
-              (no-drawing-error-page request))))
+              (no-drawing-error-page-from-sap request))))
 
 
 (defn get-api-part-from-uri
