@@ -51,12 +51,14 @@ body {
     font-size: 90%;
     //vertical-align: middle;
 }
+
 .tools {
     padding-top:4px;
     padding-bottom:4px;
     padding-left:8px;
     background-repeat:no-repeat;
-    background-position: right top;
+    background-position: right center;
+    height:40px;
 }
 
 .tools-spacer {

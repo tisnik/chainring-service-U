@@ -7,6 +7,7 @@ var xpos = 0;
 var ypos = 0;
 var grid = false;
 var boundary = false;
+var dimensions= false;
 var clickedX = null;
 var clickedY = null;
 var attributeToHighlight = null;
@@ -145,6 +146,11 @@ function onViewBoundaryClick() {
     reloadImage(null, null);
 }
 
+function onViewDimensionsClick() {
+    dimensions = !dimensions;
+    reloadImage(null, null);
+}
+
 function disableScrollOnMouseWheel(e) {
     if (e.preventDefault) {
         e.preventDefault();
@@ -270,6 +276,7 @@ function transformation() {
 function otherOptions() {
     return "&boundary=" + boundary +
            "&grid=" + grid +
+           "&dimensions=" + dimensions +
            "&blip=" + blipVisible;
 }
 
