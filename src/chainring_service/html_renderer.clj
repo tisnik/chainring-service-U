@@ -48,11 +48,11 @@
                 )
                 [:div {:style "height: 10ex"}]
                 [:h3 "Další volby"]
-                [:a {:href "settings" :class "btn btn-default" :role "button" :style "width:10em"} "Nastavení"]
+                ;[:a {:href "settings" :class "btn btn-default" :role "button" :style "width:10em"} "Nastavení"]
+                ;[:br]
                 [:br]
-                [:br]
-                [:a {:href "db-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav databáze"]
-                "&nbsp;"
+                ;[:a {:href "db-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav databáze"]
+                ;"&nbsp;"
                 [:a {:href "drawings-stats" :class "btn btn-default" :role "button" :style "width:10em"} "Stav výkresů"]
                 (widgets/footer)
             ] ; </div class="container">
@@ -857,7 +857,8 @@
          [:span {:class "tools-spacer"}]
          [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
          [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
-         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]]
+         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit kóty"  :onclick "onViewDimensionsClick()"} [:img {:src "icons/view_dimensions.png"}]]
          [:span {:class "tools-spacer"}]
     ])
 

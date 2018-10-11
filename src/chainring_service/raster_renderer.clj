@@ -122,16 +122,17 @@
 
 
 (defn draw-entities
-    [gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
+    [gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center show-dimensions]
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
-        (condp = (:T entity) 
-            "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
-            "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center) 
-            "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
-            "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
-                nil
-        )))
+        (if (or show-dimensions (not= "koty" (:layer entity)))
+            (condp = (:T entity) 
+                "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+                "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center) 
+                "A" (draw-arc    gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+                "T" (draw-text   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+                    nil
+        ))))
 
 (defn draw-entities-from-binary-file
     [gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset]
@@ -392,7 +393,7 @@
 (defn draw-into-image
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy use-memory-cache
-     show-grid show-boundary show-blips
+     show-grid show-boundary show-blips show-dimensions
      debug configuration timestamp]
     (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
         (if data
@@ -422,13 +423,14 @@
             (log/info "grid" show-grid grid-size grid-color)
             (log/info "boundary" show-boundary)
             (log/info "blip" show-blips blip-size blip-rgb)
+            (log/info "dimensions" show-dimensions)
             (log/info "debug" debug)
             (let [start-time (System/currentTimeMillis)]
                 (setup-graphics-context image gc width height)
                 (log/info "gc:" gc)
                 (if show-grid
                     (draw-grid gc width height grid-size grid-color))
-                (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
+                (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center show-dimensions)
                 (draw-rooms gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)
                 (if show-boundary
                     (draw-boundary gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color h-center v-center))
@@ -799,9 +801,10 @@
           coordsx             (get params "coordsx")
           coordsy             (get params "coordsy")
           ; make sure that only 'true' is converted into truth value, nil/false otherwise
-          show-grid           (-> (get params "grid" "false")     utils/parse-boolean)
-          show-boundary       (-> (get params "boundary" "false") utils/parse-boolean)
-          show-blips          (-> (get params "blip" "false")     utils/parse-boolean)
+          show-grid           (-> (get params "grid" "false")       utils/parse-boolean)
+          show-boundary       (-> (get params "boundary" "false")   utils/parse-boolean)
+          show-blips          (-> (get params "blip" "false")       utils/parse-boolean)
+          show-dimensions     (-> (get params "dimensions" "false") utils/parse-boolean)
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))
           debug               (get params "debug" nil)
@@ -820,14 +823,14 @@
                                    width height
                                    (- user-x-offset default-x-offset) user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
-                                   show-grid show-boundary show-blips
+                                   show-grid show-boundary show-blips show-dimensions
                                    debug configuration timestamp)
                   (draw-into-image image drawing-id drawing-name
                                    width height
                                    (- user-x-offset default-x-offset) user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
                                    use-memory-cache
-                                   show-grid show-boundary show-blips
+                                   show-grid show-boundary show-blips show-dimensions
                                    debug configuration timestamp))
               (catch Exception e
                   (log/error "error during drawing!" e)))
