@@ -844,21 +844,21 @@
     [sap?]
     [:td {:class "tools" :background (if sap? "" "icons/elevel-logo-small.png")}
          [:span {:class "tools-spacer"}]
-         [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:src "icons/viewmag_plus.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:src "icons/viewmag_minus.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Původní měřítko"  :onclick "onViewMag11Click()"}    [:img {:src "icons/viewmag_1_1.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Zvětšit"          :onclick "onViewMagPlusClick()"}  [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/viewmag_plus.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Zmenšit"          :onclick "onViewMagMinusClick()"} [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/viewmag_minus.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Původní měřítko"  :onclick "onViewMag11Click()"}    [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/viewmag_1_1.gif"}]] "&nbsp;"
          ;[:img {:src "icons/viewmag_fit.gif"    :border "0" :onclick "onViewMagFitClick()"}] "&nbsp;"
          [:span {:class "tools-spacer"}]
-         [:a {:href "#" :title "Posunout doleva"  :onclick "onArrowLeftClick()"}  [:img {:src "icons/arrow1l.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Posunout dolů"    :onclick "onArrowDownClick()"}  [:img {:src "icons/arrow1d.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Posunout nahoru"  :onclick "onArrowUpClick()"}    [:img {:src "icons/arrow1u.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Posunout doprava" :onclick "onArrowRightClick()"} [:img {:src "icons/arrow1r.gif"}]] "&nbsp;"
-         [:a {:href "#" :title "Vycentrovat"      :onclick "onCenterViewClick()"} [:img {:src "icons/center.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout doleva"  :onclick "onArrowLeftClick()"}    [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/arrow1l.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout dolů"    :onclick "onArrowDownClick()"}    [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/arrow1d.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout nahoru"  :onclick "onArrowUpClick()"}      [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/arrow1u.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Posunout doprava" :onclick "onArrowRightClick()"}   [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/arrow1r.gif"}]] "&nbsp;"
+         [:a {:href "#" :title "Vycentrovat"      :onclick "onCenterViewClick()"}   [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/center.gif"}]] "&nbsp;"
          [:span {:class "tools-spacer"}]
-         [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:src "icons/view_boundary.png"}]] "&nbsp;"
-         [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:src "icons/view_grid.png"}]] "&nbsp;"
-         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:src "icons/view_blip.png"}]] "&nbsp;"
-         [:a {:href "#" :title "Zobrazit kóty"  :onclick "onViewDimensionsClick()"} [:img {:src "icons/view_dimensions.png"}]]
+         [:a {:href "#" :title "Zvýraznit okraje" :onclick "onViewBoundaryClick()"} [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/view_boundary.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit mřížku"  :onclick "onViewGridClick()"}     [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/view_grid.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit bod výběru"  :onclick "onViewBlip()"}      [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/view_blip.png"}]] "&nbsp;"
+         [:a {:href "#" :title "Zobrazit kóty"  :onclick "onViewDimensionsClick()"} [:img {:style "margin:0px;padding:0px;border:none;" :src "icons/view_dimensions.png"}]]
          [:span {:class "tools-spacer"}]
     ])
 
