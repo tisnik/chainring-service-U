@@ -125,7 +125,7 @@
     [gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center show-dimensions]
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
-        (if (or show-dimensions (not= "koty" (:layer entity)))
+        (if (or show-dimensions (not= "koty" (clojure.string/lower-case (str (:layer entity)))))
             (condp = (:T entity) 
                 "L" (draw-line   gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center)
                 "C" (draw-circle gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center) 
@@ -525,14 +525,14 @@
 ])
 
 (def room-colors [
-    {:foreground (new Color 150 150 100) :background (new Color   0,  0,150,127)}
+    {:foreground (new Color 150 150 100) :background (new Color   0,  0, 90,127)}
     {:foreground (new Color 250 150 150) :background (new Color   0,150,  0,127)}
     {:foreground (new Color 100 150 200) :background (new Color   0,150,150,127)}
     {:foreground (new Color 200 140 200) :background (new Color 150,  0,  0,127)}
     {:foreground (new Color 100 200 200) :background (new Color 150,  0,150,127)}
     {:foreground (new Color 200 200 100) :background (new Color 150,150,  0,127)}
     {:foreground (new Color 250 50 50)   :background (new Color 150,150,150,127)}
-    {:foreground (new Color 250 0 0)     :background (new Color   0,  0,250,127)}
+    {:foreground (new Color 250 0 0)     :background (new Color  60, 60,255,127)}
     {:foreground (new Color 150 150 100) :background (new Color   0,250,  0,127)}
     {:foreground (new Color 250 150 150) :background (new Color   0,250,250,127)}
     {:foreground (new Color 100 150 200) :background (new Color 250,  0,  0,127)}
@@ -649,17 +649,19 @@
 
 (defn get-all-room-attributes
     [room-attrs radio-buttons]
-    (println room-attrs)
-    (println room-attrs)
+    (println "")
+    (println "Attributes")
     (println room-attrs)
     (if radio-buttons
         (->> room-attrs
              vals
              (map #(:value %))
+             (map clojure.string/trim)
              (map #(clojure.string/split % #","))
              flatten
              (map clojure.string/trim)
              distinct
+             (filter #(seq %))
              sort
              (into []))
         (->> room-attrs
@@ -702,8 +704,8 @@
     [all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?]
     ;(println "vvvvvvvvvvvvvvvvvvvvvv")
     (println "all room attributes:" all-room-attributes)
-    (println "radion buttons: " radio-buttons?)
-    (println "radion button: " selected-radio-button)
+    (println "radio buttons: " radio-buttons?)
+    (println "radio button: " selected-radio-button)
     ;(println "^^^^^^^^^^^^^^^^^^^^^^")
     (if radio-buttons?
         (compute-room-colors-radio-buttons all-room-attributes room-attrs selected-radio-button)
