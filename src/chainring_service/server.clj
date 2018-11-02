@@ -41,6 +41,7 @@
             (db-interface/get-new-user-id))))
 
 (defn finish-processing
+    "Finish processing of HTTP requests."
     (   [request response-html]
         ; use the previous session as the new one
         (finish-processing request response-html (:session request)))
@@ -57,6 +58,7 @@
 
 
 (defn current-date-formatted
+    "Return current date formatted as yyyy-MM-dd."
     []
     (let [timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
           today         (new java.util.Date)]
@@ -70,6 +72,7 @@
         (finish-processing request (html-renderer/render-front-page valid-from))))
 
 (defn process-settings-page
+    "Function that prepares data for the settings page."
     [request]
     (let [user-id (get-user-id request)]
         (finish-processing request (html-renderer/render-settings-page user-id))))
@@ -91,6 +94,7 @@
                                               (str "Chyba při zápisu do databáze: " (.getMessage e))))))))
 
 (defn process-db-statistic-page
+    "Function that prepares data for the database statistic page."
     [request]
     (let [last-update   (new java.util.Date)
           timeformatter (new java.text.SimpleDateFormat "yyyy-MM-dd")
@@ -106,6 +110,7 @@
         (finish-processing request (html-renderer/render-db-statistic-page last-update areals buildings floors rooms drawings))))
 
 (defn process-drawings-statistic-page
+    "Function that prepares data for the drawings statistic page."
     [request]
     (let [drawings-count (count (fileutils/filename-list "drawings/" ".drw"))
           json-count (count (fileutils/filename-list "drawings/" ".json"))
@@ -116,24 +121,28 @@
         (finish-processing request (html-renderer/render-drawings-statistic-page drawings-count json-count binary-count))))
 
 (defn process-drawings-list
+    "Function that prepares data for the page with list of drawings."
     [request]
     (let [drawings (fileutils/file-list "drawings/" ".drw")]
         (log/info "drawings" drawings)
         (finish-processing request (html-renderer/render-drawings-list drawings))))
 
 (defn process-json-list
+    "Function that prepares data for the page with list of drawings stored as JSON."
     [request]
     (let [jsons (fileutils/file-list "drawings/" ".json")]
         (log/info "json drawings" jsons)
         (finish-processing request (html-renderer/render-json-list jsons))))
 
 (defn process-binary-list
+    "Function that prepares data for the page with list of drawings stored in binary format"
     [request]
     (let [binaries (fileutils/file-list "drawings/" ".bin")]
         (log/info "binary drawings" binaries)
         (finish-processing request (html-renderer/render-binary-list binaries))))
 
 (defn process-test
+    "Function that prepares data for the test page."
     [request]
     (http-utils/return-file "www" "test.html" "text/html"))
 
