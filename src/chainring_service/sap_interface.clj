@@ -18,12 +18,14 @@
 (require '[chainring-service.mocked-sap-interface])
 
 (defn get-sap-namespace
+    "Return the SAP interface that is to be used - real one or mocked one."
     [mock-sap-response]
     (if mock-sap-response "chainring-service.mocked-sap-interface"
                           "chainring-service.real-sap-interface"))
 
 
 (defn call-sap-interface
+    "Call selected function from the SAP interface - real one or mocked one."
     [request function & params]
     (let [mock-sap-response (config/mock-sap-response? request)
           sap-namespace     (get-sap-namespace mock-sap-response)]
