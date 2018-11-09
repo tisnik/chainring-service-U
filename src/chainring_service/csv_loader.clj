@@ -12,6 +12,10 @@
 
 (ns chainring-service.csv-loader)
 
+
+; TODO: we don't have to use custom module,
+; we can use https://clojars.org/org.clojars.tisnik/clj-csv-loader instead
+
 (require '[clojure.data.csv :as csv])
 (require '[clojure.java.io  :as io])
 
