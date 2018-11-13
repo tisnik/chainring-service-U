@@ -10,9 +10,14 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.drawing-utils)
+(ns chainring-service.drawing-utils
+    "Various utility functions for handling drawings.
+
+    Author: Pavel Tisnovsky")
+
 
 (defn filename->drawing-version
+    "Get drawing version from a full filename for given floor ID."
     [filename floor-id]
     (let [wo-prefix (subs filename (inc (count floor-id)))
           wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
@@ -20,6 +25,7 @@
 
 
 (defn filename->valid-from
+    "Get drawing valid-from date from a full filename for a given floor ID."
     [filename floor-id]
     (let [wo-prefix (subs filename (inc (count floor-id)))
           wo-ext    (subs wo-prefix 0 (- (count wo-prefix) (count ".json")))]
@@ -27,5 +33,6 @@
 
 
 (defn filename->drawing-id
+    "Get drawing ID from a full filename."
     [filename]
     (subs filename 0 (- (count filename) (count ".json"))))
