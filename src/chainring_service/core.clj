@@ -11,7 +11,7 @@
 ;
 
 (ns chainring-service.core
-    "Core module containing the -main function and the startup code.
+    "Core module containing the -main function (entry point) and the startup code as well.
 
     Author: Pavel Tisnovsky"
     (:gen-class))
@@ -55,14 +55,14 @@
 
 (defn start-server
     "Start the HTTP server on the specified port.
-     The port is specified as string."
+     The port is to be specified as string."
     [port]
     (log/info "Starting the server at the port: " port)
     (jetty/run-jetty app {:port (read-string port)}))
 
 
 (defn show-help
-    "Display brief help on the standard output."
+    "Display brief help onto the standard output."
     [all-options]
     (println "Usage:")
     (println (:summary all-options)))
@@ -75,7 +75,7 @@
 
 
 (defn -main
-    "Entry point to the chainring service."
+    "Entry point to the Chainring service."
     [& args]
     (let [all-options  (cli/parse-opts args cli-options)
           options      (all-options :options)
