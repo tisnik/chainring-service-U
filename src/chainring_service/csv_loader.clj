@@ -20,6 +20,7 @@
 (require '[clojure.java.io  :as io])
 
 (defn csv-data->maps
+    "Convert read CSV data into proper Clojure map."
     [csv-data]
     (map zipmap
         (->> (first csv-data)  ;; header
@@ -28,12 +29,14 @@
              (rest csv-data)))
 
 (defn load-csv
+    "Load CSV specified by filename and convert it to a proper Clojure map."
     [filename]
     (with-open [reader (io/reader filename)]
         (let [data (csv/read-csv reader)]
              (doall (csv-data->maps data)))))
 
 (defn load-csv-for-all-dates
+    "Load CSV files for all dates specified."
     [dates-from data-directory filename]
     (zipmap dates-from
         (for [date dates-from]
