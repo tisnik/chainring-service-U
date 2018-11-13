@@ -95,6 +95,7 @@
             (.writeDouble fout (:yoffset scale)))))
 
 (defn write-line
+    "Write line entity geometry into the binary file."
     [fout entity]
     (.writeDouble fout (:x1 entity))
     (.writeDouble fout (:y1 entity))
@@ -102,12 +103,14 @@
     (.writeDouble fout (:y2 entity)))
 
 (defn write-circle
+    "Write circle entity geometry into the binary file."
     [fout entity]
     (.writeDouble fout (:x entity))
     (.writeDouble fout (:y entity))
     (.writeDouble fout (:r  entity)))
 
 (defn write-arc
+    "Write arc entity geometry into the binary file."
     [fout entity]
     (.writeDouble fout (:x entity))
     (.writeDouble fout (:y entity))
@@ -116,6 +119,7 @@
     (.writeDouble fout (:a2 entity)))
 
 (defn write-text
+    "Write text entity geometry + the string itself into the binary file."
     [fout entity]
     (.writeDouble fout (:x entity))
     (.writeDouble fout (:y entity))
@@ -131,6 +135,8 @@
         "C" (write-circle fout entity)
         "A" (write-arc    fout entity)
         "T" (write-text   fout entity)))
+    ; TODO: polyline
+    ; TODO: rooms
 
 (defn write-entities
     "Write all entities into the binary file."
@@ -197,12 +203,14 @@
          [created-ms created]))
 
 (defn read-counters
+    "Read all relevant counters from the binary file."
     [fin]
     [(.readInt fin)    ; entity count
      (.readInt fin)    ; rooms count
      (.readInt fin)])  ; scales
 
 (defn read-bounds
+    "Read information about drawing bounds from the binary file."
     [fin]
     {:xmin (.readDouble fin)
      :ymin (.readDouble fin)
@@ -210,6 +218,7 @@
      :ymax (.readDouble fin)})
 
 (defn read-scales
+    "Read information about scales from the binary file."
     [fin scales-count]
     (for [i (range scales-count)]
         {:width   (.readInt fin)
@@ -219,6 +228,7 @@
          :yoffset (.readDouble fin)}))
 
 (defn read-line-from-binary
+    "Read line entity geometry information from the binary file."
     [fin]
     {:T "L"
      :x1 (.readDouble fin)
@@ -227,6 +237,7 @@
      :y2 (.readDouble fin)})
 
 (defn read-circle-from-binary
+    "Read circle entity geometry information from the binary file."
     [fin]
     {:T "C"
      :x (.readDouble fin)
@@ -234,6 +245,7 @@
      :r (.readDouble fin)})
 
 (defn read-arc-from-binary
+    "Read arc entity geometry information from the binary file."
     [fin]
     {:T "A"
      :x  (.readDouble fin)
@@ -243,6 +255,7 @@
      :a2 (.readDouble fin)})
 
 (defn read-text-from-binary
+    "Read text entity geometry information + the string itself from the binary file."
     [fin]
     (let [x (.readDouble fin)
           y (.readDouble fin)
