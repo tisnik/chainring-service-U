@@ -29,7 +29,7 @@
 
 (defn update-configuration
     "Update all selected items in the configuration structure.
-     Other items are stored with string values."
+     Other items are stored as string values."
     [configuration]
     (-> configuration
         (update-in [:config        :verbose]          utils/parse-boolean)
@@ -98,12 +98,14 @@
 
 
 (defn verbose?
-    "Read the verbose settings (it is used for all outputs that does not went into logs)"
+    "Read the verbose settings. This settings is used for all outputs that does
+    not went into logs."
     [request]
     (-> request :configuration :config :verbose))
 
 
 (defn mock-sap-response?
-    "Read the settings for the mocking responses for the SAP interface."
+    "Read the settings for the programatically mocked responses for the SAP
+    interface."
     [request]
     (-> request :configuration :sap-interface :mock-responses))
