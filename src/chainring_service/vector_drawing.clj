@@ -11,7 +11,7 @@
 ;
 
 (ns chainring-service.vector-drawing
-    "REST API handlers for returning drawings stored on disk.
+    "REST API handlers for returning vector drawings stored on disk.
 
     Author: Pavel Tisnovsky")
 
