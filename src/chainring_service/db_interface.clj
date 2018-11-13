@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.db-interface
-    "Namespace that contains interface to the database.")
+    "Namespace that contains interface to the database.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[clojure.java.jdbc     :as jdbc])
@@ -21,8 +23,9 @@
 
 
 (defn simple-query-sequence
-    "Perform a simple query from the database. Sequence of results are returned.
-     Empty sequence is returned when exception is thrown from the underlying code."
+    "Perform a simple query from the database. Sequence of results is returned
+    from this function. Empty sequence is returned when exception is thrown
+    from the underlying code."
     [query operation]
     (try
         (jdbc/query db-spec/chainring-db query)
@@ -32,8 +35,9 @@
 
 
 (defn simple-query
-    "Perform a simple query from the database. Only the first result is returned.
-     Nil is returned when exception is thrown from the underlying code."
+    "Perform a simple query from the database. Only the first result is
+    returned from this function. The special value nil is returned when
+    exception is thrown from the underlying code."
     [query operation]
     (try
         (-> (jdbc/query db-spec/chainring-db query)
@@ -44,8 +48,9 @@
 
 
 (defn simple-query-selector
-    "Perform a simple query from the database. Only one value from the first result is returned.
-     Nil is returned when exception is thrown from the underlying code."
+    "Perform a simple query from the database. Only one value from the first
+    result is returned from this function. The special value nil is returned
+    when exception is thrown from the underlying code."
     [query selector operation]
     (try
         (-> (jdbc/query db-spec/chainring-db query)
@@ -57,13 +62,14 @@
 
 
 (defn read-project-id
+    "Read project ID for project AOID."
     [project-aoid]
     (simple-query-selector ["select id from project where aoid=?" project-aoid] :id "read-project-id"))
 
 
 (defn read-project-name
     "Read project name for given project ID.
-     Nil is returned in case of any error."
+     Special value nil is returned in case of any error."
     [project-id]
     (if project-id
         (simple-query-selector ["select name from project where id=?" project-id] :name "read-project-name")))
@@ -71,7 +77,7 @@
 
 (defn read-project-info
     "Read project info for given project ID.
-     Nil is returned in case of any error."
+     Special value nil is returned in case of any error."
     [project-id]
     (if project-id
         (simple-query ["select id, name, created from project where id=?" project-id] "read-project-info")))
@@ -79,7 +85,7 @@
 
 (defn read-detailed-project-info
     "Read detailed project info for given project ID.
-     Nil is returned in case of any error."
+     Special value nil is returned in case of any error."
     [project-id]
     (if project-id
         (simple-query ["select * from project where id=?" project-id] "read-detailed-project-info")))
@@ -93,6 +99,7 @@
 
 
 (defn read-building-id
+    "Read building ID for building AOID specified."
     [building-aoid]
     (simple-query-selector ["select id from building where aoid=?" building-aoid] :id "read-building-id"))
 
@@ -121,6 +128,7 @@
 
 
 (defn read-floor-id
+    "Read floor ID for floor AOID specified."
     [floor-aoid]
     (simple-query-selector ["select id from floor where aoid=?" floor-aoid] :id "read-floor-id"))
 
@@ -133,6 +141,7 @@
 
 
 (defn read-drawing-id
+    "Read drawing ID for drawing AOID specified."
     [drawing-aoid]
     (simple-query-selector ["select id from drawing where aoid=? and version=1" drawing-aoid] :id "read-drawing-id"))
 
@@ -255,7 +264,7 @@
 
 
 (defn store-user-settings
-    "Store user settings into the database."
+    "Store user settings into the database. Settings are stored under user ID."
     [user-id resolution selected-room-color pen-width]
     (if (and user-id resolution selected-room-color pen-width)
         (update-or-insert! db-spec/chainring-db :users
