@@ -10,12 +10,16 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.sap-interface)
+(ns chainring-service.sap-interface
+    "SAP interface that can be configured to use either real SAP or mocked SAP responses.
+
+    Author: Pavel Tisnovsky")
 
 (require '[chainring-service.config :as config])
 
 (require '[chainring-service.real-sap-interface])
 (require '[chainring-service.mocked-sap-interface])
+
 
 (defn get-sap-namespace
     "Return the SAP interface that is to be used - real one or mocked one."
