@@ -25,6 +25,7 @@
 
 
 (defn valid-from
+    "Help page for the valid-from field."
     []
     (page/xhtml
         (widgets/header "/")
@@ -44,6 +45,7 @@
 
 
 (defn valid-from-settings
+    "Help page for the valid-from settings."
     []
     (page/xhtml
         (widgets/header "/")
@@ -63,6 +65,7 @@
 
 
 (defn intreno
+    "Help page for AOID field."
     []
     (page/xhtml
         (widgets/header "/")
@@ -80,6 +83,7 @@
 
 
 (defn aoid-areal
+    "Help page for AOID field for areal."
     []
     (page/xhtml
         (widgets/header "/")
@@ -95,7 +99,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn name-areal
+    "Help page for name field for areal."
     []
     (page/xhtml
         (widgets/header "/")
@@ -111,7 +117,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn valid-from-areal
+    "Help page for valid-from field for areal."
     []
     (page/xhtml
         (widgets/header "/")
@@ -127,7 +135,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn valid-to-areal
+    "Help page for valid-to field for areal."
     []
     (page/xhtml
         (widgets/header "/")
@@ -143,7 +153,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn aoid-building
+    "Help page for AOID field for building"
     []
     (page/xhtml
         (widgets/header "/")
@@ -159,7 +171,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn name-building
+    "Help page for name field for building."
     []
     (page/xhtml
         (widgets/header "/")
@@ -175,7 +189,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn valid-from-building
+    "Help page for valid-from field for building"
     []
     (page/xhtml
         (widgets/header "/")
@@ -191,7 +207,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn valid-to-building
+    "Help page for valid-to field for building"
     []
     (page/xhtml
         (widgets/header "/")
@@ -207,7 +225,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn floor-count-building
+    "Help page for floor-count field."
     []
     (page/xhtml
         (widgets/header "/")
@@ -223,7 +243,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn aoid-floor
+    "Help page for AOID field for floor."
     []
     (page/xhtml
         (widgets/header "/")
@@ -239,7 +261,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn name-floor
+    "Help page for name field for floor."
     []
     (page/xhtml
         (widgets/header "/")
@@ -255,7 +279,9 @@
                 (widgets/footer)
             ]]))
 
+
 (defn drawing-count-floor
+    "Help page for floor-count floor."
     []
     (page/xhtml
         (widgets/header "/")
