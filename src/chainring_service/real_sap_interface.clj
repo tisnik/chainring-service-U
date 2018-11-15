@@ -10,7 +10,10 @@
 ;      Pavel Tisnovsky
 ;
 
-(ns chainring-service.real-sap-interface)
+(ns chainring-service.real-sap-interface
+    "Implementation of the real SAP interface.
+
+    Author: Pavel Tisnovsky")
 
 (import com.sap.conn.jco.AbapException)
 (import com.sap.conn.jco.JCoContext)
@@ -28,6 +31,7 @@
 
 
 (defn get-aoid-row-i
+    "Read values for AOID from nth row from the table returned by SAP."
     [return-table i]
     (.setRow return-table i)
     {:ID         (.getString return-table "INTRENO")
@@ -40,6 +44,7 @@
 
 
 (defn get-room-row-i
+    "Read values for any data from nth row from the table returned by SAP."
     [return-table i]
     (.setRow return-table i)
     {:AOID       (.getString return-table "AOID")
@@ -49,6 +54,7 @@
 
 
 (defn get-attribute-row-i
+    "Read values for attributes from nth row from the table returned by SAP."
     [return-table i]
     (.setRow return-table i)
     {:ID          (.getString return-table "ID")
@@ -58,6 +64,7 @@
 
 
 (defn get-attribute-value-row-i
+    "Read the pair with attribute key and attribute value from SAP table."
     [return-table i]
     (.setRow return-table i)
     {:ID          (.getString return-table "KEY")
@@ -65,6 +72,7 @@
 
 
 (defn get-sap-function
+    "Interface for the getFunction method."
     [destination function-name]
     (try
         (-> destination
@@ -76,6 +84,7 @@
 
 
 (defn get-aoids-from-sap-table
+    "Read all AOIDs from SAP table."
     [function table-name]
     (let [return-table (.getTable (.getTableParameterList function) table-name)]
           (for [i (range (.getNumRows return-table))]
@@ -83,6 +92,7 @@
 
 
 (defn date->sap
+    "Convert date (string) to be compatible with SAP."
     [date]
     (clojure.string/replace date #"-" ""))
 
@@ -124,6 +134,7 @@
 
 
 (defn read-floors
+    "Read list of floors for selected areal and building."
     [areal building-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOORS")]
@@ -141,6 +152,7 @@
 
 
 (defn read-rooms
+    "Read list of rooms for selected floor."
     [floor-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ROOMS")]
@@ -158,6 +170,7 @@
 
 
 (defn read-room-attribute-types
+    "Read all possible room attributes."
     []
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ATTRS")]
@@ -179,6 +192,7 @@
 
 
 (defn values-for-attribute
+    "Read all values for selected room attribute."
     [attribute]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_ATTR_VALUES")]
@@ -196,6 +210,7 @@
 
 
 (defn read-room-common-possible-attributes
+    "Read common possible attributes for all rooms from selected floor."
     [floor-id valid-from attribute-id]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
@@ -216,6 +231,7 @@
 
 
 (defn read-common-rooms-attribute
+    "Read common attributes for all rooms from selected floor."
     [floor-id valid-from attribute-id]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
@@ -236,6 +252,7 @@
 
 
 (defn read-room-type
+    "Read types for all rooms from selected floor."
     [floor-id valid-from]
     (let [rooms (read-rooms floor-id valid-from)]
          (for [room rooms] {:AOID  (:AOID room)
@@ -244,12 +261,14 @@
 
 
 (defn read-room-type-possible-attributes
+    "Read set of possible room types for selected floor."
     [floor-id valid-from]
     (let [rooms (read-rooms floor-id valid-from)]
          (distinct (for [room rooms] (:Function room)))))
 
 
 (defn read-rooms-attribute
+    "Read selected attribute values for all rooms from floor."
     [floor-id valid-from attribute-id]
     (if (and floor-id valid-from attribute-id)
         (if (= attribute-id "typ")
@@ -258,6 +277,7 @@
 
 
 (defn read-rooms-possible-attributes
+    "Read set of possible room attributes for selected floor."
     [floor-id valid-from attribute-id]
     (if (and floor-id valid-from attribute-id)
         (if (= attribute-id "typ")
