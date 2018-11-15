@@ -218,6 +218,7 @@
 
 
 (defn render-json-list
+    "Render list of JSON files containing drawings."
     [drawings]
     (page/xhtml
         (widgets/header "/")
@@ -244,6 +245,7 @@
 
 
 (defn render-binary-list
+    "Render list of binary files containing drawings."
     [drawings]
     (page/xhtml
         (widgets/header "/")
@@ -270,6 +272,7 @@
 
 
 (defn render-areals-list
+    "Render list of areals."
     [valid-from areals-from areals]
     (page/xhtml
         (widgets/header "/")
@@ -302,6 +305,7 @@
 
 
 (defn render-areal-info
+    "Render info about selected areal."
     [project-id project-info building-count valid-from]
     (page/xhtml
         (widgets/header "/")
@@ -339,6 +343,7 @@
 
 
 (defn get-building-name
+    "Get the name of building."
     ( [building-info]
       (if (empty? (:Label building-info))
           (:AOID building-info)
@@ -350,6 +355,7 @@
 
 
 (defn render-building-info
+    "Render information about building."
     [building-id building-info valid-from]
     (page/xhtml
         (widgets/header "/")
@@ -390,6 +396,7 @@
 
 
 (defn render-floor-info
+    "Render information about floor."
     [floor-id floor-info drawing-count valid-from]
     (page/xhtml
         (widgets/header "/")
@@ -430,6 +437,7 @@
 
 
 (defn render-drawing-info
+    "Render information about drawing."
     [drawing-id drawing-info]
     (page/xhtml
         (widgets/header "/")
@@ -458,6 +466,7 @@
 
 
 (defn render-building-list
+    "Render list of buildings for selected project (areal)."
     [project-id project-info buildings valid-from]
     (page/xhtml
         (widgets/header "/")
@@ -493,6 +502,7 @@
 
 
 (defn render-floor-list
+    "Render list of floors for selected building."
     [project-id building-id project-info building-info floors valid-from]
     (page/xhtml
         (widgets/header "/")
@@ -548,11 +558,13 @@
 
 
 (defn sap-href
+    "Construct HREF to SAP for a selected room."
     [room]
     "")
 
 
 (defn render-room-list-page
+    "Render list of rooms for the selected floor."
     [floor-id floor-info version rooms]
     (page/xhtml
         (widgets/header "/")
