@@ -11,8 +11,13 @@
 ;
 
 (ns chainring-service.http-utils
-    "Module that contains several HTTP-related utility functions.")
+    "Module that contains several HTTP-related utility functions.
 
+    Author: Pavel Tisnovsky")
+
+
+; TODO: we don't have to use custom module,
+; we can use https://clojars.org/org.clojars.tisnik/clj-http-utils instead
 
 (require '[ring.util.response    :as http-response])
 (require '[clojure.tools.logging :as log])
