@@ -99,10 +99,12 @@
 
 
 (defn back-button
+    "Render back button widget."
     []
     [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"])
 
 
 (defn help-button
+    "Render help button widget."
     [help-page-url]
     [:a {:href help-page-url} [:img {:src "icons/help.gif"}]])
