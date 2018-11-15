@@ -23,6 +23,7 @@
 
 
 (defn all-aoids
+    "Generate response with all AOIDs for the date-from with possible filtering."
     [request date-from]
     (let [start-time (rest-api-utils/current-time)
           areals     (sap-interface/call-sap-interface request "read-areals" date-from)
@@ -39,6 +40,7 @@
 
 
 (defn all-objects
+    "Generate response with all objects for the date-from with possible filtering."
     [request date-from]
     (let [start-time (rest-api-utils/current-time)
           areals     (sap-interface/call-sap-interface request "read-areals" date-from)
@@ -56,6 +58,7 @@
 
 
 (defn areals
+    "Generate response with list of areals."
     [request date-from]
     (let [start-time (rest-api-utils/current-time)
           areals     (sap-interface/call-sap-interface request "read-areals" date-from)
@@ -70,6 +73,7 @@
 
 
 (defn buildings
+    "Generate response with list of buildings with possible filtering."
     [request areal-id date-from]
     (let [start-time (rest-api-utils/current-time)
           buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id date-from)
@@ -84,6 +88,7 @@
 
 
 (defn floors
+    "Generate response with list of floors with possible filtering."
     [request areal-id building-id date-from]
     (let [start-time (rest-api-utils/current-time)
           floors     (sap-interface/call-sap-interface request "read-floors" areal-id building-id date-from)
@@ -99,6 +104,7 @@
 
 
 (defn rooms
+    "Generate response with list of rooms with possible filtering."
     [request areal-id building-id floor-id date-from]
     (let [start-time (rest-api-utils/current-time)
           rooms      (sap-interface/call-sap-interface request "read-rooms" floor-id date-from)
@@ -115,6 +121,7 @@
 
 
 (defn areal
+    "Generate response with information about selected areal."
     [request areal-id date-from]
     (let [start-time (rest-api-utils/current-time)
           areal-info (sap-interface/call-sap-interface request "read-areal-info" areal-id date-from)
@@ -130,6 +137,7 @@
 
 
 (defn building
+    "Generate response with information about selected building."
     [request building-id date-from]
     (let [start-time    (rest-api-utils/current-time)
           building-info (sap-interface/call-sap-interface request "read-building-info" building-id date-from)
@@ -145,6 +153,7 @@
 
 
 (defn floor
+    "Generate response with information about selected floor."
     [request floor-id date-from]
     (let [start-time (rest-api-utils/current-time)
           floor-info (sap-interface/call-sap-interface request "read-floor-info" floor-id date-from)
@@ -160,6 +169,7 @@
 
 
 (defn room
+    "Generate response with information about selected room."
     [request room-id date-from]
     (let [start-time (rest-api-utils/current-time)
           room-info  (sap-interface/call-sap-interface request "read-room-info" room-id date-from)
