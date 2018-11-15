@@ -114,17 +114,20 @@
 
 
 (defn get-timestamp
+    "Retrieve timestamp."
     []
     (->> (new java.util.Date)
          (.format timeformatter)))
 
 
 (defn current-time
+    "Retrieve current time."
     []
     (System/currentTimeMillis))
  
  
 (defn valid-date?
+    "Check if the given string represents valid date."
     [date]
     (or (nil? date)
         (re-matches #"\d\d\d\d-\d\d-\d\d" date)))
