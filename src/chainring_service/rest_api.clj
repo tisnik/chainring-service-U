@@ -261,6 +261,7 @@
 
 
 (defn list-all-dates-from
+    "Returns all dates (with drawings) from the selected date."
     [request uri]
     (try
         (let [start-time (System/currentTimeMillis)
@@ -278,6 +279,7 @@
 
 
 (defn nearest-date-from
+    "Returns nearest date from the specified date-from."
     [request uri]
     (try
         (let [start-time      (System/currentTimeMillis)
@@ -317,6 +319,7 @@
 
 
 (defn sap-reload-mock-data
+    "Reload all data used to mock SAP responses."
     [request uri]
     (let [params            (:params request)
           mock-sap-response (config/mock-sap-response? request)]
@@ -357,7 +360,9 @@
          (log/info params)
          (rest-api-utils/send-response params request)))
 
+
 (defn rooms-attribute
+    "Returns list of selected attribute values for all rooms on floor."
     [request uri]
     (let [params     (:params request)
           floor      (get params "floor-id")
@@ -376,6 +381,7 @@
 
 
 (defn possible-attributes
+    "Returns set of possible attribute values for all rooms on floor."
     [request uri]
     (let [params     (:params request)
           floor      (get params "floor-id")
@@ -413,6 +419,7 @@
     (let [response {:cache-utilization @drawings-cache/hit-counters
                     :cache-size (drawings-cache/cache-size)}]
          (rest-api-utils/send-response response request)))
+
 
 (defn store-drawing-raw-data
     "REST API handler for the /api/{version}/drawing-raw-data endpoint."
