@@ -11,7 +11,9 @@
 ;
 
 (ns chainring-service.raster-renderer
-    "Namespace that contains functions to render drawings into raster images.")
+    "Namespace that contains functions to render drawings into raster images.
+
+    Author: Pavel Tisnovsky")
 
 
 (require '[clojure.string        :as str])
@@ -85,6 +87,7 @@
 
 
 (defn draw-line
+    "Draw a line entity onto drawing canvas."
     [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
     (let [x1 (transform (:x1 entity) scale x-offset user-x-offset h-center)
           y1 (transform (:y1 entity) scale y-offset user-y-offset v-center)
@@ -94,6 +97,7 @@
 
 
 (defn draw-arc
+    "Draw an arc entity onto drawing canvas."
     [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
     (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
           y (transform (:y entity) scale y-offset user-y-offset v-center)
@@ -106,6 +110,7 @@
 
 
 (defn draw-circle
+    "Draw a circle entity onto drawing canvas."
     [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
     (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
           y (transform (:y entity) scale y-offset user-y-offset v-center)
@@ -114,6 +119,7 @@
 
 
 (defn draw-text
+    "Draw a text entity onto drawing canvas."
     [gc entity scale x-offset y-offset user-x-offset user-y-offset h-center v-center]
     (let [x (transform (:x entity) scale x-offset user-x-offset h-center)
           y (transform (:y entity) scale y-offset user-y-offset v-center)
@@ -122,6 +128,7 @@
 
 
 (defn draw-entities
+    "Draw all entities onto drawing canvas."
     [gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center show-dimensions]
     (.setColor gc Color/BLACK)
     (doseq [entity entities]
@@ -134,7 +141,9 @@
                     nil
         ))))
 
+
 (defn draw-entities-from-binary-file
+    "Draw all entities read from binary file."
     [gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset]
     (.setColor gc Color/BLACK)
     (doseq [i (range entity-count)]
@@ -149,6 +158,7 @@
 
 
 (defn draw-room-background
+    "Draw background of highlighted room."
     [gc xpoints ypoints background-color]
     (.setColor gc background-color)
     (.fillPolygon gc (int-array xpoints)
@@ -157,6 +167,7 @@
 
 
 (defn draw-room-contour
+    "Draw contour of highlighted room."
     [gc xpoints ypoints foreground-color]
     (.setColor gc foreground-color)
     (.drawPolygon gc (int-array xpoints)
@@ -165,12 +176,14 @@
 
 
 (defn draw-selected-room
+    "Draw background and contour of selected room."
     [gc xpoints ypoints]
     (draw-room-background gc xpoints ypoints (new Color 1.0 1.0 0.5 0.5))
     (draw-room-contour    gc xpoints ypoints Color/RED))
 
 
 (defn draw-highlighted-room
+    "Draw background and contour of highlighted room."
     [gc xpoints ypoints aoid room-colors]
     (let [colors (get room-colors aoid)
           foreground-color (:foreground colors)
@@ -180,11 +193,13 @@
 
 
 (defn draw-regular-room
+    "Draw regular room onto the canvas."
     [gc xpoints ypoints]
     (draw-room-contour gc xpoints ypoints Color/BLUE))
 
 
 (defn coords-in-polygon
+    "Test if specified coordinates lies in the polygon."
     [xpoints ypoints coordsx coordsy]
     (if (and coordsx coordsy)
         (let [polygon (new Polygon (int-array xpoints) (int-array ypoints) (count xpoints))]
@@ -192,11 +207,13 @@
 
 
 (defn selected-room?
+    "Check if the room was selected by user."
     [aoid selected]
     (= aoid selected))
 
 
 (defn highlighted-room?
+    "Check if the room was highlighted."
     [aoid room-colors]
     (get room-colors aoid nil))
 
@@ -237,6 +254,7 @@
 
 
 (defn draw-grid
+    "Draw a regular grid onto the canvas."
     [gc width height grid-size grid-color]
     (.setColor gc grid-color)
     (.setStroke gc (new BasicStroke 1))
@@ -248,6 +266,7 @@
 
 
 (defn draw-boundary
+    "Draw drawing boundary onto the canvas."
     [gc bounds scale x-offset y-offset user-x-offset user-y-offset boundary-color h-center v-center]
     (.setColor gc boundary-color)
     (.setStroke gc (new BasicStroke 1))
@@ -260,6 +279,7 @@
 
 
 (defn draw-selection-point
+    "Draw selection point onto the canvas."
     [gc x y blip-size blip-color]
     (when (and x y)
           (.setStroke gc (new BasicStroke 1))
@@ -269,12 +289,14 @@
 
 
 (defn draw-timestamp
+    "Draw a timestamp onto the canvas."
     [gc timestamp width height]
     (.setColor gc (new Color 50 50 50))
     (.drawString gc timestamp (- width 140) (- height 6)))
 
 
 (defn drawing-full-name
+    "Construct filename with drawing from either drawing id or drawing name."
     [drawing-id drawing-name]
     (if drawing-id
         (format (str "drawings/%s.json") drawing-id)
@@ -283,6 +305,7 @@
 
 
 (defn drawing-full-name-binary
+    "Construct filename with drawing stored in binary file from either drawing id or drawing name."
     [drawing-id drawing-name]
     (if drawing-id
         (format (str "drawings/%05d.bin") (Integer/parseInt drawing-id))
@@ -291,6 +314,7 @@
 
 
 (defn read-drawing-from-json
+    "Read drawing data from the JSON file."
     ( [filename]
         (let [start-time (System/currentTimeMillis)
               data       (json/read-str (slurp filename) :key-fn clojure.core/keyword)
@@ -303,11 +327,14 @@
 
 
 (defn prepare-data-stream
+    "Prepare data stream with binary drawing data."
     [filename]
     (let [fis (new java.io.FileInputStream filename)]
         (new java.io.DataInputStream fis)))
 
+
 (defn draw-into-image-from-binary-data
+    "Draw the drawing read from binary file onto the raster image."
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy show-grid show-boundary show-blips
      debug configuration]
@@ -369,7 +396,9 @@
         )
     ))
 
+
 (defn get-drawing-data
+    "Retrieve data with drawing with possible use of drawing cache."
     [drawing-id drawing-name use-memory-cache]
     (when-let [full-name (drawing-full-name drawing-id drawing-name)]
         (log/info "full drawing name:" full-name)
@@ -382,6 +411,7 @@
 
 
 (defn offset+scale
+    "Apply linear transformation: offset + scale to x and y coordinates."
     [data width height user-scale]
     (let [scale-info (get-scale data width height)
           x-offset   (:xoffset scale-info)
@@ -391,6 +421,7 @@
 
 
 (defn draw-into-image
+    "Draw the drawing onto the raster image."
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
      selected room-colors coordsx coordsy use-memory-cache
      show-grid show-boundary show-blips show-dimensions
@@ -441,7 +472,9 @@
         )
     )))
 
+
 (defn aoid+selected
+    "Return room that is selected by user (x,y) or by AOID (SAP)."
     [rooms scale x-offset user-x-offset y-offset user-y-offset
      coordsx coordsy h-center v-center]
      (for [room rooms]
@@ -457,7 +490,9 @@
                    {:aoid aoid
                     :selected nil}))))
 
+
 (defn find-room
+    "Find room that is selected by user (x,y) or by AOID (SAP)."
     [drawing-id drawing-name width height
      user-x-offset user-y-offset user-scale coordsx coordsy use-memory-cache
      h-center v-center]
@@ -495,13 +530,18 @@
 (def color9-alpha (new Color 100  80 100 127))
 (def color10-alpha (new Color 100 120 100 127))
 
+
 (defn fg-color
+    "Construct foreground color from R, G, B."
     [r g b]
     (new Color r g b))
 
+
 (defn bg-color
+    "Construct background color from R, G, B."
     [r g b]
     (new Color r g b 127))
+
 
 (def occupation-colors [
      {:foreground (fg-color 70 70 70) :background (bg-color 100 100 100)} ; Nepronajímatelné
@@ -582,7 +622,9 @@
 (def purpose-types     [1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20])
 (def cleanup-types     [100601 100602 100603 100604 100605 100606 100607 100608 100609 100610 100611])
 
+
 (defn attribute-color
+    "Compute color for specified room attribute."
     [room-attribute values-to-show values colors]
     (print room-attribute " ")
     (let [i (.indexOf values room-attribute)]
@@ -592,6 +634,7 @@
 
 
 (defn compute-room-color-static-values
+    "Compute room color for specified room attribute with static values."
     [highlight-group room-attribute-numeric-code values-to-show]
     (condp = highlight-group
         :typ        (attribute-color room-attribute-numeric-code values-to-show room-types       room-colors)
@@ -629,6 +672,7 @@
 ])
 
 (defn compute-room-color-list-of-values
+    "Compute room color for specified room attribute with list of values."
     [all-room-attributes room-attribute values-to-show]
     (if (seq room-attribute)
         (let [i (.indexOf all-room-attributes room-attribute)
@@ -648,6 +692,7 @@
 ;
 
 (defn get-all-room-attributes
+    "Retrieve all room attributes in sorted and unique format."
     [room-attrs radio-buttons]
     (println "")
     (println "Attributes")
@@ -672,7 +717,9 @@
              sort
              (into []))))
 
+
 (defn room-with-attribute
+    "Check if the room has the specified attribute."
     [room-attrs attribute]
     (let [room-id    (key room-attrs)
           values-str (:value (val room-attrs))
@@ -681,6 +728,7 @@
 
 
 (defn compute-room-colors-radio-buttons
+    "Compute room colors for radio-buttons-based attributes."
     [all-room-attributes room-attrs selected-radio-button]
     (if (seq selected-radio-button)
         (try
@@ -694,13 +742,17 @@
                  {})) ; fallback
         {}))
 
+
 (defn compute-room-colors-no-radio-buttons
+    "Compute room colors for normal attributes."
     [all-room-attributes highlight-group room-attrs values-to-show]
     (if (some #{highlight-group} [:typ :UP :UK :DS :OB :uklid :obsazenost :smlouva])
         (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (:key (val room)) values-to-show)]))
         (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (:value (val room)) values-to-show)]))))
 
+
 (defn compute-room-colors
+    "Compute room colors."
     [all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?]
     ;(println "vvvvvvvvvvvvvvvvvvvvvv")
     (println "all room attributes:" all-room-attributes)
@@ -713,6 +765,7 @@
 
 
 (defn use-binary-rendering?
+    "Check whether we can use rendering with date read from binary file."
     [use-binary? drawing-name]
     ; if drawing-name is set, use this name to decide
     ; otherwise use the settings 'use-binary?'
@@ -722,6 +775,7 @@
 
 
 (defn room->aoid+attribute-
+    "Retrieve AOID+attributes for the specified room."
     [room]
     (let [splitted (str/split room #"\|")]
         (if (== (count splitted) 3)
@@ -733,6 +787,7 @@
 
 
 (defn room->aoid+attribute
+    "Retrieve AOID+attributes for the specified room."
     [room]
     (try
          [(:AOID room) {:value (:value room) :key (utils/parse-int (:key room))}]
@@ -741,6 +796,7 @@
 
 
 (defn decode-attrs
+    "Decode room attributes."
     [rooms]
     (try
         (if rooms
@@ -751,6 +807,7 @@
 
 
 (defn decode-from-sap
+    "Decode room attributes read from SAP."
     [rooms]
     (try
         (if rooms
@@ -758,7 +815,9 @@
         (catch Exception e
             (log/error e))))
 
+
 (defn read-values-to-show
+    "Read values that needs to be shown from HTTP cookies."
     [cookies]
     (let [ks (->> cookies
                   keys
@@ -770,6 +829,7 @@
 
 
 (defn perform-raster-drawing
+    "Perform the rendering with highlighted rooms, grid, bounds, timestamp, etc."
     [request]
     (let [params                (:params request)
           configuration         (:configuration request)
@@ -842,6 +902,7 @@
 
 
 (defn perform-find-room
+    "Try to find room on (coordsx, coordsy) on drawing."
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
@@ -875,6 +936,7 @@
               (catch Exception e
                   (log/error "error during finding room!" e)))))
 
+
 (defn raster-drawing
     "REST API handler for the /api/raster-drawing endpoint."
     [request]
@@ -885,7 +947,9 @@
           (log/info "Image size (bytes): " (.available input-stream))
           (http-utils/png-response input-stream)))
 
+
 (defn find-room-on-drawing
+    "REST API handler to find room on drawing."
     [request]
     (let [start-time          (System/currentTimeMillis)
           room                (perform-find-room request)
