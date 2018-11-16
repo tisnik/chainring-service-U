@@ -10,7 +10,7 @@
 ;      Pavel Tisnovsky
 ;
 
-(defproject chainring-service "0.1.0-SNAPSHOT"
+(defproject chainring-service "1.0.0-SNAPSHOT"
     :description "FIXME: write description"
     :url "http://https://github.com/tisnik/chainring-service"
     :license {:name "Eclipse Public License"
