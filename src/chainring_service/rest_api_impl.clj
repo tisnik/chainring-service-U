@@ -1,5 +1,5 @@
 
-;  (C) Copyright 2017, 2018  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018, 2019  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,6 @@
     "Generate response with all AOIDs for the date-from with possible filtering."
     [request date-from]
     (let [start-time (rest-api-utils/current-time)
-          areals     (sap-interface/call-sap-interface request "read-areals" date-from)
           buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
           floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
           end-time   (rest-api-utils/current-time)
@@ -35,7 +34,7 @@
                       :duration   (- end-time start-time)
                       :valid-from date-from
                       :timestamp  timestamp
-                      :aoids      (concat (:areals areals) buildings floors)}]
+                      :aoids      (concat buildings floors)}]
         response))
 
 
@@ -43,7 +42,6 @@
     "Generate response with all objects for the date-from with possible filtering."
     [request date-from]
     (let [start-time (rest-api-utils/current-time)
-          areals     (sap-interface/call-sap-interface request "read-areals" date-from)
           buildings  (sap-interface/call-sap-interface request "read-buildings" nil date-from)
           floors     (sap-interface/call-sap-interface request "read-floors" nil nil date-from)
           end-time   (rest-api-utils/current-time)
@@ -51,53 +49,35 @@
           response   {:status    :ok
                       :duration  (- end-time start-time)
                       :timestamp timestamp
-                      :areals    areals
                       :buildings buildings
                       :floors    floors}]
         response))
 
 
-(defn areals
-    "Generate response with list of areals."
-    [request date-from]
-    (let [start-time (rest-api-utils/current-time)
-          areals     (sap-interface/call-sap-interface request "read-areals" date-from)
-          end-time   (rest-api-utils/current-time)
-          timestamp  (rest-api-utils/get-timestamp)
-          response   {:status    :ok
-                      :duration  (- end-time start-time)
-                      :timestamp timestamp
-                      :date-from (:date-from areals)
-                      :areals    (:areals areals)}]
-        response))
-
-
 (defn buildings
     "Generate response with list of buildings with possible filtering."
-    [request areal-id date-from]
+    [request date-from]
     (let [start-time (rest-api-utils/current-time)
-          buildings  (sap-interface/call-sap-interface request "read-buildings" areal-id date-from)
+          buildings  (sap-interface/call-sap-interface request "read-buildings" date-from)
           end-time   (rest-api-utils/current-time)
           timestamp  (rest-api-utils/get-timestamp)
           response   {:status    :ok
                       :duration  (- end-time start-time)
                       :timestamp timestamp
-                      :areal-id  areal-id
                       :buildings buildings}]
         response))
 
 
 (defn floors
     "Generate response with list of floors with possible filtering."
-    [request areal-id building-id date-from]
+    [request building-id date-from]
     (let [start-time (rest-api-utils/current-time)
-          floors     (sap-interface/call-sap-interface request "read-floors" areal-id building-id date-from)
+          floors     (sap-interface/call-sap-interface request "read-floors" building-id date-from)
           end-time   (rest-api-utils/current-time)
           timestamp  (rest-api-utils/get-timestamp)
           response   {:status       :ok
                       :duration     (- end-time start-time)
                       :timestamp    timestamp
-                      :areal-id     areal-id
                       :building-id  building-id
                       :floors       floors}]
         response))
@@ -105,7 +85,7 @@
 
 (defn rooms
     "Generate response with list of rooms with possible filtering."
-    [request areal-id building-id floor-id date-from]
+    [request building-id floor-id date-from]
     (let [start-time (rest-api-utils/current-time)
           rooms      (sap-interface/call-sap-interface request "read-rooms" floor-id date-from)
           end-time   (rest-api-utils/current-time)
@@ -113,26 +93,9 @@
           response   {:status       :ok
                       :duration     (- end-time start-time)
                       :timestamp    timestamp
-                      :areal-id     areal-id
                       :building-id  building-id
                       :floor-id     floor-id
                       :rooms        rooms}]
-        response))
-
-
-(defn areal
-    "Generate response with information about selected areal."
-    [request areal-id date-from]
-    (let [start-time (rest-api-utils/current-time)
-          areal-info (sap-interface/call-sap-interface request "read-areal-info" areal-id date-from)
-          end-time   (rest-api-utils/current-time)
-          timestamp  (rest-api-utils/get-timestamp)
-          response   {:status     :ok
-                      :areal-id   areal-id
-                      :duration   (- end-time start-time)
-                      :timestamp  timestamp
-                      :date-from  date-from
-                      :areal-info areal-info}]
         response))
 
 

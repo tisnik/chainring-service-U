@@ -1,5 +1,5 @@
 
-;  (C) Copyright 2017, 2018  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018, 2019  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -53,11 +53,9 @@
                     (str api-prefix "/liveness")       "check the liveness of the service"
                     (str api-prefix "/readiness")      "check the readiness of the service and all subcomponents"
                     (str api-prefix "/config")         "actual configuration"
-                    (str api-prefix "/areals")         "list of areals"
                     (str api-prefix "/buildings")      "list of buildings"
                     (str api-prefix "/floors")         "list of floors"
                     (str api-prefix "/rooms")          "list of rooms"
-                    (str api-prefix "/areal")          "areal metadata"
                     (str api-prefix "/building")       "building metadata"
                     (str api-prefix "/floor")          "floor metadata"
                     (str api-prefix "/drawing")        "drawing metadata"
@@ -127,29 +125,14 @@
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
-(defn list-of-areals-handler
-    "REST API handler for the /api/{version}/areals endpoint."
-    [request uri]
-    (try
-        (let [params     (:params request)
-              valid-from (get params "valid-from")]
-              (if (rest-api-utils/valid-date? valid-from)
-                  (rest-api-utils/send-response (rest-api-impl/areals request valid-from) request)
-                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
-        (catch Exception e
-            (log/error e "list-of-areals")
-            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
-
-
 (defn list-of-buildings-handler
     "REST API handler for the /api/{version}/buildings endpoint."
     [request uri]
     (try
         (let [params     (:params request)
-              areal-id   (get params "areal-id")
               valid-from (get params "valid-from")]
               (if (rest-api-utils/valid-date? valid-from)
-                  (rest-api-utils/send-response (rest-api-impl/buildings request areal-id valid-from) request)
+                  (rest-api-utils/send-response (rest-api-impl/buildings request valid-from) request)
                   (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
             (log/error e "list-of-buildings")
@@ -161,11 +144,10 @@
     [request uri]
     (try
         (let [params      (:params request)
-              areal-id    (get params "areal-id")
               building-id (get params "building-id")
               valid-from  (get params "valid-from")]
               (if (rest-api-utils/valid-date? valid-from)
-                  (rest-api-utils/send-response (rest-api-impl/floors request areal-id building-id valid-from) request)
+                  (rest-api-utils/send-response (rest-api-impl/floors request building-id valid-from) request)
                   (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
             (log/error e "list-of-floors")
@@ -177,32 +159,14 @@
     [request uri]
     (try
         (let [params      (:params request)
-              areal-id    (get params "areal-id")
               building-id (get params "building-id")
               floor-id    (get params "floor-id")
               valid-from  (get params "valid-from")]
               (if (rest-api-utils/valid-date? valid-from)
-                  (rest-api-utils/send-response (rest-api-impl/rooms request areal-id building-id floor-id valid-from) request)
+                  (rest-api-utils/send-response (rest-api-impl/rooms request building-id floor-id valid-from) request)
                   (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
         (catch Exception e
             (log/error e "list-of-rooms")
-            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
-
-
-(defn info-about-areal-handler
-    "REST API handler for /api/{version}/areal endpoint."
-    [request uri]
-    (try
-        (let [params     (:params request)
-              valid-from (get params "valid-from") 
-              areal-id   (get params "areal-id")]
-              (if (rest-api-utils/valid-date? valid-from)
-                  (if areal-id
-                      (rest-api-utils/send-response (rest-api-impl/areal request areal-id valid-from) request)
-                      (rest-api-utils/send-error-response "areal-id parameter is not specified" uri request :bad-request))
-                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
-        (catch Exception e
-            (log/error e "info-about-areal")
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 

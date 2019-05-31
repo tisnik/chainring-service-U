@@ -19,7 +19,8 @@
 (require '[clojure.tools.logging   :as log])
 (require '[clojure.pprint          :as pprint])
 
-(require '[clj-fileutils.fileutils :as fileutils])
+(require '[clj-fileutils.fileutils   :as fileutils])
+(require '[clj-http-utils.http-utils :as http-utils])
 
 (require '[chainring-service.db-interface       :as db-interface])
 (require '[chainring-service.html-renderer      :as html-renderer])
@@ -28,7 +29,6 @@
 (require '[chainring-service.raster-renderer    :as raster-renderer])
 (require '[chainring-service.vector-drawing     :as vector-drawing])
 (require '[chainring-service.config             :as config])
-(require '[chainring-service.http-utils         :as http-utils])
 (require '[chainring-service.sap-interface      :as sap-interface])
 (require '[chainring-service.real-sap-interface :as real-sap-interface])
 (require '[chainring-service.drawing-utils      :as drawing-utils])
@@ -163,42 +163,6 @@
     "Function to render proper help page."
     [request page-handler]
     (finish-processing request (page-handler)))
-
-
-(defn process-areal-list-page
-    "Function that prepares data for the page with list of areals."
-    [request]
-    (let [params        (:params request)
-          valid-from    (get params "valid-from")
-          areals-struct (sap-interface/call-sap-interface request "read-areals" valid-from)
-          areals-from   (:date-from areals-struct)
-          areals        (:areals areals-struct)]
-        (log/info "Areals" areals)
-        (log/info "Valid from" valid-from)
-        (if areals
-            (if (seq areals)
-                (finish-processing request (html-renderer/render-areals-list valid-from areals-from areals))
-                (finish-processing request (html-renderer/render-error-page "Databáze projektů (areálů) je prázdná")))
-            (finish-processing request (html-renderer/render-error-page "Chyba při přístupu k SAPu")))))
-
-
-(defn process-areal-info-page
-    "Function that prepares data for the page with information about selected areal."
-    [request]
-    (let [params         (:params request)
-          areal-id       (get params "areal-id")
-          valid-from     (get params "valid-from")
-          areal-info     (sap-interface/call-sap-interface request "read-areal-info" areal-id valid-from)
-          building-count (count (sap-interface/call-sap-interface request "read-buildings" areal-id valid-from))]
-          (log/info "Areal ID:" areal-id)
-          (log/info "Building count:" building-count)
-          (log/info "Areal info" areal-info)
-          (log/info "Valid from" valid-from)
-          (if areal-id
-              (if areal-info
-                  (finish-processing request (html-renderer/render-areal-info areal-id areal-info building-count valid-from))
-                  (finish-processing request (html-renderer/render-error-page "Nelze načíst informace o vybraném areálu")))
-              (finish-processing request (html-renderer/render-error-page "Žádný areál nebyl vybrán")))))
 
 
 (defn process-building-info-page
@@ -551,13 +515,11 @@
             ; endpoints to return list of AOIDs
             [:get  "aoids"]                  (rest-api/list-all-aoids request uri)
             [:get  "objects"]                (rest-api/list-all-objects request uri)
-            [:get  "areals"]                 (rest-api/list-of-areals-handler request uri)
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
             [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
             [:get  "rooms"]                  (rest-api/list-of-rooms-handler request uri)
 
             ; endpoints to return information about selected AOID
-            [:get  "areal"]                  (rest-api/info-about-areal-handler request uri)
             [:get  "building"]               (rest-api/info-about-building-handler request uri)
             [:get  "floor"]                  (rest-api/info-about-floor-handler request uri)
             [:get  "room"]                   (rest-api/info-about-room-handler request uri)
@@ -611,13 +573,11 @@
             "/drawings-stats"             (process-drawings-statistic-page request)
 
             ; AOID list pages
-            "/areals"                     (process-areal-list-page request)
             "/areal"                      (process-areal-page request)
             "/building"                   (process-building-page request)
             "/floor"                      (process-floor-page request)
 
             ; AOID info pages
-            "/areal-info"                 (process-areal-info-page request)
             "/building-info"              (process-building-info-page request)
             "/floor-info"                 (process-floor-info-page request)
 
