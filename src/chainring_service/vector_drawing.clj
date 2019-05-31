@@ -19,7 +19,7 @@
 (require '[ring.util.response    :as http-response])
 (require '[clojure.tools.logging :as log])
 
-(require '[chainring-service.http-utils :as http-utils])
+(require '[clj-http-utils.http-utils :as http-utils])
 
 
 (defn send-drawing
