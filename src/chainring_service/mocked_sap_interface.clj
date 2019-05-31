@@ -1,5 +1,5 @@
 ;
-;  (C) Copyright 2017, 2018  Pavel Tisnovsky
+;  (C) Copyright 2017, 2018, 2019  Pavel Tisnovsky
 ;
 ;  All rights reserved. This program and the accompanying materials
 ;  are made available under the terms of the Eclipse Public License v1.0
@@ -31,10 +31,6 @@
      "2018-09-01"])
 
 
-(def areals-data-file-name
-    "areals.csv")
-
-
 (def buildings-data-file-name
     "buildings.csv")
 
@@ -53,10 +49,6 @@
 
 (def room-attributes-file-name
     "room_attributes.csv")
-
-
-(def areals
-    (atom nil))
 
 
 (def buildings
@@ -82,7 +74,6 @@
 (defn load-all-data-files
     "Load all files with mock data."
     []
-    (reset! areals               (csv-loader/load-csv-for-all-dates dates-from data-directory areals-data-file-name))
     (reset! buildings            (csv-loader/load-csv-for-all-dates dates-from data-directory buildings-data-file-name))
     (reset! floors               (csv-loader/load-csv-for-all-dates dates-from data-directory floors-data-file-name))
     (reset! rooms                (csv-loader/load-csv-for-all-dates dates-from data-directory rooms-data-file-name))
@@ -108,7 +99,6 @@
     (log/info "Dates: " dates-from)
     (load-all-data-files)
     (let [status {:dates-from dates-from
-                  :areals     (aoids-count-per-date dates-from @areals)
                   :buildings  (aoids-count-per-date dates-from @buildings)
                   :floors     (aoids-count-per-date dates-from @floors)
                   :rooms      (aoids-count-per-date dates-from @rooms)}]
@@ -132,35 +122,17 @@
     dates-from)
 
 
-(defn read-areals
-    "Read list of areals for selected valid-from."
-    [valid-from]
-    (let [real-date-from (get-real-date-from valid-from)]
-        {:date-from real-date-from
-         :areals    (get @areals real-date-from)}))
-
-
-(defn read-areal-info
-    "Read areal info for given AOID."
-    [areal valid-from]
-    (let [real-date-from (get-real-date-from valid-from)]
-        (first (filter #(= areal (:AOID %)) (get @areals real-date-from)))))
-
-
 (defn read-buildings
-    "Read list of buildings for selected areal."
-    [areal valid-from]
+    "Read list of buildings."
+    [valid-from]
     (let [real-date-from     (get-real-date-from valid-from)
           buildings-for-date (get @buildings real-date-from)]
-        (if areal
-            (let [prefix (str areal ".")]
-                (filter #(.startsWith (:AOID %) prefix) buildings-for-date))
-            buildings-for-date)))
+            buildings-for-date))
 
 
 (defn read-building-info
     "Read building info for given AOID."
-    [areal building valid-from]
+    [building valid-from]
     (let [real-date-from     (get-real-date-from valid-from)
           buildings-for-date (get @buildings real-date-from)]
         (if building
@@ -168,29 +140,21 @@
 
 
 (defn read-floors
-    "Read list of floors for selected areal and building."
-    [areal building valid-from]
+    "Read list of floors for selected building."
+    [building valid-from]
     (let [real-date-from  (get-real-date-from valid-from)
           floors-for-date (get @floors real-date-from)]
-        (if areal
-            (if building
-                ; filter by areal-id and building-id
-                (let [prefix (str building ".")]
-                    (filter #(.startsWith (:AOID %) prefix) floors-for-date))
-                ; filter by areal-id
-                (let [prefix (str areal ".")]
-                    (filter #(.startsWith (:AOID %) prefix) floors-for-date)))
-            (if building
-                ; filter by building-id
-                (let [prefix (str building ".")]
-                    (filter #(.startsWith (:AOID %) prefix) floors-for-date))
-                ; no filtering at all
-                floors-for-date))))
+        (if building
+            ; filter by building-id
+            (let [prefix (str building ".")]
+                (filter #(.startsWith (:AOID %) prefix) floors-for-date))
+            ; no filtering at all
+            floors-for-date)))
 
 
 (defn read-floor-info
     "Read floor info for given AOID."
-    [areal building floor valid-from]
+    [building floor valid-from]
     (let [real-date-from  (get-real-date-from valid-from)
           floors-for-date (get @floors real-date-from)]
         (if floor
