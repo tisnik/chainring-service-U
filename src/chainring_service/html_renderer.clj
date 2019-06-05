@@ -1021,6 +1021,46 @@
         ] ; </body>
 ))
 
+(defn render-search-page-2
+    []
+    (page/xhtml
+        (widgets/header "/" {:include-drawing-js? true
+                             :sap-enabled false
+                             :sap-url     ""})
+        [:body {:class "body-drawing" :onload "readBuildings()"}
+            [:table {:border "1" :style "border-color:#d0d0d0"}
+                ; 1st row - the whole left toolbar + view tools on the right side
+                [:tr
+                    [:td {:rowspan 2 :style "vertical-align:top;width:15em;"}
+                        [:span "Budova"]
+                        [:span
+                            (form/drop-down {:id "buildings" :class "select" :onchange "onBuildingSelected()"} "buildings" [] "")
+                        ]
+                        [:br]
+                        [:br]
+                        [:span "Místnost"]
+                        [:span
+                            (form/drop-down {:id "rooms" :class "select" :onchange "onRoomSelected()"} "rooms" [] "")
+                        ]
+                    ]
+                    (render-view-tools false)
+                ]
+                ; 2nd row - drawing on the right side
+                [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
+                                 :src (str "/raster-drawing")
+                                 :border "0"
+                                 :onclick "onImageClick(this, event)"}]]
+                                 [:div [:strong "Vybraná místnost: "]
+                                       [:a {:id "sap_href" :name "sap_href"} [:span {:id "selected_room"} "?"]]]
+                                 [:div {:style "height:3ex"} "&nbsp;"]]]
+            ]
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                (widgets/footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
+
 (defn render-store-settings-page
     "Render page with setting dialog and a 'back' button."
     []

@@ -128,6 +128,11 @@
                 (finish-processing request (html-renderer/render-search-page valid-from for-select))
                 (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))))
 
+(defn process-search-page-2
+    "Function that prepares data for the search page."
+    [request]
+    (finish-processing request (html-renderer/render-search-page-2)))
+
 (defn process-drawings-statistic-page
     "Function that prepares data for the drawings statistic page."
     [request]
@@ -567,6 +572,7 @@
             "/db-stats"                   (process-db-statistic-page request)
             "/drawings-stats"             (process-drawings-statistic-page request)
             "/search"                     (process-search-page request)
+            "/search2"                    (process-search-page-2 request)
 
             ; AOID list pages
             "/buildings"                  (process-buildings-page request)
