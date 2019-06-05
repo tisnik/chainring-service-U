@@ -479,7 +479,7 @@
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 "Seznam budov"]
+                [:h1 "Seznam budov v areálu"]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
