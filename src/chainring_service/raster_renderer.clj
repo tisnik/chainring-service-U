@@ -451,7 +451,7 @@
      selected room-colors coordsx coordsy use-memory-cache
      show-grid show-boundary show-blips show-dimensions
      debug configuration timestamp]
-    (if (or drawing-name drawing-id)
+    (if (and (or drawing-name drawing-id) (not= drawing-id "null"))
         (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
             (if data
             (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
