@@ -18,6 +18,7 @@
 
 (require '[clojure.pprint                          :as pprint])
 (require '[clojure.tools.logging                   :as log])
+(require '[clj-fileutils.fileutils                 :as fileutils])
 
 (require '[chainring-service.db-interface          :as db-interface])
 (require '[chainring-service.config                :as config])
@@ -326,18 +327,18 @@
 
 
 (defn rooms-attribute
-    "Returns list of selected attribute values for all rooms on floor."
+    "Returns list of selected attribute values for all rooms on given floor."
     [request uri]
     (let [params     (:params request)
           floor      (get params "floor-id")
           valid-from (get params "valid-from")
           attribute  (get params "attribute")
           sap-response (sap-interface/call-sap-interface request "read-rooms-attribute" floor valid-from attribute)]
-          (println "-------------")
-          (println (count sap-response))
-          (println "~~~~~~~~~~~~~")
-          (println sap-response)
-          (println "-------------")
+          (log/info "floor:" floor)
+          (log/info "valid-from:" valid-from)
+          (log/info "attribute:" attribute)
+          (log/info "rooms from SAP:" (count sap-response))
+          (log/info "SAP response: " sap-response)
           (rest-api-utils/send-response sap-response request)
        ;   (let [cookie-val (clojure.string/join "_" (for [r sap-response] (str (:AOID r) "|" (:value r) "|" (:key r))))]
        ; (rest-api-utils/send-response-with-cookie sap-response request :ok "rooms" cookie-val))
@@ -383,6 +384,51 @@
     (let [response {:cache-utilization @drawings-cache/hit-counters
                     :cache-size (drawings-cache/cache-size)}]
          (rest-api-utils/send-response response request)))
+
+; TODO - refactor
+(defn floor-id->str
+    "Converts floor-id into string."
+    [floor-id]
+    (-> floor-id
+        (clojure.string/replace \. \_)
+        (clojure.string/replace \\ \_)
+        (clojure.string/replace \/ \_)))
+
+
+(defn read-all-drawings-for-floor
+    "Prepares list of all drawings for specified floor."
+    [floor-id]
+    (let [files     (fileutils/file-list "drawings/" ".json")
+          filenames (for [file files] (.getName file))
+          floor-id  (floor-id->str floor-id)
+          drawings  (filter #(startsWith % floor-id) filenames)]
+          (sort drawings)))
+
+
+(defn read-latest-drawing-for-floor
+    "Prepares the latest drawing for specified floor."
+    [floor-id]
+    (let [files     (fileutils/file-list "drawings/" ".json")
+          filenames (for [file files] (.getName file))
+          floor-id  (floor-id->str floor-id)
+          drawings  (filter #(startsWith % floor-id) filenames)]
+          (last drawings)))
+
+
+(defn drawings-for-floor
+    [request uri]
+    (let [params     (:params request)
+          floor-id   (get params "floor-id")
+          drawings   (read-all-drawings-for-floor floor-id)]
+          (rest-api-utils/send-response drawings request)))
+
+
+(defn latest-drawing-for-floor
+    [request uri]
+    (let [params     (:params request)
+          floor-id   (get params "floor-id")
+          drawing    (read-latest-drawing-for-floor floor-id)]
+          (rest-api-utils/send-response drawing request)))
 
 
 (defn store-drawing-raw-data
