@@ -1006,6 +1006,31 @@ function onListOfRoomsReceived(data) {
     }
 }
 
+function onListOfBuildingsReceived(data) {
+    var building_list = JSON.parse(data);
+    if (building_list === undefined || building_list == null || building_list.length <= 0) {
+        return;
+    }
+    if (building_list.status != "ok") {
+         console.log("error during API call");
+         return;
+    }
+
+    var buildings = building_list["buildings"];
+
+    var select = document.getElementById("buildings");
+    select.options.length = 0;
+    var i;
+    select.options[select.options.length] = new Option("", "", true);
+    for (i = 0; i < buildings.length; i+=1) {
+        var building = buildings[i];
+        // console.log(building["AOID"]);
+        // console.log(building["Short"]);
+        // console.log(building["Label"]);
+        select.options[select.options.length] = new Option(building["Short"] + "  " + building["Label"], building["AOID"]);
+    }
+}
+
 function onBuildingSelected() {
     building = document.getElementById("buildings").value;
     console.log("Selected building: " + building);
@@ -1020,3 +1045,14 @@ function onBuildingSelected() {
     // try display list of rooms
     callAjax(url, onListOfRoomsReceived);
 }
+
+function readBuildings() {
+    var url = "/api/v1/buildings";
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "?random=" + random;
+    console.log(url);
+
+    // try display list of buildings
+    callAjax(url, onListOfBuildingsReceived);
+}
+
