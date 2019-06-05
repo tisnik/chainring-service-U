@@ -370,6 +370,9 @@
                     [:tr [:th "Jméno"]
                          [:td (get-building-name building-info "nezadáno")]
                          [:td [:a {:href "/help_name_building"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Označení"]
+                         [:td (:Short building-info "nezadáno")]
+                         [:td [:a {:href "/help_name_building"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:th "Funkce"]
                          [:td (:Function building-info)]
                          [:td [:a {:href "/help_function_areal"} [:img {:src "icons/help.gif"}]]]]
@@ -408,7 +411,10 @@
                     [:tr [:th "ID"]
                          [:td floor-id]
                          [:td [:a {:href "/help_aoid_floor"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:th "Jméno"]
+                    [:tr [:th "Označení"]
+                         [:td (:Short floor-info)]
+                         [:td [:a {:href "/help_name_floor"} [:img {:src "icons/help.gif"}]]]]
+                    [:tr [:th "Popis"]
                          [:td (:Label floor-info)]
                          [:td [:a {:href "/help_name_floor"} [:img {:src "icons/help.gif"}]]]]
                     [:tr [:th "Začátek platnosti"]
@@ -477,12 +483,15 @@
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
+                         [:th "Označení"]
                          [:th "Budova"]
                          ;[:th "AOID"]
                          ;[:th "Vytvořeno"]
                          [:th ""]]
                     (for [building buildings]
                             [:tr [:td (:AOID building)]
+                                 [:td [:a {:href (str "building?building-id=" (:AOID building) "&valid-from=" valid-from)}
+                                          (if (empty? (:Short building)) "" (:Short building))]]
                                  [:td [:a {:href (str "building?building-id=" (:AOID building) "&valid-from=" valid-from)}
                                           (if (empty? (:Label building)) (:AOID building) (:Label building))]]
                                  [:td [:a {:title "Podrobnější informace o budově"
@@ -512,6 +521,7 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr
                         [:th "Budova"] [:td (get-building-name building-info "nezadáno")]
+                        [:th "Označení"] [:td (:Short building-info "nezadáno")]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
                                   :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
@@ -524,14 +534,15 @@
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
-                         [:th "Podlaží"]
+                         [:th "Označení"]
+                         [:th "Popis"]
                          ;[:th "AOID"]
                          ;[:th "Vytvořeno"]
                          ;[:th "Výkresů"]
                          [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:AOID floor)]
-                                 [:td [:a {:href (str "floor?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (get-building-name floor)]]
+                                 [:td [:a {:href (str "floor?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (:Short floor)]]
                                  ;[:td (:aoid floor)]
                                  ;[:td (:created floor)]
                                  ;[:td
@@ -539,6 +550,7 @@
                                  ;    [:div {:class "no-drawings"} 0]
                                  ;    [:div {:class "has-drawings"} (:drawings floor)])
                                  ;]
+                                 [:td [:a {:href (str "floor?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (get-building-name floor)]]
                                  [:td [:a {:title "Podrobnější informace o podlaží"
                                            :href (str "floor-info?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
@@ -736,6 +748,7 @@
     [rooms]
     [:table {:id "room_list" :class "table table-stripped table-hover" :style "width:auto;"}
         [:tr {:class "vcell"}
+             [:th "Označení"]
              [:th "Jméno"]
              [:th "AOID"]
              [:th {:id "room_attribute_label"} ""]
@@ -745,7 +758,9 @@
              ;[:th "Obsazení"]
         ]
         (for [room rooms]
-                [:tr {:class "vcell"} [:td (:Label room)]
+                [:tr {:class "vcell"}
+                     [:td (:Short room)]
+                     [:td (:Label room)]
                      [:td [:a {:href "#" :onclick (str "onRoomSelect('" (:AOID room) "')")} (:AOID room)]]
                      [:td {:style "white-space: pre" :id (str "room_" (:AOID room) "_attribute_value")} ""]
                      ;[:td (:valid_from room) "<br>"
@@ -964,6 +979,47 @@
         ] ; </body>
 ))
 
+
+(defn render-search-page
+    [now buildings]
+    (page/xhtml
+        (widgets/header "/" {:include-drawing-js? true
+                             :sap-enabled false
+                             :sap-url     ""})
+        [:body {:class "body-drawing"}
+            [:table {:border "1" :style "border-color:#d0d0d0"}
+                ; 1st row - the whole left toolbar + view tools on the right side
+                [:tr
+                    [:td {:rowspan 2 :style "vertical-align:top;width:15em;"}
+                        [:span "Budova"]
+                        [:span
+                            (form/drop-down {:id "buildings" :class "select" :onchange "onBuildingSelected()"} "buildings" buildings "")
+                        ]
+                        [:br]
+                        [:br]
+                        [:span "Místnost"]
+                        [:span
+                            (form/drop-down {:id "rooms" :class "select" :onchange "onRoomSelected()"} "rooms" [] "")
+                        ]
+                    ]
+                    (render-view-tools false)
+                ]
+                ; 2nd row - drawing on the right side
+                [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
+                                 :src (str "/raster-drawing")
+                                 :border "0"
+                                 :onclick "onImageClick(this, event)"}]]
+                                 [:div [:strong "Vybraná místnost: "]
+                                       [:a {:id "sap_href" :name "sap_href"} [:span {:id "selected_room"} "?"]]]
+                                 [:div {:style "height:100ex"} "&nbsp;"]]]
+            ]
+            [:div {:class "container"}
+                (widgets/navigation-bar "/")
+                [:h1 now]
+                (widgets/footer)
+            ] ; </div class="container">
+        ] ; </body>
+))
 
 (defn render-store-settings-page
     "Render page with setting dialog and a 'back' button."
