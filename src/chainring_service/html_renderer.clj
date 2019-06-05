@@ -34,7 +34,7 @@
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
                 [:h3 "Vstup do systému"]
-                (form/form-to {:name "inputForm"} [:get "/areals"]
+                (form/form-to {:name "inputForm"} [:get "/buildings"]
                     [:span "Platnost od:"] "&nbsp;"
                     [:script "new tcal ({'formname': 'inputForm', 'controlname': 'valid-from'});"]
                     [:br]
@@ -44,7 +44,7 @@
                     [:a {:href "/help_valid_from_settings"} [:img {:src "icons/help.gif"}]]
                     [:br]
                     [:br]
-                    [:button {:type "submit" :class "btn btn-success" :style "width:10em"} "Seznam areálů"]
+                    [:button {:type "submit" :class "btn btn-success" :style "width:10em"} "Seznam budov"]
                 )
                 [:div {:style "height: 10ex"}]
                 [:h3 "Další volby"]
@@ -466,15 +466,14 @@
 
 
 (defn render-building-list
-    "Render list of buildings for selected project (areal)."
-    [project-id project-info buildings valid-from]
+    "Render list of buildings."
+    [buildings valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Seznam budov v areálu '" (:AOID project-info) "'")]
-                [:h4 (:Label project-info)]
+                [:h1 "Seznam budov"]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
@@ -484,10 +483,10 @@
                          [:th ""]]
                     (for [building buildings]
                             [:tr [:td (:AOID building)]
-                                 [:td [:a {:href (str "building?areal-id=" project-id "&building-id=" (:AOID building) "&valid-from=" valid-from)}
+                                 [:td [:a {:href (str "building?building-id=" (:AOID building) "&valid-from=" valid-from)}
                                           (if (empty? (:Label building)) (:AOID building) (:Label building))]]
                                  [:td [:a {:title "Podrobnější informace o budově"
-                                           :href (str "building-info?areal-id=" project-id "&building-id=" (:AOID building) "&valid-from=" valid-from)}
+                                           :href (str "building-info?building-id=" (:AOID building) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                     [:tr [:td {:colspan 3} "&nbsp;"]]
                     [:tr [:td "Zadaná platnost od:"]
@@ -503,25 +502,19 @@
 
 (defn render-floor-list
     "Render list of floors for selected building."
-    [project-id building-id project-info building-info floors valid-from]
+    [building-id building-info floors valid-from]
     (page/xhtml
         (widgets/header "/")
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Seznam podlaží v areálu '" (:Label project-info) "' a budově '" (get-building-name building-info) "'")]
+                [:h1 (str "Seznam podlaží v budově '" (get-building-name building-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr
-                        [:th "Areál"]  [:td (:Label project-info)]
-                        [:th "AOID"]   [:td (:AOID project-info)]
-                        [:td [:a {:title "Podrobnější informace o areálu"
-                                  :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
-                                  [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (get-building-name building-info "nezadáno")]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
+                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr [:td {:colspan 5} "&nbsp;"]]
                     [:tr [:td {:colspan 2} "Zadaná platnost od:"]
@@ -538,7 +531,7 @@
                          [:th ""]]
                     (for [floor floors]
                             [:tr [:td (:AOID floor)]
-                                 [:td [:a {:href (str "floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (get-building-name floor)]]
+                                 [:td [:a {:href (str "floor?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)} (get-building-name floor)]]
                                  ;[:td (:aoid floor)]
                                  ;[:td (:created floor)]
                                  ;[:td
@@ -547,7 +540,7 @@
                                  ;    [:div {:class "has-drawings"} (:drawings floor)])
                                  ;]
                                  [:td [:a {:title "Podrobnější informace o podlaží"
-                                           :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)}
+                                           :href (str "floor-info?building-id=" building-id "&floor-id=" (:AOID floor) "&valid-from=" valid-from)}
                                            [:img {:src "icons/info.gif"}]]]])
                 ]
                 [:button {:class "btn btn-primary" :onclick "window.history.back()" :type "button"} "Zpět"]
@@ -616,31 +609,25 @@
 
 (defn render-drawing-list
     "Render page with list of drawings."
-    [project-id building-id floor-id project-info building-info floor-info valid-from drawings]
+    [building-id floor-id building-info floor-info valid-from drawings]
     (page/xhtml
         (widgets/header "/")
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 (str "Areál '" (:Label project-info) "', budova '" (get-building-name building-info) "' a podlaží '" (:Label floor-info) "'")]
+                [:h1 (str "Budova '" (get-building-name building-info) "' a podlaží '" (:Label floor-info) "'")]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr
-                        [:th "Areál"]  [:td (:Label project-info)]
-                        [:th "AOID"]   [:td (:AOID project-info)]
-                        [:td [:a {:title "Podrobnější informace o areálu"
-                                  :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
-                                  [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Budova"] [:td (get-building-name building-info)]
                         [:th "AOID"]   [:td (:AOID building-info)]
                         [:td [:a {:title "Podrobnější informace o budově"
-                                  :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
+                                  :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr
                         [:th "Podlaží"] [:td (:Label floor-info)]
                         [:th "AOID"]   [:td (:AOID floor-info)]
                         [:td [:a {:title "Podrobnější informace o podlaží"
-                                  :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
+                                  :href (str "floor-info?building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                                   [:img {:src "icons/info.gif"}]]]]
                     [:tr [:td {:colspan 5} "&nbsp;"]]
                     [:tr [:td {:colspan 2} "Zadaná platnost od:"]
@@ -652,7 +639,7 @@
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "Platnost od"] [:th "&nbsp;"]]
                     (for [drawing drawings]
-                            [:tr [:td [:a {:href (str "drawing?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from "&drawing-id=" (drawing-utils/filename->drawing-id drawing))} (drawing-utils/filename->drawing-version drawing floor-id)]]
+                            [:tr [:td [:a {:href (str "drawing?building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from "&drawing-id=" (drawing-utils/filename->drawing-id drawing))} (drawing-utils/filename->drawing-version drawing floor-id)]]
                                  [:td [:a {:title "Podrobnější informace o výkresu"
                                            :href (str "drawing-info?drawing-id=" (drawing-utils/filename->drawing-id drawing))}
                                            [:img {:src "icons/info.gif"}]]]])
@@ -705,34 +692,25 @@
 
 (defn render-floor-info-table
     "Render info for 'Vybrane podlazi'/'Selected floor'."
-    [project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from]
+    [building-id floor-id drawing-id building-info floor-info drawing-info valid-from]
     [:table {:id "room_info" :class "table table-stripped table-hover" :style "width:auto;"}
-        [:tr {:class "vcell"}
-            [:th "Areál"]  [:td (:Label project-info)]
-            [:th "AOID"]   [:td (:AOID project-info)]
-            [:td [:a {:title "Podrobnější informace o areálu"
-                      :href (str "areal-info?areal-id=" project-id "&valid-from=" valid-from)}
-                      [:img {:src "icons/info.gif"}]]]
-            [:td [:a {:title "Vybrat jiný areál"
-                      :href (str "/areals?valid-from=" valid-from)}
-                      [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Budova"] [:td (:Label building-info)]
             [:th "AOID"]   [:td (:AOID building-info)]
             [:td [:a {:title "Podrobnější informace o budově"
-                      :href (str "building-info?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
+                      :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jinou budovu"
-                      :href (str "/areal?areal-id=" project-id "&valid-from=" valid-from)}
+                      :href (str "/buildings&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Podlaží"] [:td (:Label floor-info)]
             [:th "AOID"]   [:td (:AOID floor-info)]
             [:td [:a {:title "Podrobnější informace o podlaží"
-                      :href (str "floor-info?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
+                      :href (str "floor-info?building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiné podlaží"
-                      :href (str "/building?areal-id=" project-id "&building-id=" building-id "&valid-from=" valid-from)}
+                      :href (str "/building?building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Výkres"] [:td {:colspan 3} drawing-id]
@@ -740,7 +718,7 @@
                       :href (str "drawing-info?drawing-id=" drawing-id)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jiný výkres"
-                      :href (str "/floor?areal-id=" project-id "&building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
+                      :href (str "/floor?building-id=" building-id "&floor-id=" floor-id "&valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
     ])
 
@@ -806,7 +784,7 @@
 
 (defn render-filters
     "Render room filters part."
-    [project-id building-id floor-id valid-from room-attribute-types]
+    [building-id floor-id valid-from room-attribute-types]
     [:table {:id "filters" :class ""}
         [:tr
             [:td {:style "vertical-align:top"}
@@ -877,7 +855,7 @@
 
 (defn render-drawing
     "Render page with drawing on the right side and with configurable toolbar on the left side."
-    [configuration project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from valid-from-fmt rooms room-attribute-types sap?]
+    [configuration building-id floor-id drawing-id building-info floor-info drawing-info valid-from valid-from-fmt rooms room-attribute-types sap?]
     (page/xhtml
         (if sap?
             (widgets/header "/" {:include-drawing-js? true
@@ -902,15 +880,15 @@
                         (if (not sap?)
                             [:span
                                 (render-floor-info-header)
-                                (render-floor-info-table project-id building-id floor-id drawing-id project-info building-info floor-info drawing-info valid-from)
+                                (render-floor-info-table building-id floor-id drawing-id building-info floor-info drawing-info valid-from)
                                 (render-filters-header)
-                                (render-filters project-id building-id floor-id valid-from room-attribute-types)
+                                (render-filters building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
                                 (render-room-list rooms)]
                             [:span
                                 (render-date-field floor-id valid-from-fmt)
                                 (render-filters-header)
-                                (render-filters project-id building-id floor-id valid-from room-attribute-types)
+                                (render-filters building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
                                 (render-room-list rooms)])
                     ]
