@@ -24,6 +24,7 @@
 (require '[clj-utils.utils           :as utils])
 (require '[clj-http-utils.http-utils :as http-utils])
 
+(require '[chainring-service.csv-loader       :as csv-loader])
 (require '[chainring-service.sap-interface    :as sap-interface])
 (require '[chainring-service.db-interface     :as db-interface])
 (require '[chainring-service.drawings-storage :as drawings-storage])
@@ -41,6 +42,30 @@
 (import java.io.ByteArrayOutputStream)
 (import javax.imageio.ImageIO)
 
+
+(def data-directory
+    "data")
+
+(def room-type-colors
+    (atom nil))
+
+(defn color-record->id+color
+    [record]
+    [(utils/parse-int (:Code record))
+     (new Color
+         (utils/parse-int (:Red record))
+         (utils/parse-int (:Green record))
+         (utils/parse-int (:Blue record))
+         127)])
+
+(defn load-room-type-colors
+    []
+    (let [raw-data (csv-loader/load-csv (str data-directory "/room_type_colors.csv"))
+          with-colors (for [record raw-data] (color-record->id+color record))
+          as-map (into {} with-colors)]
+        (reset! room-type-colors as-map)))
+
+(load-room-type-colors)
 
 (defn proper-scale?
     "Predicate if the given item contains expected width and height attributes."
@@ -186,7 +211,7 @@
     "Draw background and contour of highlighted room."
     [gc xpoints ypoints aoid room-colors]
     (let [colors (get room-colors aoid)
-          foreground-color (:foreground colors)
+          foreground-color (Color/BLACK);(:foreground colors)
           background-color (:background colors)]
           (draw-room-background gc xpoints ypoints background-color)
           (draw-room-contour    gc xpoints ypoints foreground-color)))
@@ -618,18 +643,32 @@
 
 (def contract-types    [1 2])
 (def occupation-types  [1 2 3 4])
-(def room-types        [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16])
+(def room-types        [100 101 140 200 202 300 304 317
+                        400 401 402
+                        500 502 503 504 505 506 507 509 510 512 513 514 515 516 517 518 519 520 521 522 523 526 527 528 529 540
+                        600 700 800 900
+                        1000 1100 1200 1201 1202 1203 1217 1220 1300 1400 1500 1600 1700 1800
+                        2000 2100 2101 2200 2201 2202 2217 2300 2301 2400 2500 2502 2503 2518 2700 2800 2900
+                        3000 3100 3110 3200 3300 3330 3331 3333 3334 3350 3400 3500 3600 3700
+                        4000 4100 4200 4300 4400 4500
+                        5000 5100 5200 5300 5400 5500 5600 5700 5800 5850 5900 5901 5902 5903 5904 5906 5917 5924 5932 5933 5950 5960 5970
+                        6000 6100 6200 6300 6301 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 8000 8100 8200 8300 8400 8500 9900 50000])
 (def purpose-types     [1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20])
 (def cleanup-types     [100601 100602 100603 100604 100605 100606 100607 100608 100609 100610 100611])
 
 
+(defn get-room-type-colors
+    "Compute color for specified room type"
+    [room-attribute values-to-show colors]
+    (if (get values-to-show room-attribute)
+        {:background (get colors room-attribute Color/GRAY)}))
+
 (defn attribute-color
     "Compute color for specified room attribute."
     [room-attribute values-to-show values colors]
-    (print room-attribute " ")
     (let [i (.indexOf values room-attribute)]
         (if (>= i 0)
-            (if (get values-to-show i)
+            (if (get values-to-show room-attribute)
                 (get colors i {:foreground Color/GRAY :background (new Color 255 255 255 127)})))))
 
 
@@ -637,7 +676,7 @@
     "Compute room color for specified room attribute with static values."
     [highlight-group room-attribute-numeric-code values-to-show]
     (condp = highlight-group
-        :typ        (attribute-color room-attribute-numeric-code values-to-show room-types       room-colors)
+        :typ        (get-room-type-colors room-attribute-numeric-code values-to-show @room-type-colors)
         :OB         (attribute-color room-attribute-numeric-code values-to-show occupation-types occupation-colors)
         :DS         (attribute-color room-attribute-numeric-code values-to-show contract-types   contract-colors)
         :UK         (attribute-color room-attribute-numeric-code values-to-show cleanup-types    cleanup-colors)
@@ -873,12 +912,13 @@
           timestamp           (.toString (new java.util.Date))
           image               (new BufferedImage width height BufferedImage/TYPE_INT_RGB)
           image-output-stream (ByteArrayOutputStream.)]
-          (println "----------")
-          (println attribute)
-          (println floor-id)
-          (println valid-from)
-          (println room-attrs)
-          (println cookies)
+          ;(println "----------")
+          ;(println "----------")
+          ;(println "attribute:  " attribute)
+          ;(println "floor id:   " floor-id)
+          ;(println "valid from: " valid-from)
+          ;(println "room attrs: " room-attrs)
+          ;(println "cookies:    " cookies)
           (try
               (if (use-binary-rendering? use-binary? drawing-name)
                   (draw-into-image-from-binary-data image drawing-id drawing-name
