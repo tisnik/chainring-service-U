@@ -117,6 +117,17 @@
         (finish-processing request (html-renderer/render-db-statistic-page last-update areals buildings floors rooms drawings))))
 
 
+(defn process-search-page
+    "Function that prepares data for the search page."
+    [request]
+    (let [valid-from    (current-date-formatted)]
+        (let [buildings (sap-interface/call-sap-interface request "read-buildings" valid-from)
+              for-select (concat [[]] (for [b buildings] [(:Short b) (:AOID b)]))]
+            (log/info "Buildings:" buildings)
+            (if (seq buildings)
+                (finish-processing request (html-renderer/render-search-page valid-from for-select))
+                (finish-processing request (html-renderer/render-error-page "Nebyla nalezena žádná budova"))))))
+
 (defn process-drawings-statistic-page
     "Function that prepares data for the drawings statistic page."
     [request]
@@ -184,6 +195,7 @@
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
 
+; TODO - refactor
 (defn floor-id->str
     "Converts floor-id into string."
     [floor-id]
@@ -512,7 +524,8 @@
 
             [:get  "rooms-attribute"]        (rest-api/rooms-attribute request uri)
             [:get  "possible-attributes"]    (rest-api/possible-attributes request uri)
-
+            [:get  "drawings-for-floor"]     (rest-api/drawings-for-floor request uri)
+            [:get  "latest-drawing-for-floor"] (rest-api/latest-drawing-for-floor request uri)
             [:get  "drawing"]                (rest-api/drawing-handler request uri)
             [:get  "drawings"]               (rest-api/all-drawings-handler request uri)
             [:put  "drawing-raw-data-to-db"] (rest-api/store-drawing-raw-data request)
@@ -553,6 +566,7 @@
             "/store-settings"             (process-store-settings-page request)
             "/db-stats"                   (process-db-statistic-page request)
             "/drawings-stats"             (process-drawings-statistic-page request)
+            "/search"                     (process-search-page request)
 
             ; AOID list pages
             "/buildings"                  (process-buildings-page request)
