@@ -10,6 +10,12 @@ body {
     padding-top: 5px;
 }
 
+.select {
+    background-color: white;
+    height:30px;
+    width:25ex;
+}
+
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-inverse .navbar-nav > .active > a:hover, 
 .navbar-inverse .navbar-nav > .active > a:focus {

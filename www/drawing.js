@@ -945,3 +945,78 @@ function showHideFilters() {
     filtersVisible = !filtersVisible;
     showHideSomething("filters", "show_hide_filters", !filtersVisible, "");
 }
+
+function onDrawingIdReceived(data) {
+    var drawing_name = JSON.parse(data);
+    console.log(drawing_name);
+    if (drawing_name === undefined || drawing_name == null) {
+        return;
+    }
+    var i = drawing_name.lastIndexOf(".")
+    raster_drawing_id = drawing_name.substring(0, i);
+    console.log(raster_drawing_id);
+    reloadImage(null, null);
+}
+
+function onRoomSelected() {
+    var building = document.getElementById("buildings").value;
+    var room = document.getElementById("rooms").value;
+
+    var i = room.lastIndexOf(".")
+    var floor = room.substring(0, i)
+    floor_id = floor;
+    version = "1";
+
+    console.log("Selected building: " + building);
+    console.log("Selected floor: " + floor);
+    console.log("Selected room: " + room);
+
+    var url = "/api/v1/latest-drawing-for-floor?floor-id=" + floor;
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
+    console.log(url);
+
+    // try display list of rooms
+    callAjax(url, onDrawingIdReceived);
+}
+
+function onListOfRoomsReceived(data) {
+    var room_list = JSON.parse(data);
+    if (room_list === undefined || room_list == null || room_list.length <= 0) {
+        return;
+    }
+    if (room_list.status != "ok") {
+         console.log("error during API call");
+         return;
+    }
+    // console.log(room_list["building-id"]);
+    // console.log(room_list["floor-id"]);
+    // console.log(room_list["rooms"]);
+    var rooms = room_list["rooms"];
+
+    var select = document.getElementById("rooms");
+    select.options.length = 0;
+    var i;
+    for (i = 0; i < rooms.length; i+=1) {
+        var room = rooms[i];
+        // console.log(room["AOID"]);
+        // console.log(room["Short"]);
+        // console.log(room["Label"]);
+        select.options[select.options.length] = new Option(room["Short"] + "  " + room["Label"], room["AOID"]);
+    }
+}
+
+function onBuildingSelected() {
+    building = document.getElementById("buildings").value;
+    console.log("Selected building: " + building);
+    if (building === undefined || building == null || building.length <= 0) {
+        return;
+    }
+    var url = "/api/v1/rooms?building-id=" + building + "&floor-id=" + building;
+    random = (Math.random() + 1).toString(36).substring(2);
+    url += "&random=" + random;
+    console.log(url);
+
+    // try display list of rooms
+    callAjax(url, onListOfRoomsReceived);
+}
