@@ -215,6 +215,7 @@ function callAjax(url, callback) {
             if (xmlHttpRequest.status == 200) {
                 callback(xmlHttpRequest.responseText);
             } else {
+                console.log(xmlHttpRequest.status);
                 window.alert("Load failed");
             }
         }
@@ -950,6 +951,8 @@ function onDrawingIdReceived(data) {
     var drawing_name = JSON.parse(data);
     console.log(drawing_name);
     if (drawing_name === undefined || drawing_name == null) {
+        raster_drawing_id = null;
+        reloadImage(null, null);
         return;
     }
     var i = drawing_name.lastIndexOf(".")
@@ -961,6 +964,7 @@ function onDrawingIdReceived(data) {
 function onRoomSelected() {
     var building = document.getElementById("buildings").value;
     var room = document.getElementById("rooms").value;
+    selectedRoom = room;
 
     var i = room.lastIndexOf(".")
     var floor = room.substring(0, i)
