@@ -197,12 +197,21 @@
         (for [room ra] {:AOID (:Room room)
                         :Label attribute-name
                         :key (get room selector)
-                        :value (get room selector)})))
+                        :value (get room :ozn)})))
 
 
 (defn read-rooms-possible-attributes
     "Read set of possible attribute values for all rooms from floor."
     [floor-id valid-from attribute-id]
-    (if (= attribute-id "PR")
-        ["p1" "p2" "p3"]
-        ["voda1" "voda2" "voda3"]))
+    [
+"sklad",
+"WC a sprcha"
+"chodba"
+"schodiště"
+"kancelář"
+"ostatní"
+"rozvodna"
+"šatna"
+"archiv"
+"jídelna"
+"kuchyňka"])
