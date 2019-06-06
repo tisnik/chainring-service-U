@@ -271,44 +271,6 @@
 ))
 
 
-(defn render-areal-info
-    "Render info about selected areal."
-    [project-id project-info building-count valid-from]
-    (page/xhtml
-        (widgets/header "/")
-        [:body
-            [:div {:class "container"}
-                (widgets/navigation-bar "/")
-                [:h1 (str "Informace o areálu '" (or (:Label project-info) (:AOID project-info)) "'")]
-                [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "AOID"]
-                         [:td project-id]
-                         [:td [:a {:href "/help_aoid_areal"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:th "Jméno"]
-                         [:td (:Label project-info)]
-                         [:td [:a {:href "/help_name_areal"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:td {:colspan 3} "&nbsp;"]]
-                    [:tr [:th "Začátek platnosti"]
-                         [:td (:valid-from project-info)]
-                         [:td [:a {:href "/help_valid_from_areal"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:th "Konec platnosti"]
-                         [:td (:valid-to project-info)]
-                         [:td [:a {:href "/help_valid_to_areal"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:td {:colspan 3} "&nbsp;"]]
-                    [:tr [:td "Interní identifikátor"]
-                         [:td (:ID project-info)]
-                         [:td [:a {:href "/help_intreno"} [:img {:src "icons/help.gif"}]]]]
-                    [:tr [:td "Zadaná platnost od:"]
-                         [:td valid-from]
-                         [:td [:a {:href "/help_valid_from"} [:img {:src "icons/help.gif"}]]]]
-                ]
-                (widgets/back-button)
-                (widgets/footer)
-            ] ; </div class="container">
-        ] ; </body>
-))
-
-
 (defn get-building-name
     "Get the name of building."
     ( [building-info]
