@@ -37,8 +37,10 @@
     {:ID         (.getString return-table "INTRENO")
      :AOID       (.getString return-table "AOID")
      :Label      (.getString return-table "XAO")
+     :Short      (.getString return-table "DOORPLT")
      :FunctionId (.getString return-table "AOFUNCTION")
      :Function   (.getString return-table "XMAOFUNCTION")
+     :ADDR       (.getString return-table "ADDR")
      :valid-from (.getString return-table "VALIDFROM")
      :valid-to   (.getString return-table "VALIDTO")})
 
@@ -49,6 +51,7 @@
     (.setRow return-table i)
     {:AOID       (.getString return-table "AOID")
      :Label      (.getString return-table "XAO")
+     :Short      (.getString return-table "DOORPLT")
      :key        (.getString return-table "KEY")
      :value      (.getString return-table "VALUE")})
 
@@ -117,13 +120,13 @@
 
 (defn read-buildings
     "Read list of buildings from SAP."
-    [areal-id valid-from]
+    [valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_BUILDINGS")]
     
           (when function
-              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
-              (.setValue (.getImportParameterList function) "I_AREA", areal-id)
+              (if valid-from
+                  (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from)))
         
               (try
                   (.execute function destination)
@@ -135,12 +138,13 @@
 
 (defn read-floors
     "Read list of floors for selected areal and building."
-    [areal building-id valid-from]
+    [building-id valid-from]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOORS")]
     
           (when function
-              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (if valid-from
+                  (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from)))
               (.setValue (.getImportParameterList function) "I_BUILDING", building-id)
         
               (try
@@ -158,8 +162,28 @@
           function    (get-sap-function destination "Z_CAD_GET_ROOMS")]
     
           (when function
-              (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
+              (if valid-from
+                  (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from)))
               (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
+        
+              (try
+                  (.execute function destination)
+                  (catch AbapException e
+                      (println e)
+                      nil))
+              (get-aoids-from-sap-table function "ET_ROOMS"))))
+
+
+(defn read-rooms-for-building
+    "Read list of rooms for selected building"
+    [building-id valid-from]
+    (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
+          function    (get-sap-function destination "Z_CAD_GET_ROOMS1")]
+    
+          (when function
+              (if valid-from
+                  (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from)))
+              (.setValue (.getImportParameterList function) "I_BUILDING", building-id)
         
               (try
                   (.execute function destination)
@@ -184,11 +208,11 @@
               (let [return-table (.getTable (.getTableParameterList function) "ET_ATTRS")]
                     (let [result (for [i (range (.getNumRows return-table))]
                                  (get-attribute-row-i return-table i))]
-                                 (conj result {:ID "typ"
-                                               :Atribut "Typ místnosti"
-                                               :radiobutton nil
-                                               :dyncolor nil
-                           }))))))
+                                 ;(conj result {:ID "typ"
+                                 ;              :Atribut "Typ místnosti"
+                                 ;              :radiobutton nil
+                                 ;              :dyncolor nil})
+                                 result)))))
 
 
 (defn values-for-attribute
@@ -235,7 +259,7 @@
     [floor-id valid-from attribute-id]
     (let [destination (JCoDestinationManager/getDestination "ABAP_AS_WITH_POOL")
           function    (get-sap-function destination "Z_CAD_GET_FLOOR_VALUES")]
-    
+
           (when function
               (.setValue (.getImportParameterList function) "I_DATE", (date->sap valid-from))
               (.setValue (.getImportParameterList function) "I_FLOOR", floor-id)
@@ -296,8 +320,8 @@
 
 (defn read-building-info
     "Read info about selected building."
-    [areal building valid-from]
-    (let [buildings (read-buildings areal valid-from)]
+    [building valid-from]
+    (let [buildings (read-buildings valid-from)]
         (if buildings
             (first (filter #(= building (:AOID %)) buildings))
             nil)))
@@ -305,8 +329,8 @@
 
 (defn read-floor-info
     "Read info about floor."
-    [areal building floor valid-from]
-    (let [floors (read-floors areal building valid-from)]
+    [building floor valid-from]
+    (let [floors (read-floors building valid-from)]
         (if floors
             (first (filter #(= floor (:AOID %)) floors))
             nil)))
