@@ -22,6 +22,8 @@ var debugMode = true;
 var selectedRoom = null;
 var counter = 0;
 
+var search_drawing = false;
+
 var palette = [
     "rgb(  0,  0,150)",
     "rgb(  0,150,  0)",
@@ -355,6 +357,9 @@ function reloadImage(clickedX, clickedY) {
     url += transformation();
     url += otherOptions();
     url += addAttributeToHighlight();
+    if (search_drawing) {
+        url += "&search-drawing=1";
+    }
     url += "&counter=" + counter;
     random = (Math.random() + 1).toString(36).substring(2);
     url += "&random=" + random;
@@ -443,6 +448,7 @@ function deleteRoomAttributes() {
 function isAttributeWithStaticValues(attribute_id) {
     if (attribute_id != null) {
         return attribute_id === "typ" ||
+               attribute_id === "FM" ||
                attribute_id === "OB" || attribute_id === "obsazenost" ||
                attribute_id === "DS" || attribute_id === "smlouva" ||
                attribute_id === "UK" || attribute_id === "uklid" ||
@@ -455,7 +461,7 @@ function isAttributeWithStaticValues(attribute_id) {
 
 function isAttributeWithListOfValues(attribute_id) {
     if (attribute_id != null) {
-        return attribute_id === "PR" || attribute_id === "projekt";
+        return attribute_id === "PR" || attribute_id === "projekt" || attribute_id === "NS";
     }
     else {
         return false;
@@ -534,6 +540,7 @@ function showLegendForAttribute(attribute, used_values) {
         html += colorBox("rgb(240,  20, 20)", "Pronajímatelné - obsazené", 2, used_values);
         html += colorBox("rgb( 20, 240, 20)", "Pronajímatelné - neobsazené", 3, used_values);
         break;
+    case "FM":
     case "typ":
         html =  colorBox("rgb(  0,  0,150)", "aula a sál", 100, used_values);
         html += colorBox("rgb(  0,150,  0)", "sál počítačový", 101, used_values);
@@ -722,6 +729,8 @@ function showLegendForAttributeList(attribute_list) {
     var element = document.getElementById("legenda");
     var html = "";
 
+    // new code: TODO test
+    attribute_list.sort();
     var i;
     for (i = 0; i < attribute_list.length; i+=1) {
         var color = palette[i % palette.length];
@@ -958,6 +967,7 @@ function onDrawingIdReceived(data) {
     var i = drawing_name.lastIndexOf(".")
     raster_drawing_id = drawing_name.substring(0, i);
     console.log(raster_drawing_id);
+    search_drawing = true;
     reloadImage(null, null);
 }
 
@@ -1041,7 +1051,7 @@ function onBuildingSelected() {
     if (building === undefined || building == null || building.length <= 0) {
         return;
     }
-    var url = "/api/v1/rooms?building-id=" + building + "&floor-id=" + building;
+    var url = "/api/v1/rooms-for-building?building-id=" + building + "&floor-id=" + building;
     random = (Math.random() + 1).toString(36).substring(2);
     url += "&random=" + random;
     console.log(url);
