@@ -188,9 +188,7 @@
           valid-from     (get params "valid-from")
           building-id    (get params "building-id")
           building-info  (sap-interface/call-sap-interface request "read-building-info" building-id valid-from)]
-          ;floor-count    (count (sap-interface/call-sap-interface request "read-floors" areal-id building-id valid-from))]
           (log/info "Building ID:" building-id)
-          ;(log/info "Floor count:" floor-count)
           (log/info "Building info" building-info)
           (log/info "Valid from" valid-from)
           (if building-id
@@ -415,7 +413,6 @@
     (let [params               (:params request)
           session              (:session request)
           configuration        (:configuration request)
-          areal-id             (get params "areal-id")
           building-id          (get params "building-id")
           floor-id             (get params "floor-id")
           drawing-id           (get params "drawing-id")
