@@ -385,70 +385,6 @@
         (new java.io.DataInputStream fis)))
 
 
-(defn draw-into-image-from-binary-data
-    "Draw the drawing read from binary file onto the raster image."
-    [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
-     selected room-colors coordsx coordsy show-grid show-boundary show-blips
-     debug configuration]
-    (if-let [full-name        (drawing-full-name-binary drawing-id drawing-name)]
-        (let [fin             (prepare-data-stream full-name)
-              gc              (.createGraphics image)
-              grid-size       (-> configuration :renderer :grid-size)
-              grid-rgb        (-> configuration :renderer :grid-color)
-              grid-color      (utils/rgb->Color grid-rgb)
-              boundary-rgb    (-> configuration :renderer :boundary-color)
-              boundary-color  (utils/rgb->Color boundary-rgb)
-              blip-size       (-> configuration :renderer :blip-size)
-              blip-rgb        (-> configuration :renderer :blip-color)
-              blip-color      (utils/rgb->Color blip-rgb)]
-            (try
-                (let [[magic-number file-version data-version] (drawings-storage/read-binary-header fin)
-                      [created-ms created]                     (drawings-storage/read-created-time fin)
-                      [entity-count rooms-count scales-count]  (drawings-storage/read-counters fin)
-                      bounds                                   (drawings-storage/read-bounds fin)
-                      scales                                   (drawings-storage/read-scales fin scales-count)
-                      scale-info (get-scale-from-scales scales width height)
-                      x-offset   (:xoffset scale-info)
-                      y-offset   (:yoffset scale-info)
-                      scale      (* (:scale scale-info) user-scale)]
-                    (assert (= magic-number 0x6502))
-                    (assert (= file-version 1))
-                    (assert (= data-version 1))
-                    (when debug
-                          (log/info "full drawing name" full-name)
-                          (log/info "magic number " (Integer/toString magic-number 16))
-                          (log/info "file version" file-version)
-                          (log/info "data version" data-version)
-                          (log/info "created (ms)" created-ms)
-                          (log/info "created (ms)" (.toString created))
-                          (log/info "entities" entity-count)
-                          (log/info "rooms"    rooms-count)
-                          (log/info "scales"   scales-count)
-                          (log/info "bounds"   bounds)
-                          (log/info "x-offset" x-offset)
-                          (log/info "y-offset" y-offset)
-                          (log/info "scale:" scale)
-                          (log/info "scale-info:" scale-info)
-                          (log/info "width" width)
-                          (log/info "height" height)
-                          (doseq [scale scales]
-                              (log/info "scale" scale)))
-                    (let [start-time (System/currentTimeMillis)]
-                        (setup-graphics-context image gc width height)
-                        (log/info "gc:" gc)
-                        (draw-entities-from-binary-file gc fin entity-count scale x-offset y-offset user-x-offset user-y-offset)
-                        (draw-rooms-from-binary gc fin rooms-count scale x-offset y-offset user-x-offset user-y-offset selected room-colors)
-                        (if (or debug show-blips)
-                            (draw-selection-point gc coordsx coordsy blip-size blip-color))
-                        (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time))
-                    ))
-                (catch Throwable e
-                    (log/error e)
-                    (.close fin)))
-        )
-    ))
-
-
 (defn get-drawing-data
     "Retrieve data with drawing with possible use of drawing cache."
     [drawing-id drawing-name use-memory-cache]
@@ -487,18 +423,8 @@
                   rooms           (:rooms data)
                   bounds          (:bounds data)
                   gc              (.createGraphics image)]
-                (log/info "width x height" width height)
-                (log/info "offset" x-offset y-offset)
-                (log/info "scale:" scale)
-                (log/info "entities:" (count entities))
-                (log/info "rooms" (count rooms))
-                (log/info "bounds" bounds)
-                (log/info "selected" selected)
-                (log/info "clicked" coordsx coordsy)
-                (log/info "debug" debug)
                 (let [start-time (System/currentTimeMillis)]
                     (setup-graphics-context image gc width height)
-                    (log/info "gc:" gc)
                     (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center false)
                     (draw-only-selected-room gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)
                     (draw-timestamp gc timestamp width height)
@@ -506,9 +432,8 @@
             )
         ))
         (let [start-time (System/currentTimeMillis)
-              gc              (.createGraphics image)]
+              gc         (.createGraphics image)]
             (setup-graphics-context image gc width height)
-            (log/info "gc:" gc)
             (draw-timestamp gc timestamp width height)
             (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
     )
@@ -877,16 +802,6 @@
         (compute-room-colors-no-radio-buttons all-room-attributes highlight-group room-attrs values-to-show)))
 
 
-(defn use-binary-rendering?
-    "Check whether we can use rendering with date read from binary file."
-    [use-binary? drawing-name]
-    ; if drawing-name is set, use this name to decide
-    ; otherwise use the settings 'use-binary?'
-    (if drawing-name
-        (.endsWith drawing-name ".bin")
-        use-binary?))
-
-
 (defn room->aoid+attribute-
     "Retrieve AOID+attributes for the specified room."
     [room]
@@ -964,7 +879,6 @@
           room-colors           (if (or search-drawing (= ignore-type "true"))
                                     nil
                                     (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?))
-          use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
@@ -995,27 +909,20 @@
           ;(println "room attrs: " room-attrs)
           ;(println "cookies:    " cookies)
           (try
-              (if (use-binary-rendering? use-binary? drawing-name)
-                  (draw-into-image-from-binary-data image drawing-id drawing-name
+              (if search-drawing
+                  (draw-into-image-search image drawing-id drawing-name
                                    width height
                                    (- user-x-offset default-x-offset) user-y-offset user-scale
                                    selected room-colors coordsx-f coordsy-f
-                                   show-grid show-boundary show-blips show-dimensions
+                                   use-memory-cache
                                    debug configuration timestamp)
-                  (if search-drawing
-                      (draw-into-image-search image drawing-id drawing-name
-                                       width height
-                                       (- user-x-offset default-x-offset) user-y-offset user-scale
-                                       selected room-colors coordsx-f coordsy-f
-                                       use-memory-cache
-                                       debug configuration timestamp)
-                      (draw-into-image image drawing-id drawing-name
-                                       width height
-                                       (- user-x-offset default-x-offset) user-y-offset user-scale
-                                       selected room-colors coordsx-f coordsy-f
-                                       use-memory-cache
-                                       show-grid show-boundary show-blips show-dimensions
-                                       debug configuration timestamp)))
+                  (draw-into-image image drawing-id drawing-name
+                                   width height
+                                   (- user-x-offset default-x-offset) user-y-offset user-scale
+                                   selected room-colors coordsx-f coordsy-f
+                                   use-memory-cache
+                                   show-grid show-boundary show-blips show-dimensions
+                                   debug configuration timestamp))
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
@@ -1028,7 +935,6 @@
     [request]
     (let [params              (:params request)
           configuration       (:configuration request)
-          use-binary?         (-> configuration :drawings :use-binary)
           use-memory-cache    (-> configuration :drawings :use-memory-cache)
           drawing-id          (get params "drawing-id")
           drawing-name        (get params "drawing-name")
@@ -1044,17 +950,10 @@
           coordsx-f           (if coordsx (Double/parseDouble coordsx))
           coordsy-f           (if coordsx (Double/parseDouble coordsy))]
           (try
-              (if (use-binary-rendering? use-binary? drawing-name)
-                  nil
-                 ;(find-room-from-binary-data image drawing-id drawing-name
-                 ;                 width height
-                 ;                 user-x-offset user-y-offset user-scale
-                 ;                 selected room-colors coordsx-f coordsy-f
-                 ;                 debug)
-                  (find-room drawing-id drawing-name
-                             width height
-                             (- user-x-offset default-x-offset) user-y-offset user-scale
-                             coordsx-f coordsy-f use-memory-cache h-center v-center))
+              (find-room drawing-id drawing-name
+                         width height
+                         (- user-x-offset default-x-offset) user-y-offset user-scale
+                         coordsx-f coordsy-f use-memory-cache h-center v-center)
               (catch Exception e
                   (log/error "error during finding room!" e)))))
 
