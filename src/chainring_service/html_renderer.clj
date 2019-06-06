@@ -127,10 +127,6 @@
         ] ; </body>
 ))
 
-; (form/text-field {:size "40" :class "form-control" :placeholder "Search for word"} "word" (str word))
-; (form/drop-down "class" ["N/A" "Noun" "Verb" "Adjective" "Adverb" "Pronoun" "Preposition" "Conjunction" "Determiner" "Exclamation"])]]
-; (form/check-box "internal")]]
-
 
 (defn render-db-statistic-page
     "Render page with database statistic."
