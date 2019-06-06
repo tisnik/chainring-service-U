@@ -479,7 +479,7 @@
         [:body
             [:div {:class "container"}
                 (widgets/navigation-bar "/")
-                [:h1 "Seznam budov v areálu"]
+                [:h1 "Seznam budov"]
                 [:br]
                 [:table {:class "table table-stripped table-hover" :style "width:auto"}
                     [:tr [:th "ID"]
@@ -713,7 +713,7 @@
                       :href (str "building-info?building-id=" building-id "&valid-from=" valid-from)}
                       [:img {:src "icons/info.gif"}]]]
             [:td [:a {:title "Vybrat jinou budovu"
-                      :href (str "/buildings&valid-from=" valid-from)}
+                      :href (str "/buildings?valid-from=" valid-from)}
                       [:img {:src "icons/view-list-tree.png"}]]]]
         [:tr {:class "vcell"}
             [:th "Podlaží"] [:td (:Label floor-info)]
