@@ -207,6 +207,13 @@
     (draw-room-contour    gc xpoints ypoints Color/RED))
 
 
+(defn draw-selected-room-red
+    "Draw background and contour of selected room."
+    [gc xpoints ypoints]
+    (draw-room-background gc xpoints ypoints (new Color 1.0 0.5 0.5 0.5))
+    (draw-room-contour    gc xpoints ypoints Color/RED))
+
+
 (defn draw-highlighted-room
     "Draw background and contour of highlighted room."
     [gc xpoints ypoints aoid room-colors]
@@ -261,12 +268,32 @@
                   :else (draw-regular-room gc transformed-xpoints transformed-ypoints)))))
 
 
+(defn draw-room-selected
+    [gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
+    (let [polygon (:polygon room)
+          aoid    (:room_id room)
+          xpoints (map first polygon)
+          ypoints (map second polygon)
+          transformed-xpoints (map #(transform % scale x-offset user-x-offset h-center) xpoints)
+          transformed-ypoints (map #(transform % scale y-offset user-y-offset v-center) ypoints)]
+          (if (seq xpoints)
+              (if (selected-room? aoid selected)
+                  (draw-selected-room-red gc transformed-xpoints transformed-ypoints)))))
+
+
 (defn draw-rooms
     "Draw all rooms that are passed via the 'rooms' parameter."
     [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
     (.setStroke gc (new BasicStroke 2))
     (doseq [room rooms]
         (draw-room gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)))
+
+(defn draw-only-selected-room
+    "Draw rooms that are passed via the 'rooms' parameter."
+    [gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center]
+    (.setStroke gc (new BasicStroke 2))
+    (doseq [room rooms]
+        (draw-room-selected gc room scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)))
 
 
 (defn draw-rooms-from-binary
@@ -445,6 +472,48 @@
           [x-offset y-offset scale]))
 
 
+(defn draw-into-image-search
+    "Draw the drawing onto the raster image."
+    [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
+     selected room-colors coordsx coordsy use-memory-cache
+     debug configuration timestamp]
+    (if (and (or drawing-name drawing-id) (not= drawing-id "null"))
+        (let [data (get-drawing-data drawing-id drawing-name use-memory-cache)]
+            (if data
+            (let [[x-offset y-offset scale] (offset+scale data width height user-scale)
+                  h-center        (/ width 2)
+                  v-center        (/ height 2)
+                  entities        (:entities data)
+                  rooms           (:rooms data)
+                  bounds          (:bounds data)
+                  gc              (.createGraphics image)]
+                (log/info "width x height" width height)
+                (log/info "offset" x-offset y-offset)
+                (log/info "scale:" scale)
+                (log/info "entities:" (count entities))
+                (log/info "rooms" (count rooms))
+                (log/info "bounds" bounds)
+                (log/info "selected" selected)
+                (log/info "clicked" coordsx coordsy)
+                (log/info "debug" debug)
+                (let [start-time (System/currentTimeMillis)]
+                    (setup-graphics-context image gc width height)
+                    (log/info "gc:" gc)
+                    (draw-entities gc entities scale x-offset y-offset user-x-offset user-y-offset h-center v-center false)
+                    (draw-only-selected-room gc rooms scale x-offset y-offset user-x-offset user-y-offset selected room-colors h-center v-center)
+                    (draw-timestamp gc timestamp width height)
+                    (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
+            )
+        ))
+        (let [start-time (System/currentTimeMillis)
+              gc              (.createGraphics image)]
+            (setup-graphics-context image gc width height)
+            (log/info "gc:" gc)
+            (draw-timestamp gc timestamp width height)
+            (log/info "Rasterization time (ms):" (- (System/currentTimeMillis) start-time)))
+    )
+)
+
 (defn draw-into-image
     "Draw the drawing onto the raster image."
     [image drawing-id drawing-name width height user-x-offset user-y-offset user-scale
@@ -469,19 +538,19 @@
                   blip-size       (-> configuration :renderer :blip-size)
                   blip-rgb        (-> configuration :renderer :blip-color)
                   blip-color      (utils/rgb->Color blip-rgb)]
-                (log/info "width x height" width height)
-                (log/info "offset" x-offset y-offset)
-                (log/info "scale:" scale)
-                (log/info "entities:" (count entities))
-                (log/info "rooms" (count rooms))
-                (log/info "bounds" bounds)
-                (log/info "selected" selected)
-                (log/info "clicked" coordsx coordsy)
-                (log/info "grid" show-grid grid-size grid-color)
-                (log/info "boundary" show-boundary)
-                (log/info "blip" show-blips blip-size blip-rgb)
-                (log/info "dimensions" show-dimensions)
-                (log/info "debug" debug)
+               ;(log/info "width x height" width height)
+               ;(log/info "offset" x-offset y-offset)
+               ;(log/info "scale:" scale)
+               ;(log/info "entities:" (count entities))
+               ;(log/info "rooms" (count rooms))
+               ;(log/info "bounds" bounds)
+               ;(log/info "selected" selected)
+               ;(log/info "clicked" coordsx coordsy)
+               ;(log/info "grid" show-grid grid-size grid-color)
+               ;(log/info "boundary" show-boundary)
+               ;(log/info "blip" show-blips blip-size blip-rgb)
+               ;(log/info "dimensions" show-dimensions)
+               ;(log/info "debug" debug)
                 (let [start-time (System/currentTimeMillis)]
                     (setup-graphics-context image gc width height)
                     (log/info "gc:" gc)
@@ -652,16 +721,6 @@
 
 (def contract-types    [1 2])
 (def occupation-types  [1 2 3 4])
-(def room-types        [100 101 140 200 202 300 304 317
-                        400 401 402
-                        500 502 503 504 505 506 507 509 510 512 513 514 515 516 517 518 519 520 521 522 523 526 527 528 529 540
-                        600 700 800 900
-                        1000 1100 1200 1201 1202 1203 1217 1220 1300 1400 1500 1600 1700 1800
-                        2000 2100 2101 2200 2201 2202 2217 2300 2301 2400 2500 2502 2503 2518 2700 2800 2900
-                        3000 3100 3110 3200 3300 3330 3331 3333 3334 3350 3400 3500 3600 3700
-                        4000 4100 4200 4300 4400 4500
-                        5000 5100 5200 5300 5400 5500 5600 5700 5800 5850 5900 5901 5902 5903 5904 5906 5917 5924 5932 5933 5950 5960 5970
-                        6000 6100 6200 6300 6301 6400 6500 6600 6700 6800 6900 7000 7100 7200 7300 7400 7500 8000 8100 8200 8300 8400 8500 9900 50000])
 (def purpose-types     [1 2 3 4 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20])
 (def cleanup-types     [100601 100602 100603 100604 100605 100606 100607 100608 100609 100610 100611])
 
@@ -684,8 +743,13 @@
 (defn compute-room-color-static-values
     "Compute room color for specified room attribute with static values."
     [highlight-group room-attribute-numeric-code values-to-show]
+    (println highlight-group)
+    (println highlight-group)
+    (println highlight-group)
+    (println highlight-group)
     (condp = highlight-group
         :typ        (get-room-type-colors room-attribute-numeric-code values-to-show @room-type-colors)
+        :FM         (get-room-type-colors room-attribute-numeric-code values-to-show @room-type-colors)
         :OB         (attribute-color room-attribute-numeric-code values-to-show occupation-types occupation-colors)
         :DS         (attribute-color room-attribute-numeric-code values-to-show contract-types   contract-colors)
         :UK         (attribute-color room-attribute-numeric-code values-to-show cleanup-types    cleanup-colors)
@@ -794,7 +858,7 @@
 (defn compute-room-colors-no-radio-buttons
     "Compute room colors for normal attributes."
     [all-room-attributes highlight-group room-attrs values-to-show]
-    (if (some #{highlight-group} [:typ :UP :UK :DS :OB :uklid :obsazenost :smlouva])
+    (if (some #{highlight-group} [:typ :FM :UP :UK :DS :OB :uklid :obsazenost :smlouva])
         (into {} (for [room room-attrs] [(key room) (compute-room-color-static-values highlight-group (:key (val room)) values-to-show)]))
         (into {} (for [room room-attrs] [(key room) (compute-room-color-list-of-values all-room-attributes (:value (val room)) values-to-show)]))))
 
@@ -803,6 +867,7 @@
     "Compute room colors."
     [all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?]
     ;(println "vvvvvvvvvvvvvvvvvvvvvv")
+    (println "group:" highlight-group)
     (println "all room attributes:" all-room-attributes)
     (println "radio buttons: " radio-buttons?)
     (println "radio button: " selected-radio-button)
@@ -883,6 +948,7 @@
           configuration         (:configuration request)
           cookies               (:cookies request)
           ignore-type           (get params "ignore-type")
+          search-drawing        (get params "search-drawing")
           values-to-show        (read-values-to-show cookies)
           selected-radio-button (-> (get cookies "radio_value") :value)
           highlight-group       (-> (get cookies "attribute") :value keyword)
@@ -890,12 +956,12 @@
           floor-id              (-> (get cookies "floor_id") :value)
           valid-from            (-> (get cookies "valid_from") :value)
           radio-buttons?        (some #{highlight-group} [:MT :MV :ME])
-          room-attrs            (if (= ignore-type "true")
+          room-attrs            (if (or search-drawing (= ignore-type "true"))
                                     []
                                     (-> (sap-interface/call-sap-interface request "read-rooms-attribute" floor-id valid-from attribute) decode-from-sap))
           ;room-attrs            (-> (get cookies "rooms") :value decode-attrs)
           all-room-attributes   (get-all-room-attributes room-attrs radio-buttons?)
-          room-colors           (if (= ignore-type "true")
+          room-colors           (if (or search-drawing (= ignore-type "true"))
                                     nil
                                     (compute-room-colors all-room-attributes highlight-group room-attrs values-to-show selected-radio-button radio-buttons?))
           use-binary?         (-> configuration :drawings :use-binary)
@@ -936,13 +1002,20 @@
                                    selected room-colors coordsx-f coordsy-f
                                    show-grid show-boundary show-blips show-dimensions
                                    debug configuration timestamp)
-                  (draw-into-image image drawing-id drawing-name
-                                   width height
-                                   (- user-x-offset default-x-offset) user-y-offset user-scale
-                                   selected room-colors coordsx-f coordsy-f
-                                   use-memory-cache
-                                   show-grid show-boundary show-blips show-dimensions
-                                   debug configuration timestamp))
+                  (if search-drawing
+                      (draw-into-image-search image drawing-id drawing-name
+                                       width height
+                                       (- user-x-offset default-x-offset) user-y-offset user-scale
+                                       selected room-colors coordsx-f coordsy-f
+                                       use-memory-cache
+                                       debug configuration timestamp)
+                      (draw-into-image image drawing-id drawing-name
+                                       width height
+                                       (- user-x-offset default-x-offset) user-y-offset user-scale
+                                       selected room-colors coordsx-f coordsy-f
+                                       use-memory-cache
+                                       show-grid show-boundary show-blips show-dimensions
+                                       debug configuration timestamp)))
               (catch Exception e
                   (log/error "error during drawing!" e)))
           ; serialize image into output stream
