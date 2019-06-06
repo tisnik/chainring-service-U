@@ -517,6 +517,7 @@
             [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
             [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
             [:get  "rooms"]                  (rest-api/list-of-rooms-handler request uri)
+            [:get  "rooms-for-building"]     (rest-api/list-rooms-for-building-handler request uri)
 
             ; endpoints to return information about selected AOID
             [:get  "building"]               (rest-api/info-about-building-handler request uri)
@@ -559,6 +560,7 @@
     (cond (.endsWith uri ".gif")  (http-utils/return-file "www" (uri->file-name uri) "image/gif")
           (.endsWith uri ".png")  (http-utils/return-file "www" (uri->file-name uri) "image/png")
           (.endsWith uri ".ico")  (http-utils/return-file "www" (uri->file-name uri) "image/x-icon")
+          (.endsWith uri ".svg")  (http-utils/return-file "www" (uri->file-name uri) "image/svg+xml")
           (.endsWith uri ".css")  (http-utils/return-file "www" (uri->file-name uri) "text/css")
           (.endsWith uri ".js")   (http-utils/return-file "www" (uri->file-name uri) "application/javascript")
           (.endsWith uri ".htm")  (http-utils/return-file "www" (uri->file-name uri) "text/html")

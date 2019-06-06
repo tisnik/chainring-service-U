@@ -98,6 +98,20 @@
                       :rooms        rooms}]
         response))
 
+(defn rooms-for-building
+    "Generate response with list of rooms with possible filtering."
+    [request building-id date-from]
+    (let [start-time (rest-api-utils/current-time)
+          rooms      (sap-interface/call-sap-interface request "read-rooms-for-building" building-id date-from)
+          end-time   (rest-api-utils/current-time)
+          timestamp  (rest-api-utils/get-timestamp)
+          response   {:status       :ok
+                      :duration     (- end-time start-time)
+                      :timestamp    timestamp
+                      :building-id  building-id
+                      :rooms        rooms}]
+        response))
+
 
 (defn building
     "Generate response with information about selected building."

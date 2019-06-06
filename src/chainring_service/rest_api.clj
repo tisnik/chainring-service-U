@@ -171,6 +171,21 @@
             (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
 
 
+(defn list-rooms-for-building-handler
+    "REST API handler for the /api/{version}/rooms endpoint."
+    [request uri]
+    (try
+        (let [params      (:params request)
+              building-id (get params "building-id")
+              valid-from  (get params "valid-from")]
+              (if (rest-api-utils/valid-date? valid-from)
+                  (rest-api-utils/send-response (rest-api-impl/rooms-for-building request building-id valid-from) request)
+                  (rest-api-utils/send-error-response-wrong-date valid-from uri request)))
+        (catch Exception e
+            (log/error e "list-of-rooms-for-building")
+            (rest-api-utils/send-error-response "SAP Access error" (str e) request :internal-server-error))))
+
+
 (defn info-about-building-handler
     "REST API handler for the /api/{version}/building endpoint."
     [request uri]
@@ -411,7 +426,7 @@
     (let [files     (fileutils/file-list "drawings/" ".json")
           filenames (for [file files] (.getName file))
           floor-id  (floor-id->str floor-id)
-          drawings  (filter #(startsWith % floor-id) filenames)]
+          drawings  (sort (filter #(startsWith % floor-id) filenames))]
           (last drawings)))
 
 
