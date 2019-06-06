@@ -271,39 +271,6 @@
 ))
 
 
-(defn render-areals-list
-    "Render list of areals."
-    [valid-from areals-from areals]
-    (page/xhtml
-        (widgets/header "/")
-        [:body
-            [:div {:class "container"}
-                (widgets/navigation-bar "/")
-                [:h1 "Seznam areálů"]
-                [:table {:class "table table-stripped table-hover" :style "width:auto"}
-                    [:tr [:th "ID"]
-                         [:th "Jméno"]
-                         [:th "Platnost od"]
-                         [:th ""]]
-                    (for [areal areals]
-                            [:tr [:td (:AOID areal)]
-                                 [:td [:a {:href (str "areal?areal-id=" (:AOID areal) "&valid-from=" valid-from)}(:Label areal)]]
-                                 [:td areals-from]
-                                 [:td [:a {:title "Podrobnější informace o areálu"
-                                           :href (str "areal-info?areal-id=" (:AOID areal) "&valid-from=" valid-from)}
-                                           [:img {:src "icons/info.gif"}]]]])
-                    [:tr [:td {:colspan 4} "&nbsp;"]]
-                    [:tr [:td {:colspan 2} "Zadaná platnost od:"]
-                         [:td valid-from]
-                         [:td (widgets/help-button "/help_valid_from")]]
-                ]
-                (widgets/back-button)
-                (widgets/footer)
-            ] ; </div class="container">
-        ] ; </body>
-))
-
-
 (defn render-areal-info
     "Render info about selected areal."
     [project-id project-info building-count valid-from]
