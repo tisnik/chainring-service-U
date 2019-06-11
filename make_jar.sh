@@ -13,5 +13,5 @@
 #
 
 lein uberjar
-mv target/uberjar/chainring-service-0.1.0-SNAPSHOT-standalone.jar chainring.jar
+mv target/uberjar/chainring-service-1.0.0-SNAPSHOT-standalone.jar chainring.jar
 
