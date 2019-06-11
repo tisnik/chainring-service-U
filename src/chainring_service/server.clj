@@ -468,7 +468,7 @@
               (let [rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
                     room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
                     session              (assoc session :drawing-id drawing-id)]
-                   (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session))
+                   (finish-processing request (html-renderer/render-drawing configuration nil floor-id drawing-id nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session))
               (no-drawing-error-page-from-sap request))))
 
 
