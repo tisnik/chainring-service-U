@@ -16,6 +16,10 @@
     Author: Pavel Tisnovsky")
 
 
+(require '[clj-fileutils.fileutils  :as fileutils])
+(use     '[clj-utils.utils])
+
+
 (defn filename->drawing-version
     "Get drawing version from a full filename for given floor ID."
     [filename floor-id]
@@ -36,3 +40,24 @@
     "Get drawing ID from a full filename."
     [filename]
     (subs filename 0 (- (count filename) (count ".json"))))
+
+
+(defn floor-id->str
+    "Converts floor-id into string."
+    [floor-id]
+    (-> floor-id
+        (clojure.string/replace \. \_)
+        (clojure.string/replace \\ \_)
+        (clojure.string/replace \/ \_)))
+
+
+(defn read-latest-drawing-for-floor
+    "Prepares the latest drawing for specified floor."
+    [floor-id]
+    (if floor-id
+        (let [files     (fileutils/file-list "drawings/" ".json")
+              filenames (for [file files] (.getName file))
+              floor-id  (floor-id->str floor-id)
+              drawings  (sort (filter #(startsWith % floor-id) filenames))]
+              (last drawings))
+        nil))

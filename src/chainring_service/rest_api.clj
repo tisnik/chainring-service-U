@@ -24,6 +24,7 @@
 (require '[chainring-service.config                :as config])
 (require '[chainring-service.drawings-storage      :as drawings-storage])
 (require '[chainring-service.drawings-cache        :as drawings-cache])
+(require '[chainring-service.drawing-utils         :as drawing-utils])
 
 (require '[chainring-service.sap-interface         :as sap-interface])
 (require '[chainring-service.mocked-sap-interface  :as mocked-sap-interface])
@@ -400,22 +401,13 @@
                     :cache-size (drawings-cache/cache-size)}]
          (rest-api-utils/send-response response request)))
 
-; TODO - refactor
-(defn floor-id->str
-    "Converts floor-id into string."
-    [floor-id]
-    (-> floor-id
-        (clojure.string/replace \. \_)
-        (clojure.string/replace \\ \_)
-        (clojure.string/replace \/ \_)))
-
 
 (defn read-all-drawings-for-floor
     "Prepares list of all drawings for specified floor."
     [floor-id]
     (let [files     (fileutils/file-list "drawings/" ".json")
           filenames (for [file files] (.getName file))
-          floor-id  (floor-id->str floor-id)
+          floor-id  (drawing-utils/floor-id->str floor-id)
           drawings  (filter #(startsWith % floor-id) filenames)]
           (sort drawings)))
 
@@ -423,11 +415,7 @@
 (defn read-latest-drawing-for-floor
     "Prepares the latest drawing for specified floor."
     [floor-id]
-    (let [files     (fileutils/file-list "drawings/" ".json")
-          filenames (for [file files] (.getName file))
-          floor-id  (floor-id->str floor-id)
-          drawings  (sort (filter #(startsWith % floor-id) filenames))]
-          (last drawings)))
+    (drawing-utils/read-latest-drawing-for-floor floor-id))
 
 
 (defn drawings-for-floor
