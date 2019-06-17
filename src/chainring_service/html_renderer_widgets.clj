@@ -29,6 +29,7 @@
         [:meta {:name "Author"    :content "Pavel Tisnovsky"}]
         [:meta {:name "Generator" :content "Clojure"}]
         [:meta {:http-equiv "Content-type" :content "text/html; charset=utf-8"}]
+        (page/include-js  (str url-prefix "jquery.js"))
         (page/include-css (str url-prefix "bootstrap/bootstrap.min.css"))
         (page/include-css (str url-prefix "chainring.css"))
         (page/include-css (str url-prefix "calendar.css"))
