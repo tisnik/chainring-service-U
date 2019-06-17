@@ -27,6 +27,7 @@
 (require '[chainring-service.html-renderer-help :as html-renderer-help])
 (require '[chainring-service.rest-api           :as rest-api])
 (require '[chainring-service.raster-renderer    :as raster-renderer])
+(require '[chainring-service.svg-renderer       :as svg-renderer])
 (require '[chainring-service.vector-drawing     :as vector-drawing])
 (require '[chainring-service.config             :as config])
 (require '[chainring-service.sap-interface      :as sap-interface])
@@ -198,7 +199,7 @@
               (finish-processing request (html-renderer/render-error-page "Žádná budova nebyla vybrána")))))
 
 
-; TODO - refactor
+; TODO - refactor (into drawing-utils)
 (defn floor-id->str
     "Converts floor-id into string."
     [floor-id]
@@ -500,47 +501,48 @@
         (rest-api/api-info-handler request prefix)
         (condp = [method (get-api-command uri prefix)]
             ; toplevel
-            [:get  ""]                       (rest-api/api-info-handler request prefix)
+            [:get  ""]                         (rest-api/api-info-handler request prefix)
 
             ; common endpoints
-            [:get  "info"]                   (rest-api/info-handler request)
-            [:get  "liveness"]               (rest-api/liveness-handler request)
-            [:get  "readiness"]              (rest-api/readiness-handler request)
-            [:get  "config"]                 (rest-api/config-handler request)
+            [:get  "info"]                     (rest-api/info-handler request)
+            [:get  "liveness"]                 (rest-api/liveness-handler request)
+            [:get  "readiness"]                (rest-api/readiness-handler request)
+            [:get  "config"]                   (rest-api/config-handler request)
 
             ; endpoints to return list of AOIDs
-            [:get  "aoids"]                  (rest-api/list-all-aoids request uri)
-            [:get  "objects"]                (rest-api/list-all-objects request uri)
-            [:get  "buildings"]              (rest-api/list-of-buildings-handler request uri)
-            [:get  "floors"]                 (rest-api/list-of-floors-handler request uri)
-            [:get  "rooms"]                  (rest-api/list-of-rooms-handler request uri)
-            [:get  "rooms-for-building"]     (rest-api/list-rooms-for-building-handler request uri)
+            [:get  "aoids"]                    (rest-api/list-all-aoids request uri)
+            [:get  "objects"]                  (rest-api/list-all-objects request uri)
+            [:get  "buildings"]                (rest-api/list-of-buildings-handler request uri)
+            [:get  "floors"]                   (rest-api/list-of-floors-handler request uri)
+            [:get  "rooms"]                    (rest-api/list-of-rooms-handler request uri)
+            [:get  "rooms-for-building"]       (rest-api/list-rooms-for-building-handler request uri)
 
             ; endpoints to return information about selected AOID
-            [:get  "building"]               (rest-api/info-about-building-handler request uri)
-            [:get  "floor"]                  (rest-api/info-about-floor-handler request uri)
-            [:get  "room"]                   (rest-api/info-about-room-handler request uri)
+            [:get  "building"]                 (rest-api/info-about-building-handler request uri)
+            [:get  "floor"]                    (rest-api/info-about-floor-handler request uri)
+            [:get  "room"]                     (rest-api/info-about-room-handler request uri)
 
             ; endpoints to work with dates
-            [:get  "dates-from"]             (rest-api/list-all-dates-from request uri)
-            [:get  "nearest-date-from"]      (rest-api/nearest-date-from request uri)
+            [:get  "dates-from"]               (rest-api/list-all-dates-from request uri)
+            [:get  "nearest-date-from"]        (rest-api/nearest-date-from request uri)
 
-            [:get  "rooms-attribute"]        (rest-api/rooms-attribute request uri)
-            [:get  "possible-attributes"]    (rest-api/possible-attributes request uri)
-            [:get  "drawings-for-floor"]     (rest-api/drawings-for-floor request uri)
+            [:get  "rooms-attribute"]          (rest-api/rooms-attribute request uri)
+            [:get  "possible-attributes"]      (rest-api/possible-attributes request uri)
+            [:get  "drawings-for-floor"]       (rest-api/drawings-for-floor request uri)
             [:get  "latest-drawing-for-floor"] (rest-api/latest-drawing-for-floor request uri)
-            [:get  "drawing"]                (rest-api/drawing-handler request uri)
-            [:get  "drawings"]               (rest-api/all-drawings-handler request uri)
-            [:put  "drawing-raw-data-to-db"] (rest-api/store-drawing-raw-data request)
-            [:get  "drawing-data"]           (rest-api/deserialize-drawing request)
-            [:put  "drawing-data"]           (rest-api/serialize-drawing request)
-            [:post "drawing-data"]           (rest-api/serialize-drawing request)
-            [:get  "drawings-cache"]         (rest-api/drawings-cache-info-handler request)
-            [:post "sap-reload-mock-data"]   (rest-api/sap-reload-mock-data request uri)
-            [:get  "sap-href"]               (rest-api/sap-href-handler request uri)
-            [:get  "sap-debug"]              (rest-api/sap-debug-handler request uri)
-            [:get  "raster-drawing"]         (raster-renderer/raster-drawing request)
-                                             (rest-api/unknown-endpoint-handler request uri)
+            [:get  "drawing"]                  (rest-api/drawing-handler request uri)
+            [:get  "drawings"]                 (rest-api/all-drawings-handler request uri)
+            [:put  "drawing-raw-data-to-db"]   (rest-api/store-drawing-raw-data request)
+            [:get  "drawing-data"]             (rest-api/deserialize-drawing request)
+            [:put  "drawing-data"]             (rest-api/serialize-drawing request)
+            [:post "drawing-data"]             (rest-api/serialize-drawing request)
+            [:get  "drawings-cache"]           (rest-api/drawings-cache-info-handler request)
+            [:post "sap-reload-mock-data"]     (rest-api/sap-reload-mock-data request uri)
+            [:get  "sap-href"]                 (rest-api/sap-href-handler request uri)
+            [:get  "sap-debug"]                (rest-api/sap-debug-handler request uri)
+            [:get  "raster-drawing"]           (raster-renderer/raster-drawing request)
+            [:get  "svg-drawing"]              (svg-renderer/svg-drawing request)
+                                               (rest-api/unknown-endpoint-handler request uri)
         )))
 
 
