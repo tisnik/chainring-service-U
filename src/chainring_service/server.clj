@@ -427,7 +427,7 @@
           (log-process-drawing-info building-id building-info floor-id floor-info drawing-id drawing-info rooms)
           (if drawing-id
               (if drawing-info
-                  (finish-processing request (html-renderer/render-drawing configuration building-id floor-id drawing-id building-info floor-info drawing-info valid-from nil rooms room-attribute-types nil) session)
+                  (finish-processing request (html-renderer/render-drawing configuration building-id floor-id drawing-id building-info floor-info drawing-info valid-from nil rooms room-attribute-types nil nil) session)
                   (no-drawing-error-page request))
               (no-drawing-error-page request))))
 
@@ -439,6 +439,7 @@
           session        (:session request)
           configuration  (:configuration request)
           floor-id       (get params "floor-id")
+          room-id        (get params "room-id")
           drawing-id     (get params "drawing-id")
           valid-from     (get params "valid-from")
           valid-from-fmt (get params "valid-from")
@@ -447,7 +448,7 @@
           room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
           session        (assoc session :drawing-id drawing-id)]
           (if drawing-id
-              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session)
+              (finish-processing request (html-renderer/render-drawing configuration nil nil floor-id drawing-id nil nil nil nil valid-from valid-from-fmt rooms room-attribute-types true room-id) session)
               (no-drawing-error-page-from-sap request))))
 
 
@@ -458,6 +459,7 @@
           session        (:session request)
           configuration  (:configuration request)
           floor-id       (get params "floor-id")
+          room-id        (get params "room-id")
           valid-from-fmt (or (get params "valid-from") (current-date-formatted))
           valid-from     (clojure.string/replace valid-from-fmt "-" "")
           drawings       (all-drawings-for-floor floor-id)
@@ -469,7 +471,7 @@
               (let [rooms                (sap-interface/call-sap-interface request "read-rooms" floor-id valid-from)
                     room-attribute-types (sap-interface/call-sap-interface request "read-room-attribute-types")
                     session              (assoc session :drawing-id drawing-id)]
-                   (finish-processing request (html-renderer/render-drawing configuration nil floor-id drawing-id nil nil nil valid-from valid-from-fmt rooms room-attribute-types true) session))
+                   (finish-processing request (html-renderer/render-drawing configuration nil floor-id drawing-id nil nil nil valid-from valid-from-fmt rooms room-attribute-types true room-id) session))
               (no-drawing-error-page-from-sap request))))
 
 
