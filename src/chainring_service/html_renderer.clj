@@ -795,7 +795,7 @@
 
 (defn render-drawing
     "Render page with drawing on the right side and with configurable toolbar on the left side."
-    [configuration building-id floor-id drawing-id building-info floor-info drawing-info valid-from valid-from-fmt rooms room-attribute-types sap?]
+    [configuration building-id floor-id drawing-id building-info floor-info drawing-info valid-from valid-from-fmt rooms room-attribute-types sap? room-id]
     (page/xhtml
         (if sap?
             (widgets/header "/" {:include-drawing-js? true
@@ -816,7 +816,7 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
-                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:30em;" "vertical-align:top;width:35em;" )}
+                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:30em;width:0px;" "vertical-align:top;width:35em;" )}
                         (if (not sap?)
                             [:span
                                 (render-floor-info-header)
@@ -825,17 +825,14 @@
                                 (render-filters building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
                                 (render-room-list rooms)]
-                            [:span
-                                (render-date-field floor-id valid-from-fmt)
-                                (render-filters-header)
-                                (render-filters building-id floor-id valid-from room-attribute-types)
-                                (render-room-list-header)
-                                (render-room-list rooms)])
+                            [:span ""])
                     ]
                     (render-view-tools sap?)
                 ; 2nd row - drawing on the right side
                 [:tr [:td {:style "vertical-align:top"} [:div {:style "position:relative;"} [:img {:id "drawing"
-                                 :src (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&ignore-type=true")
+                                 :src (if room-id
+                                          (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&ignore-type=true&selected=" room-id)
+                                          (str "/raster-drawing?drawing-id=" drawing-id "&floor-id=" floor-id "&ignore-type=true"))
                                  :border "0"
                                  :onclick "onImageClick(this, event)"}]]
                                  ; [:div {:id "sap_href_div" :style "display:none"} "&nbsp;"]
