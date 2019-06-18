@@ -1,17 +1,6 @@
-var drawing_input = null;
-var drawing = null;
-
-var scale = 1.0;
-var xpos = 0;
-var ypos = 0;
-
-var debugMode = true;
-
-var selectedRoom = null;
-var counter = 0;
-
-var search_drawing = false;
-
+var lastEventListener = null;
+var lastEmbedSrc = 'atom.svg';
+var lastEmbed = null;
 
 // dummy logs for Internet Explorer 11:
 if (!window.console) console = {log: function() {}};
@@ -30,116 +19,6 @@ Array.prototype.indexOf = function(obj, start) {
          if (this[i] === obj) { return i; }
      }
      return -1;
-}
-
-
-function changeXpos(delta) {
-    xpos += delta;
-    reloadImage(null, null);
-}
-
-
-function changeYpos(delta) {
-    ypos += delta;
-    reloadImage(null, null);
-}
-
-
-function setXpos(value) {
-    xpos = value;
-    reloadImage(null, null);
-}
-
-
-function setYpos(value) {
-    ypos = value;
-    reloadImage(null, null);
-}
-
-
-function changeScaleBy(mag) {
-    scale *= mag;
-    reloadImage(null, null);
-}
-
-
-function resetScale() {
-    scale = 1.0;
-    reloadImage(null, null);
-}
-
-
-function onViewMagPlusClick() {
-    changeScaleBy(1.1);
-}
-
-
-function onViewMagMinusClick() {
-    changeScaleBy(0.9);
-}
-
-
-function onViewMag11Click() {
-    resetScale();
-}
-
-
-function onViewMagFitClick() {
-    resetScale();
-}
-
-
-function onArrowLeftClick() {
-    changeXpos(-20);
-}
-
-
-function onArrowRightClick() {
-    changeXpos(20);
-}
-
-
-function onArrowUpClick() {
-    changeYpos(-20);
-}
-
-
-function onArrowDownClick() {
-    changeYpos(20);
-}
-
-
-function onCenterViewClick() {
-    setXpos(0);
-    setYpos(0);
-}
-
-
-function disableScrollOnMouseWheel(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    } else {
-        e.returnValue = false;
-    }
-}
-
-
-function onMouseWheel(ev) {
-    var e = window.event || ev; // old IE support
-    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-    console.log("mouse wheel: " + delta);
-
-    if (delta > 0) {
-        onViewMagPlusClick();
-    }
-    else if (delta < 0) {
-        onViewMagMinusClick();
-    }
-
-    disableScrollOnMouseWheel(e);
-
-    // no default handler
-    return false;
 }
 
 
@@ -186,60 +65,6 @@ function getEvent(e)
     return !e ? window.event : e;
 }
 
-function rasterDrawingUrl(drawing_id, floor_id, version) {
-    return "/raster-drawing?drawing-id=" + raster_drawing_id + "&floor-id=" + floor_id+ "&version=" + version;
-}
-
-function transformation() {
-    return "&x-offset=" + xpos +
-           "&y-offset=" + ypos +
-           "&scale=" + scale;
-}
-
-function selectedRoomInUrl() {
-    if (selectedRoom != null) {
-        return "&selected=" + selectedRoom;
-    }
-    else {
-        return "";
-    }
-}
-
-function registerMouseWheelCallbackFunction(drawingElement) {
-    if (drawingElement.addEventListener) {
-        // IE9, Chrome, Safari, Opera
-        drawingElement.addEventListener("mousewheel", onMouseWheel, false);
-        // Firefox
-        drawingElement.addEventListener("DOMMouseScroll", onMouseWheel, false);
-    }
-    // IE 6/7/8
-    else {
-        drawingElement.attachEvent("onmousewheel", onMouseWheel);
-    }
-}
-
-function reloadImage(clickedX, clickedY) {
-    var url = rasterDrawingUrl(drawing_id, floor_id, version);
-    if (clickedX != null && clickedY != null) {
-        url += "&coordsx=" + clickedX + "&coordsy=" + clickedY;
-    }
-    url += selectedRoomInUrl();
-    url += transformation();
-    if (search_drawing) {
-        url += "&search-drawing=1";
-    }
-    url += "&counter=" + counter;
-    random = (Math.random() + 1).toString(36).substring(2);
-    url += "&random=" + random;
-    counter += 1;
-    console.log(url);
-    var drawingElement = document.getElementById("drawing");
-    drawingElement.src=url;
-
-    registerMouseWheelCallbackFunction(drawingElement);
-}
-
-
 function onDrawingIdReceived(data) {
     var drawing_name = JSON.parse(data);
     console.log(drawing_name);
@@ -260,6 +85,9 @@ function onRoomSelected() {
     var room = document.getElementById("rooms").value;
     selectedRoom = room;
 
+    building = "080";
+    room = "080.P1.0010"; 
+
     var i = room.lastIndexOf(".")
     var floor = room.substring(0, i)
     floor_id = floor;
@@ -269,13 +97,17 @@ function onRoomSelected() {
     console.log("Selected floor: " + floor);
     console.log("Selected room: " + room);
 
-    var url = "/api/v1/latest-drawing-for-floor?floor-id=" + floor;
+    var url = "/api/v1/svg-drawing?building-id=" + building + "&floor-id=" + floor + "&room-id=" + room;
     random = (Math.random() + 1).toString(36).substring(2);
     url += "&random=" + random;
+
+    //var url = "vim.svg";
     console.log(url);
 
+    reloadSVG(url);
+
     // try display list of rooms
-    callAjax(url, onDrawingIdReceived);
+    // callAjax(url, onDrawingIdReceived);
 }
 
 function onListOfRoomsReceived(data) {
@@ -354,3 +186,46 @@ function readBuildings() {
     callAjax(url, onListOfBuildingsReceived);
 }
 
+function initialize() {
+    readBuildings();
+    lastEmbed = createNewEmbed(lastEmbedSrc);
+}
+
+function createNewEmbed(src){
+    var embed = document.createElement('embed');
+    embed.setAttribute('style', 'width: 1000px; height: 1000px; border:1px solid black;');
+    embed.setAttribute('type', 'image/svg+xml');
+    embed.setAttribute('src', src);
+  
+    document.getElementById('drawing-div').appendChild(embed)
+  
+    lastEventListener = function(){
+      svgPanZoom(embed, {
+        zoomEnabled: true,
+        controlIconsEnabled: true
+      });
+    }
+    embed.addEventListener('load', lastEventListener)
+  
+    return embed
+}
+
+function removeEmbed(){
+    // Destroy svgpanzoom
+    svgPanZoom(lastEmbed).destroy()
+    // Remove event listener
+    lastEmbed.removeEventListener('load', lastEventListener)
+    // Null last event listener
+    lastEventListener = null
+    // Remove embed element
+    document.getElementById('drawing-div').removeChild(lastEmbed)
+    // Null reference to embed
+    lastEmbed = null
+}
+
+
+function reloadSVG(url) {
+    // Remove last added svg
+    removeEmbed()
+    lastEmbed = createNewEmbed(url)
+}
