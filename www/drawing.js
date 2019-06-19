@@ -19,7 +19,9 @@ var blipVisible = false;
 
 var debugMode = true;
 
-var selectedRoom = null;
+// setup from the server
+//var selectedRoom = null;
+
 var counter = 0;
 
 var search_drawing = false;

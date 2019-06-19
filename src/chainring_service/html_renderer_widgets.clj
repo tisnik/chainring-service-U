@@ -56,6 +56,9 @@
         (if (and options (:sap-enabled options))
             [:script "var sap_enabled = true;"]
             [:script "var sap_enabled = false;"])
+        (if (and options (:selected-room options))
+            [:script "var selectedRoom = '" (:selected-room options) "';"]
+            [:script "var selectedRoom = null;"])
         (if (and options (:sap-url options))
             [:script (str "var sap_url = '" (:sap-url options) "';")]
             [:script "var sap_url = null;"])

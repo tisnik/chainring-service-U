@@ -803,12 +803,14 @@
                                  :raster-drawing-id drawing-id
                                  :include-calendar? true
                                  :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
-                                 :sap-url     (-> configuration :sap-interface :url)})
+                                 :sap-url     (-> configuration :sap-interface :url)
+                                 :selected-room room-id})
             (widgets/header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
                                  :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
-                                 :sap-url     (-> configuration :sap-interface :url)}))
+                                 :sap-url     (-> configuration :sap-interface :url)
+                                 :selected-room room-id}))
         [:body (if sap? {:class "body-drawing-sap"} {:class "body-drawing"})
             (if sap?
                 "" ;(widgets/navigation-bar "#")
@@ -816,16 +818,16 @@
             [:table {:border "1" :style "border-color:#d0d0d0"}
                 ; 1st row - the whole left toolbar + view tools on the right side
                 [:tr
-                    [:td {:rowspan 2 :style (if sap? "vertical-align:top;width:30em;width:0px;" "vertical-align:top;width:35em;" )}
-                        (if (not sap?)
+                    [:td {:rowspan 2 :style (if (and sap? room-id) "vertical-align:top;width:30em;width:0px;" "vertical-align:top;width:35em;" )}
+                        (if (and sap? room-id)
+                            [:span ""]
                             [:span
                                 (render-floor-info-header)
                                 (render-floor-info-table building-id floor-id drawing-id building-info floor-info drawing-info valid-from)
                                 (render-filters-header)
                                 (render-filters building-id floor-id valid-from room-attribute-types)
                                 (render-room-list-header)
-                                (render-room-list rooms)]
-                            [:span ""])
+                                (render-room-list rooms)])
                     ]
                     (render-view-tools sap?)
                 ; 2nd row - drawing on the right side
