@@ -1,5 +1,5 @@
 var lastEventListener = null;
-var lastEmbedSrc = 'atom.svg';
+var lastEmbedSrc = 'bgimage.svg';
 var lastEmbed = null;
 
 // dummy logs for Internet Explorer 11:
@@ -83,10 +83,11 @@ function onDrawingIdReceived(data) {
 function onRoomSelected() {
     var building = document.getElementById("buildings").value;
     var room = document.getElementById("rooms").value;
-    selectedRoom = room;
 
-    building = "080";
-    room = "080.P1.0010"; 
+    if (room === undefined || room == null || room == "") {
+        return;
+    }
+    selectedRoom = room;
 
     var i = room.lastIndexOf(".")
     var floor = room.substring(0, i)
@@ -101,17 +102,14 @@ function onRoomSelected() {
     random = (Math.random() + 1).toString(36).substring(2);
     url += "&random=" + random;
 
-    //var url = "vim.svg";
     console.log(url);
 
     reloadSVG(url);
-
-    // try display list of rooms
-    // callAjax(url, onDrawingIdReceived);
 }
 
 function onListOfRoomsReceived(data) {
     var room_list = JSON.parse(data);
+
     if (room_list === undefined || room_list == null || room_list.length <= 0) {
         return;
     }
@@ -126,6 +124,10 @@ function onListOfRoomsReceived(data) {
 
     var select = document.getElementById("rooms");
     select.options.length = 0;
+
+    // first selection
+    select.options[select.options.length] = new Option("Vyberte", "", true);
+
     var i;
     for (i = 0; i < rooms.length; i+=1) {
         var room = rooms[i];
@@ -151,7 +153,10 @@ function onListOfBuildingsReceived(data) {
     var select = document.getElementById("buildings");
     select.options.length = 0;
     var i;
-    select.options[select.options.length] = new Option("", "", true);
+
+    // first selection
+    select.options[select.options.length] = new Option("Vyberte", "", true);
+
     for (i = 0; i < buildings.length; i+=1) {
         var building = buildings[i];
         // console.log(building["AOID"]);
@@ -164,13 +169,18 @@ function onListOfBuildingsReceived(data) {
 function onBuildingSelected() {
     building = document.getElementById("buildings").value;
     console.log("Selected building: " + building);
-    if (building === undefined || building == null || building.length <= 0) {
+    if (building === undefined || building == null || building == "" || building.length <= 0) {
         return;
     }
     var url = "/api/v1/rooms-for-building?building-id=" + building + "&floor-id=" + building;
     random = (Math.random() + 1).toString(36).substring(2);
     url += "&random=" + random;
     console.log(url);
+
+    var select = document.getElementById("rooms");
+    select.options.length = 0;
+    // first selection
+    select.options[select.options.length] = new Option("Čekejte prosím", "", true);
 
     // try display list of rooms
     callAjax(url, onListOfRoomsReceived);
@@ -182,7 +192,7 @@ function readBuildings() {
     url += "?random=" + random;
     console.log(url);
 
-    // try display list of buildings
+    // try to display list of buildings
     callAjax(url, onListOfBuildingsReceived);
 }
 
