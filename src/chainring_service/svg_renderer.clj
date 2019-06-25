@@ -34,20 +34,18 @@
         (http-response/status 200)))
 
 
-(def x "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 20010904//EN'
-'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
-<!-- Created with Chainring -->
-<svg  xmlns='http://www.w3.org/2000/svg'
-      xmlns:xlink='http://www.w3.org/1999/xlink'>
-          <rect x='10' y='10' height='100' width='100'
-                    style='stroke:#ff0000; fill: #0000ff'/>
-</svg>")
-
-
 (defn render-empty-svg
     []
-    "")
+    (with-out-str
+        (println "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+    <!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 20010904//EN'
+    'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+    <!-- Created with Chainring -->
+    <svg  xmlns='http://www.w3.org/2000/svg'
+          xmlns:xlink='http://www.w3.org/1999/xlink' style='font-size:1em'>
+          <image xlink:href='/bglogo.png' width='500' height='500' />
+          <rect x='-50' y='-50' width='600' height='600' style='fill:none;stroke:none' />
+    </svg>")))
 
 
 (defn drawing-full-name
@@ -77,7 +75,7 @@
 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
 <!-- Created with Chainring -->
 <svg  xmlns='http://www.w3.org/2000/svg'
-      xmlns:xlink='http://www.w3.org/1999/xlink'>"))
+      xmlns:xlink='http://www.w3.org/1999/xlink' style='font-size:1em'>"))
 
 
 (defn draw-svg-footer
@@ -149,7 +147,7 @@
     (let [x (:x entity)
           y (:y entity)
           t (:text entity)]
-          ))
+          (println (format "<text x='%f' y='%f' font-family='Arial, Helvetica, sans-serif'>%s</text>", x, y, t))))
 
 
 (defn draw-entities
@@ -165,9 +163,46 @@
         ))))
 
 
+(defn selected-room?
+    "Check if the room was selected by user."
+    [aoid selected]
+    (= aoid selected))
+
+
+(defn draw-room-contour
+    "Draw contour of highlighted room."
+    [points style]
+    (let [polygon (clojure.string/join " " points)]
+        (println (format "<polygon points='%s' style='%s' />" polygon style))))
+
+
+(defn draw-selected-room
+    "Draw background and contour of selected room."
+    [points]
+    (draw-room-contour points "fill:yellow;stroke:red;stroke-width:2"))
+
+
+(defn draw-regular-room
+    "Draw regular room onto the canvas."
+    [points]
+    (draw-room-contour points "fill:none;stroke:blue;stroke-width:2"))
+
+
+(defn draw-room
+    [room selected]
+    (let [polygon (:polygon room)
+          aoid    (:room_id room)
+          points  (map #(clojure.string/join "," %) polygon)]
+          (if (seq points)
+              (if (selected-room? aoid selected)
+                  (draw-selected-room points)
+                  (draw-regular-room  points)))))
+
+
 (defn draw-rooms
     [rooms selected]
-)
+    (doseq [room rooms]
+        (draw-room room selected)))
 
 
 (defn render-svg-drawing-from
@@ -180,8 +215,8 @@
                   bounds    (:bounds data)]
                 (with-out-str
                     (draw-svg-header)
-                    (draw-entities entities)
                     (draw-rooms rooms room-id)
+                    (draw-entities entities)
                     (draw-svg-footer)
                 ))
             (render-empty-svg))))
@@ -191,7 +226,7 @@
 (defn render-svg-drawing
     [building-id floor-id room-id]
     (log/info "Building ID:" building-id)
-    (log/info "Floor ID:" building-id)
+    (log/info "Floor ID:" floor-id)
     (log/info "Room ID:" room-id)
     (let [drawing-name (drawing-utils/read-latest-drawing-for-floor floor-id)]
         (if drawing-name
