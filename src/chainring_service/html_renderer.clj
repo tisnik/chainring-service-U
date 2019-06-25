@@ -801,7 +801,7 @@
             (widgets/header "/" {:include-drawing-js? true
                                  :floor-id floor-id
                                  :raster-drawing-id drawing-id
-                                 :include-calendar? true
+                                 ;:include-calendar? true
                                  :sap-enabled (and (-> configuration :sap-interface :enabled) sap?)
                                  :sap-url     (-> configuration :sap-interface :url)
                                  :selected-room room-id})
